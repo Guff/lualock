@@ -1,1 +1,2 @@
-image.set_background("/usr/share/backgrounds/Aeg_by_Tauno_Erik.jpg")
+im = image.new("/usr/share/backgrounds/Aeg_by_Tauno_Erik.jpg")
+image.set_background(im, "stretch")

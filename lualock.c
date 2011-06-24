@@ -5,6 +5,7 @@
 
 #include "globalconf.h"
 #include "lua_api.h"
+#include "image.h"
 
 lualock_t lualock;
 
@@ -57,8 +58,7 @@ void init_lua() {
     xdgInitHandle(&xdg);
 
     lualock.L = luaL_newstate();
-    
-    luaL_register(lualock.L, "image", lualock_image_lib);
+    init_lua_image(lualock.L);
     lua_pop(lualock.L, 1);
 
     lualock_lua_loadrc(lualock.L, &xdg);    
