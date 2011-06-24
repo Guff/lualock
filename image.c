@@ -6,7 +6,6 @@
 #include <cairo-svg.h>
 
 #include "globalconf.h"
-#include "image.h"
 
 typedef struct {
 	Imlib_Image image;

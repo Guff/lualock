@@ -5,11 +5,10 @@
 
 #include "globalconf.h"
 #include "lua_api.h"
-#include "image.h"
 
 lualock_t lualock;
 
-extern const struct luaL_reg lualock_image_lib[];
+extern void init_lua_image(lua_State *L);
 
 void init_display() {
     lualock.dpy = XOpenDisplay(NULL);
@@ -79,9 +78,6 @@ int main() {
     Display *dpy;
     Window win;
     
-    cairo_surface_t *surface;
-    cairo_t *cr;
-    
     init_display();
     init_window();
     init_cairo();
@@ -89,7 +85,6 @@ int main() {
     
     dpy = lualock.dpy;
     win = lualock.win;
-    cr = lualock.cr;
     
     XMapRaised(dpy, win);
     XClearWindow(dpy, win);
