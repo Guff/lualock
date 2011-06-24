@@ -5,7 +5,7 @@ CC	:= gcc
 
 PKGS := cairo-xlib imlib2 lua libxdg-basedir
 INCS := $(shell pkg-config --cflags $(PKGS))
-LIBS := $(shell pkg-config --libs $(PKGS)) -lev
+LIBS := $(shell pkg-config --libs $(PKGS))
 
 CFLAGS	:= -Wall -Wextra -I. $(INCS) $(CFLAGS)
 LDFLAGS	:= $(LIBS) $(LDFLAGS)
