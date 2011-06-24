@@ -1,1 +1,1 @@
-image.set_background("/usr/share/archlinux/wallpaper/arch_paint_2_1024x600.png")
+image.set_background("/usr/share/backgrounds/Aeg_by_Tauno_Erik.jpg")

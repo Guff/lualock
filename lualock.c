@@ -4,7 +4,7 @@
 #include <X11/Intrinsic.h>
 
 #include "globalconf.h"
-#include "luah.h"
+#include "lua_api.h"
 
 lualock_t lualock;
 
@@ -61,8 +61,10 @@ void init_lua() {
     luaL_register(lualock.L, "image", lualock_image_lib);
     lua_pop(lualock.L, 1);
 
-    luaH_loadrc(lualock.L, &xdg);    
+    lualock_lua_loadrc(lualock.L, &xdg);    
 }
+
+
 
 void event_handler(Display *dpy, Window win) {
     XEvent ev;
