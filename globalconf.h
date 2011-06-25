@@ -9,8 +9,16 @@ typedef struct {
 	Window win;
 	Pixmap pmap;
 	
+	char *password;
+	int pw_length;
+	int pw_alloc;
+	
+	struct pam_handle_t *pam_handle;
+	
 	cairo_surface_t *surface;
 	cairo_t *cr;
 } lualock_t;
 
 extern lualock_t lualock;
+
+#define PW_BUFF_SIZE 32

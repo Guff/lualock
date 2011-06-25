@@ -1,7 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <cairo-xlib.h>
 #include <X11/Intrinsic.h>
+#include <security/pam_appl.h>
+
 
 #include "globalconf.h"
 #include "lua_api.h"
@@ -63,15 +68,87 @@ void init_lua() {
     lualock_lua_loadrc(lualock.L, &xdg);    
 }
 
+bool on_key_press(XEvent ev) {
+    char ascii;
+    KeySym keysym;
+    XComposeStatus compstatus;
+    XLookupString(&ev.xkey, &ascii, 1, &keysym, &compstatus);
+    
+    switch(keysym) {
+        case XK_Return:
+        case XK_KP_Enter:
+            return false;
+        default:
+            if (isprint(ascii) && (keysym < XK_Shift_L || keysym > XK_Hyper_R)) {
+                if (lualock.pw_alloc <= lualock.pw_length + 1) {
+                    lualock.password = realloc(lualock.password, 2 * lualock.pw_alloc);
+                    lualock.pw_alloc *= 2;
+                    if (!lualock.password)
+                        exit(1);
+                }
+                lualock.password[lualock.pw_length] = ascii;
+                lualock.password[lualock.pw_length + 1] = '\0';
+                lualock.pw_length++;
+            }
+    }
+    
+    return true;
+}
 
+void on_expose() {
+    XClearWindow(lualock.dpy, lualock.win);
+}
+
+void reset_password() {
+    lualock.password[0] = '\0';
+    lualock.pw_length = 0;
+}
 
 void event_handler(Display *dpy, Window win) {
     XEvent ev;
     XGrabKeyboard(dpy, win, True, GrabModeAsync, GrabModeAsync, CurrentTime);
+    XGrabPointer(dpy, win, False, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
+                 GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
+    
+    while (!XNextEvent(dpy, &ev)) {
+        if (ev.type == KeyPress) {
+            if (!on_key_press(ev)) {
+                //write(1j, lualock.password, lualock.pw_length);
+                //printf("\n");
+                break;
+            }
+        } else if (ev.type == Expose) {
+            on_expose();
+        }
+    }
+}
 
-    while (XNextEvent(dpy, &ev))
-        if (ev.type == KeyPress)
-            return;
+static int pam_conv_cb(int msgs, const struct pam_message **msg,
+                       struct pam_response **resp, void *appdata_ptr) {
+    
+    event_handler(lualock.dpy, lualock.win);
+    
+    *resp = (struct pam_response *) calloc(msgs, sizeof(struct pam_message));
+    if (msgs == 0 || *resp == NULL)
+        return 1;
+    for (int i = 0; i < msgs; i++) {
+        if (msg[i]->msg_style != PAM_PROMPT_ECHO_OFF &&
+            msg[i]->msg_style != PAM_PROMPT_ECHO_ON)
+            continue;
+
+        // return code is currently not used but should be set to zero
+        resp[i]->resp_retcode = 0;
+        if ((resp[i]->resp = strdup(lualock.password)) == NULL)
+            return 1;
+    }
+    
+    reset_password();
+
+    return 0;
+}
+
+bool authenticate_user() {
+    return(pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
 }
 
 int main() {    
@@ -88,7 +165,20 @@ int main() {
     
     XMapRaised(dpy, win);
     XClearWindow(dpy, win);
-    event_handler(dpy, win);
+    
+    lualock.password = malloc(PW_BUFF_SIZE * sizeof(char));
+    lualock.password[0] = '\0';
+    lualock.pw_length = 0;
+    lualock.pw_alloc = PW_BUFF_SIZE;
+    
+    struct pam_conv conv = {pam_conv_cb, NULL};
+    pam_start("slimlock", getenv("USER"), &conv, &lualock.pam_handle);
+    
+    while (True) {
+        if (authenticate_user())
+            break;
+    }
+    
     
     XCloseDisplay(dpy);
     

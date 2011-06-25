@@ -20,6 +20,7 @@ static int lualock_lua_image_new(lua_State *L) {
 	image->image = imlib_load_image(filename);
 	// if loading the image didn't work, maybe it's an svg
 	if (!image->image) {
+		printf("hi");
 		svg_cairo_t *svg_image = NULL;
 		unsigned int width, height;
 		svg_cairo_create(&svg_image);
