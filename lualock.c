@@ -113,8 +113,6 @@ void event_handler(Display *dpy, Window win) {
     while (!XNextEvent(dpy, &ev)) {
         if (ev.type == KeyPress) {
             if (!on_key_press(ev)) {
-                //write(1j, lualock.password, lualock.pw_length);
-                //printf("\n");
                 break;
             }
         } else if (ev.type == Expose) {

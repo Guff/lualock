@@ -13,7 +13,7 @@ typedef struct {
 	int pw_length;
 	int pw_alloc;
 	
-	struct pam_handle_t *pam_handle;
+	struct pam_handle *pam_handle;
 	
 	cairo_surface_t *surface;
 	cairo_t *cr;
