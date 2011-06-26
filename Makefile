@@ -7,7 +7,7 @@ PKGS := cairo-xlib imlib2 lua libxdg-basedir libsvg-cairo
 INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 
-CFLAGS	:= -g -Wall -Wextra -std=gnu99 -I. $(INCS) $(CFLAGS)
+CFLAGS	:= -Wall -Wextra -std=gnu99 -I. $(INCS) $(CFLAGS)
 LDFLAGS	:= $(LIBS) $(LDFLAGS)
 
 SRCS := $(wildcard *.c)
