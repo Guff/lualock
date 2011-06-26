@@ -1,2 +1,5 @@
+background.set("#ff0000")
 im = image.new("/usr/share/backgrounds/Aeg_by_Tauno_Erik.jpg")
-image.set_background(im, "stretch")
+background.set(im, "zoom")
+im2 = image.new("/usr/share/archlinux/logos/archlinux-official-light.svg")
+image.render(im2)
