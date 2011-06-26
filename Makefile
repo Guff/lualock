@@ -3,7 +3,7 @@ INSTALLDIR := $(DESTDIR)$(PREFIX)
 
 CC	:= gcc
 
-PKGS := cairo-xlib imlib2 lua libxdg-basedir libsvg-cairo 
+PKGS := cairo-xlib imlib2 lua libxdg-basedir libsvg-cairo pangocairo
 INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 

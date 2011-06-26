@@ -1,10 +1,8 @@
 #include <string.h>
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
 #include <cairo-xlib.h>
 
 #include "globalconf.h"
+#include "background.h"
 #include "image.h"
 
 void background_set_color(const char *hex) {
@@ -17,6 +15,11 @@ void background_set_color(const char *hex) {
 	
 	cairo_set_source_rgb(lualock.cr, r, g, b);
 	cairo_paint(lualock.cr);
+}
+
+void background_stretch(image_t *image, double width, double height,
+						double win_width, double win_height) {
+	
 }
 
 static int lualock_lua_background_set(lua_State *L) {

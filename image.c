@@ -23,6 +23,15 @@ void image_render(image_t *image, int x, int y) {
 	cairo_translate(lualock.cr, x, y);
 	cairo_set_source_surface(lualock.cr, surface, 0, 0);
 	cairo_paint(lualock.cr);
+	cairo_surface_destroy(surface);
+}
+
+void image_resize(image_t *image, int w, int h) {
+	imlib_context_set_image(image->image);
+	image->image = imlib_create_cropped_scaled_image(0, 0,
+													 image_get_width(image),
+													 image_get_height(image),
+													 w, h);
 }
 
 bool image_new(const char *filename, image_t *image) {

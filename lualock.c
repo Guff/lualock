@@ -10,7 +10,6 @@
 
 #include "globalconf.h"
 #include "lua_api.h"
-#include "image.h"
 
 extern void lualock_lua_background_init(lua_State *L);
 
