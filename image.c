@@ -4,6 +4,7 @@
 #include <Imlib2.h>
 #include <svg-cairo.h>
 #include <cairo-svg.h>
+#include <stdbool.h>
 
 #include "globalconf.h"
 
@@ -13,18 +14,25 @@ typedef struct {
 	unsigned char *data;
 } image_t;
 
-static int lualock_lua_image_new(lua_State *L) {
-	image_t *image = lua_newuserdata(L, sizeof(image_t));
-	
-	const char *filename = luaL_checkstring(L, 1);
+int image_get_width(image_t *image) {
+	imlib_context_set_image(image->image);
+	return imlib_image_get_width();
+}
+
+int image_get_height(image_t *image) {
+	imlib_context_set_image(image->image);
+	return imlib_image_get_height();
+}
+
+bool image_new(const char *filename, image_t *image) {
 	image->image = imlib_load_image(filename);
 	// if loading the image didn't work, maybe it's an svg
 	if (!image->image) {
-		printf("hi");
 		svg_cairo_t *svg_image = NULL;
 		unsigned int width, height;
 		svg_cairo_create(&svg_image);
-		svg_cairo_parse(svg_image, filename);
+		if (svg_cairo_parse(svg_image, filename) != SVG_CAIRO_STATUS_SUCCESS)
+			return false;
 		svg_cairo_get_size(svg_image, &width, &height);
 		
 		cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
@@ -38,12 +46,35 @@ static int lualock_lua_image_new(lua_State *L) {
 		imlib_context_set_image(image->image);
 		image->data = (unsigned char *) imlib_image_get_data_for_reading_only();
 	}
+	return true;
+}
+
+static int lualock_lua_image_new(lua_State *L) {
+	image_t *image = lua_newuserdata(L, sizeof(image_t));
 	
-	return 1;
+	const char *filename = luaL_checkstring(L, 1);
+	bool loaded = image_new(filename, image);
+	
+	return loaded;
 }
 
 static int lualock_lua_image_set_background(lua_State *L) {
-	image_t *image = (image_t *) lua_touserdata(L, 1);
+	image_t *image = lua_touserdata(L, 1);
+	
+	// if not userdata, maybe the user wants a solid color
+	if (!image) {
+		const char *hex = luaL_checkstring(L, 1);
+		unsigned long packed_rgb;
+		sscanf(hex + 1, "%lx", &packed_rgb);
+		unsigned long r = packed_rgb >> 16;
+		unsigned long g = packed_rgb >> 8 & 0xff;
+		unsigned long b = packed_rgb & 0xff;
+		
+		cairo_set_source_rgb(lualock.cr, r, g, b);
+		cairo_paint(lualock.cr);
+		return 0;
+	}
+	
 	const char *style = lua_tostring(L, 2);
 	double width, height, win_width, win_height;
 	int off_x = 0;
@@ -51,9 +82,8 @@ static int lualock_lua_image_set_background(lua_State *L) {
 	double scale_x = 1;
 	double scale_y = 1;
 	
-	imlib_context_set_image(image->image);
-	width = imlib_image_get_width();
-	height = imlib_image_get_height();
+	width = image_get_width(image);
+	height = image_get_height(image);
 	win_width = cairo_xlib_surface_get_width(lualock.surface);
 	win_height = cairo_xlib_surface_get_height(lualock.surface);
 
@@ -91,7 +121,7 @@ static int lualock_lua_image_set_background(lua_State *L) {
 	return 0;
 }
 
-void init_lua_image(lua_State *L) {
+void lualock_lua_image_init(lua_State *L) {
 	const struct luaL_reg lualock_image_lib[] =
 	{
 		{ "new", lualock_lua_image_new },

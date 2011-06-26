@@ -13,7 +13,7 @@
 
 lualock_t lualock;
 
-extern void init_lua_image(lua_State *L);
+extern void lualock_lua_image_init(lua_State *L);
 
 void init_display() {
     lualock.dpy = XOpenDisplay(NULL);
@@ -62,7 +62,9 @@ void init_lua() {
     xdgInitHandle(&xdg);
 
     lualock.L = luaL_newstate();
-    init_lua_image(lualock.L);
+    
+    lualock_lua_image_init(lualock.L);
+    // stuff's already loaded; don't need it on the stack
     lua_pop(lualock.L, 1);
 
     lualock_lua_loadrc(lualock.L, &xdg);    
@@ -80,11 +82,10 @@ bool on_key_press(XEvent ev) {
             return false;
         default:
             if (isprint(ascii) && (keysym < XK_Shift_L || keysym > XK_Hyper_R)) {
+                // if we're running short on memory for the buffer, double it
                 if (lualock.pw_alloc <= lualock.pw_length + 1) {
                     lualock.password = realloc(lualock.password, 2 * lualock.pw_alloc);
                     lualock.pw_alloc *= 2;
-                    if (!lualock.password)
-                        exit(1);
                 }
                 lualock.password[lualock.pw_length] = ascii;
                 lualock.password[lualock.pw_length + 1] = '\0';
@@ -112,6 +113,7 @@ void event_handler(Display *dpy, Window win) {
     
     while (!XNextEvent(dpy, &ev)) {
         if (ev.type == KeyPress) {
+            // if enter was pressed, leave so password can be checked
             if (!on_key_press(ev)) {
                 break;
             }
@@ -146,7 +148,7 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
 }
 
 bool authenticate_user() {
-    return(pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
+    return (pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
 }
 
 int main() {    
@@ -170,7 +172,10 @@ int main() {
     lualock.pw_alloc = PW_BUFF_SIZE;
     
     struct pam_conv conv = {pam_conv_cb, NULL};
-    pam_start("slimlock", getenv("USER"), &conv, &lualock.pam_handle);
+    int ret = pam_start("slimlock", getenv("USER"), &conv, &lualock.pam_handle);
+    // if PAM doesn't get set up correctly, we can't authenticate. so, bail out
+    if (ret != PAM_SUCCESS)
+        exit(EXIT_FAILURE);
     
     while (True) {
         if (authenticate_user())
