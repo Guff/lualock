@@ -1,11 +1,8 @@
-#include <Imlib2.h>
 #include <stdbool.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
 
-typedef struct {
-	Imlib_Image image;
-	
-	unsigned char *data;
-} image_t;
+typedef GdkPixbuf* image_t;
 
 int image_get_width(image_t *image);
 int image_get_height(image_t *image);

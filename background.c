@@ -64,13 +64,7 @@ static int lualock_lua_background_set(lua_State *L) {
 	}
 	cairo_translate(lualock.cr, off_x, off_y);
 	cairo_scale(lualock.cr, scale_x, scale_y);
-	cairo_surface_t *surface =
-		cairo_image_surface_create_for_data(image->data, CAIRO_FORMAT_ARGB32,
-											width, height,
-											cairo_format_stride_for_width(
-												CAIRO_FORMAT_ARGB32,
-												width));
-	cairo_set_source_surface(lualock.cr, surface, 0, 0);
+	gdk_cairo_set_source_pixbuf(lualock.cr, *image, 0, 0);
 	cairo_paint(lualock.cr);
 	cairo_scale(lualock.cr, 1 / scale_x, 1 / scale_y);
 	cairo_translate(lualock.cr, -off_x, -off_y);
