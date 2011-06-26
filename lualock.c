@@ -10,10 +10,11 @@
 
 #include "globalconf.h"
 #include "lua_api.h"
+#include "image.h"
+
+extern void lualock_lua_background_init(lua_State *L);
 
 lualock_t lualock;
-
-extern void lualock_lua_image_init(lua_State *L);
 
 void init_display() {
     lualock.dpy = XOpenDisplay(NULL);
@@ -65,6 +66,9 @@ void init_lua() {
     
     lualock_lua_image_init(lualock.L);
     // stuff's already loaded; don't need it on the stack
+    lua_pop(lualock.L, 1);
+    
+    lualock_lua_background_init(lualock.L);
     lua_pop(lualock.L, 1);
 
     lualock_lua_loadrc(lualock.L, &xdg);    
