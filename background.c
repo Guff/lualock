@@ -9,18 +9,18 @@ void background_set_color(const char *hex) {
 	unsigned long packed_rgb;
 	// hex + 1 skips over the pound sign, which we don't need
 	sscanf(hex + 1, "%lx", &packed_rgb);
-	unsigned long r = packed_rgb >> 16;
-	unsigned long g = packed_rgb >> 8 & 0xff;
-	unsigned long b = packed_rgb & 0xff;
+	double r = (packed_rgb >> 16) / 256.0;
+	double g = (packed_rgb >> 8 & 0xff) / 256.0;
+	double b = (packed_rgb & 0xff) / 256.0;
 	
 	cairo_set_source_rgb(lualock.cr, r, g, b);
 	cairo_paint(lualock.cr);
 }
 
-void background_stretch(image_t *image, double width, double height,
-						double win_width, double win_height) {
+//void background_stretch(image_t *image, double width, double height,
+						//double win_width, double win_height) {
 	
-}
+//}
 
 static int lualock_lua_background_set(lua_State *L) {
 	image_t *image = lua_touserdata(L, 1);
@@ -73,15 +73,16 @@ static int lualock_lua_background_set(lua_State *L) {
 	cairo_set_source_surface(lualock.cr, surface, 0, 0);
 	cairo_paint(lualock.cr);
 	cairo_scale(lualock.cr, 1 / scale_x, 1 / scale_y);
+	cairo_translate(lualock.cr, -off_x, -off_y);
 	XClearWindow(lualock.dpy, lualock.win);
 	return 0;
 }
 
 void lualock_lua_background_init(lua_State *L) {
-	const struct luaL_reg lualock_image_lib[] =
+	const struct luaL_reg lualock_background_lib[] =
 	{
 		{ "set", lualock_lua_background_set },
 		{ NULL, NULL }
 	};
-	luaL_register(L, "background", lualock_image_lib);
+	luaL_register(L, "background", lualock_background_lib);
 }
