@@ -63,6 +63,8 @@ void init_lua() {
 
     lualock.L = luaL_newstate();
     
+    luaL_openlibs(lualock.L);
+    
     lualock_lua_image_init(lualock.L);
     // stuff's already loaded; don't need it on the stack
     lua_pop(lualock.L, 1);
@@ -86,6 +88,10 @@ bool on_key_press(XEvent ev) {
         case XK_Return:
         case XK_KP_Enter:
             return false;
+        case XK_Escape:
+            lualock.password[0] = '\0';
+            lualock.pw_length = 0;
+            break;
         default:
             if (isprint(ascii) && (keysym < XK_Shift_L || keysym > XK_Hyper_R)) {
                 // if we're running short on memory for the buffer, double it

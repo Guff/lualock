@@ -1,7 +1,7 @@
 #include <lualib.h>
 #include <lauxlib.h>
-#include <svg-cairo.h>
-#include <cairo-svg.h>
+#include <librsvg/rsvg.h>
+#include <librsvg/rsvg-cairo.h>
 
 #include "globalconf.h"
 #include "image.h"
@@ -23,7 +23,6 @@ void image_render(image_t *image, int x, int y) {
 	cairo_translate(lualock.cr, x, y);
 	cairo_set_source_surface(lualock.cr, surface, 0, 0);
 	cairo_paint(lualock.cr);
-	cairo_surface_destroy(surface);
 }
 
 void image_resize(image_t *image, int w, int h) {
@@ -35,24 +34,26 @@ void image_resize(image_t *image, int w, int h) {
 }
 
 bool image_new(const char *filename, image_t *image) {
+	GError **error = NULL;
 	image->image = imlib_load_image(filename);
 	// if loading the image didn't work, maybe it's an svg
 	if (!image->image) {
-		svg_cairo_t *svg_image = NULL;
+		RsvgDimensionData dims;
 		unsigned int width, height;
-		svg_cairo_create(&svg_image);
-		if (svg_cairo_parse(svg_image, filename) != SVG_CAIRO_STATUS_SUCCESS)
-			return false;
-		svg_cairo_get_size(svg_image, &width, &height);
-		
+
+		rsvg_init();
+		RsvgHandle *rsvg_handle = rsvg_handle_new_from_file(filename, error);
+		rsvg_handle_get_dimensions(rsvg_handle, &dims);
+		width = dims.width;
+		height = dims.height;
 		cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
 															  width, height);
 		cairo_t *cr = cairo_create(surface);
-		svg_cairo_render(svg_image, cr);
+		rsvg_handle_render_cairo(rsvg_handle, cr);
 		image->data = cairo_image_surface_get_data(surface);
 		image->image = imlib_create_image_using_copied_data(width, height, (DATA32 *) image->data);
 		imlib_context_set_image(image->image);
-		cairo_surface_destroy(surface);
+		cairo_destroy(cr);
 	} else {
 		imlib_context_set_image(image->image);
 		image->data = (unsigned char *) imlib_image_get_data_for_reading_only();

@@ -1,5 +1,6 @@
 #include <pango/pangocairo.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "globalconf.h"
 #include "text.h"
