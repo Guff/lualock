@@ -74,6 +74,9 @@ void init_lua() {
     
     lualock_lua_text_init(lualock.L);
     lua_pop(lualock.L, 1);
+    
+    lualock_lua_timer_init(lualock.L);
+    lua_pop(lualock.L, 1);
 
     lualock_lua_loadrc(lualock.L, &xdg);    
 }

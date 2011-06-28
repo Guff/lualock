@@ -7,8 +7,8 @@ PKGS := cairo-xlib gdk-2.0 gdk-pixbuf-2.0 lua libxdg-basedir pangocairo librsvg-
 INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 
-CFLAGS	:= -Wall -Wextra -std=gnu99 -I. $(INCS) $(CFLAGS)
-LDFLAGS	:= $(LIBS) $(LDFLAGS)
+CFLAGS	:= -g -Wall -Wextra -std=gnu99 -I. $(INCS) $(CFLAGS) -pthread
+LDFLAGS	:= $(LIBS) $(LDFLAGS) -pthread
 
 SRCS := $(wildcard *.c)
 OBJS := $(foreach obj,$(SRCS:.c=.o),$(obj))
