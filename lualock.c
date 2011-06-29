@@ -149,6 +149,7 @@ void event_handler(Display *dpy, Window win) {
                 break;
             }
         } else if (ev.type == Expose) {
+            printf("exposed");
             on_expose();
         }
     }
@@ -203,7 +204,7 @@ int main() {
     lualock.pw_alloc = PW_BUFF_SIZE;
     
     struct pam_conv conv = {pam_conv_cb, NULL};
-    int ret = pam_start("slimlock", getenv("USER"), &conv, &lualock.pam_handle);
+    int ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
     // if PAM doesn't get set up correctly, we can't authenticate. so, bail out
     if (ret != PAM_SUCCESS)
         exit(EXIT_FAILURE);
