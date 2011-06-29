@@ -11,11 +11,10 @@ typedef struct {
     lua_State *L;
 } timer_lua;
 
-l_timer_t timer_new(unsigned int int_us, int cycles, void (*cb)(void *), lua_State *L) {
+l_timer_t timer_new(unsigned int int_us, int cycles, void (*cb)(void)) {
     l_timer_t timer = { .cycles = cycles, .completed_cycles = 0,
                         .running = false, .int_us = int_us, .cb = cb };
-	timer_lua data = { .timer = timer, .L = L };
-    int err = pthread_create(&timer.thread, NULL, timer_run, &data);
+    int err = pthread_create(&timer.thread, NULL, timer_run, &timer);
     if (err){
         printf("Oops, couldn't make a thread: %i\n", err);
     }
@@ -24,19 +23,18 @@ l_timer_t timer_new(unsigned int int_us, int cycles, void (*cb)(void *), lua_Sta
 }
 
 void *timer_run(void *data) {
-        l_timer_t timer = ((timer_lua *)data)->timer;
-        lua_State *L = ((timer_lua *)data)->L;
+        l_timer_t timer = *(l_timer_t *)data;
         while(timer.cycles == 0 || timer.completed_cycles < timer.cycles) {
-            timer.cb(L);
+            timer.cb();
             usleep(timer.int_us);
             timer.completed_cycles++;
         }
         return NULL;
 }
 
-void timer_run_lua_function(void *L) {
-    lua_getfield(L, LUA_REGISTRYINDEX, "callback");
-    lua_pcall((lua_State *)L, 0, 0, 0);
+void timer_run_lua_function() {
+    lua_getfield(lualock.L, LUA_REGISTRYINDEX, "callback");
+    lua_pcall(lualock.L, 0, 0, 0);
 }
 
 static int lualock_lua_timer_new(lua_State *L) {
@@ -49,7 +47,7 @@ static int lualock_lua_timer_new(lua_State *L) {
     lua_insert(L, 1);
     lua_settable(L, LUA_REGISTRYINDEX);
     
-    *timer = timer_new(interval, run_times, timer_run_lua_function, L);
+    *timer = timer_new(interval, run_times, timer_run_lua_function);
     return 1;
 }
 

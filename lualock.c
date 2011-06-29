@@ -216,7 +216,6 @@ int main() {
             break;
     }
     
-    
     XCloseDisplay(dpy);
     
     return 0;
