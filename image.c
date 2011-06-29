@@ -7,27 +7,33 @@
 #include "image.h"
 
 int image_get_width(image_t *image) {
-	return gdk_pixbuf_get_width(*image);
+	return gdk_pixbuf_get_width(image->pbuf);
 }
 
 int image_get_height(image_t *image) {
-	return gdk_pixbuf_get_height(*image);
+	return gdk_pixbuf_get_height(image->pbuf);
 }
 
 void image_render(image_t *image, int x, int y) {
-	cairo_translate(lualock.cr, x, y);
-	gdk_cairo_set_source_pixbuf(lualock.cr, *image, 0, 0);
-	cairo_paint(lualock.cr);
-	cairo_translate(lualock.cr, -x, -y);
+    cairo_t *cr = cairo_create(image->surface);
+    
+    add_surface(image->surface);
+    
+    cairo_translate(cr, x, y);
+    gdk_cairo_set_source_pixbuf(cr, image->pbuf, 0, 0);
+    cairo_paint(cr);
 }
 
 
 bool image_new(const char *filename, image_t *image) {
 	GError **error = NULL;
-	*image = gdk_pixbuf_new_from_file(filename, error);
+	image->pbuf = gdk_pixbuf_new_from_file(filename, error);
+    image->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+		cairo_xlib_surface_get_width(lualock.surface),
+		cairo_xlib_surface_get_height(lualock.surface));
 	// if loading the image didn't work, maybe it's an svg
-	if (!(*image)) {
-		*image = rsvg_pixbuf_from_file(filename, error);
+	if (!(image->pbuf)) {
+		image->pbuf = rsvg_pixbuf_from_file(filename, error);
 	}
 	return true;
 }

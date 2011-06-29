@@ -15,6 +15,20 @@ extern void lualock_lua_background_init(lua_State *L);
 
 lualock_t lualock;
 
+void add_surface(cairo_surface_t *surface) {
+    int i = 0;
+    while (lualock.surfaces[i] != NULL)
+        i++;
+    
+    if (lualock.surfaces_alloc + 1 == i) {
+        lualock.surfaces_alloc += 20;
+        lualock.surfaces = realloc(lualock.surfaces, lualock.surfaces_alloc);
+    }
+    
+    lualock.surfaces[i] = surface;
+    lualock.surfaces[i + 1] = NULL;
+}
+
 void init_display() {
     lualock.dpy = XOpenDisplay(NULL);
     lualock.scr = DefaultScreen(lualock.dpy);
@@ -35,20 +49,17 @@ void init_window() {
                                    0, DefaultDepth(dpy, scr),
                                    CopyFromParent, DefaultVisual(dpy, scr),
                                    attr_mask, &attrs);
-    
-    lualock.pmap = XCreatePixmap(dpy, lualock.win,
-                                    DisplayWidth(dpy, scr),
-                                    DisplayHeight(dpy, scr),
-                                    DefaultDepth(dpy, scr));
-        
-    XSetWindowBackgroundPixmap(dpy, lualock.win, lualock.pmap);
-    
 }
 
 void init_cairo() {
     Display *dpy = lualock.dpy;
     int scr = lualock.scr;
-    lualock.surface = cairo_xlib_surface_create(dpy, lualock.pmap,
+    
+    lualock.surfaces_alloc = 20;
+    lualock.surfaces = malloc(lualock.surfaces_alloc * sizeof(cairo_surface_t *));
+    lualock.surfaces[0] = NULL;
+    
+    lualock.surface = cairo_xlib_surface_create(dpy, lualock.win,
                                                 DefaultVisual(dpy, scr),
                                                 DisplayWidth(dpy, scr),
                                                 DisplayHeight(dpy, scr));
@@ -112,7 +123,12 @@ bool on_key_press(XEvent ev) {
 }
 
 void on_expose() {
-    XClearWindow(lualock.dpy, lualock.win);
+    int i = 0;
+    while (lualock.surfaces[i] != NULL) {
+        cairo_set_source_surface(lualock.cr, lualock.surfaces[i], 0, 0);
+        cairo_paint(lualock.cr);
+        i++;
+    }
 }
 
 void reset_password() {
@@ -191,6 +207,8 @@ int main() {
     // if PAM doesn't get set up correctly, we can't authenticate. so, bail out
     if (ret != PAM_SUCCESS)
         exit(EXIT_FAILURE);
+        
+    on_expose();
     
     while (True) {
         if (authenticate_user())

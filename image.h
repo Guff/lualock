@@ -2,7 +2,10 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 
-typedef GdkPixbuf* image_t;
+typedef struct {
+	GdkPixbuf *pbuf;
+	cairo_surface_t *surface;
+} image_t;
 
 int image_get_width(image_t *image);
 int image_get_height(image_t *image);

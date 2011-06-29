@@ -6,6 +6,13 @@
 #include "image.h"
 
 void background_set_color(const char *hex) {
+	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+		cairo_xlib_surface_get_width(lualock.surface),
+		cairo_xlib_surface_get_height(lualock.surface));
+	cairo_t *cr = cairo_create(surface);
+	
+	add_surface(surface);
+	
 	unsigned long packed_rgb;
 	// hex + 1 skips over the pound sign, which we don't need
 	sscanf(hex + 1, "%lx", &packed_rgb);
@@ -13,8 +20,8 @@ void background_set_color(const char *hex) {
 	double g = (packed_rgb >> 8 & 0xff) / 256.0;
 	double b = (packed_rgb & 0xff) / 256.0;
 	
-	cairo_set_source_rgb(lualock.cr, r, g, b);
-	cairo_paint(lualock.cr);
+	cairo_set_source_rgb(cr, r, g, b);
+	cairo_paint(cr);
 }
 
 //void background_stretch(image_t *image, double width, double height,
@@ -31,6 +38,10 @@ static int lualock_lua_background_set(lua_State *L) {
 		return 0;
 	}
 	
+	cairo_t *cr = cairo_create(image->surface);
+	
+	add_surface(image->surface);
+	
 	const char *style = lua_tostring(L, 2);
 	double width, height, win_width, win_height;
 	int off_x = 0;
@@ -43,8 +54,8 @@ static int lualock_lua_background_set(lua_State *L) {
 	win_width = cairo_xlib_surface_get_width(lualock.surface);
 	win_height = cairo_xlib_surface_get_height(lualock.surface);
 
-	cairo_set_source_rgba(lualock.cr, 0, 0, 0, 1);
-	cairo_paint(lualock.cr);
+	cairo_set_source_rgba(cr, 0, 0, 0, 1);
+	cairo_paint(cr);
 
 	if (style) {
 		if (!strcmp(style, "stretch")) {
@@ -62,12 +73,10 @@ static int lualock_lua_background_set(lua_State *L) {
 			off_y = (win_height - height) / 2;
 		}
 	}
-	cairo_translate(lualock.cr, off_x, off_y);
-	cairo_scale(lualock.cr, scale_x, scale_y);
-	gdk_cairo_set_source_pixbuf(lualock.cr, *image, 0, 0);
-	cairo_paint(lualock.cr);
-	cairo_scale(lualock.cr, 1 / scale_x, 1 / scale_y);
-	cairo_translate(lualock.cr, -off_x, -off_y);
+	cairo_translate(cr, off_x, off_y);
+	cairo_scale(cr, scale_x, scale_y);
+	gdk_cairo_set_source_pixbuf(cr, image->pbuf, 0, 0);
+	cairo_paint(cr);
 	XClearWindow(lualock.dpy, lualock.win);
 	return 0;
 }

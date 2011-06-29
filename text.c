@@ -7,20 +7,25 @@
 
 void draw_text(const char *text, int x, int y, const char *font,
 			   double r, double g, double b, double a) {
+	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+		cairo_xlib_surface_get_width(lualock.surface),
+		cairo_xlib_surface_get_height(lualock.surface));
+	cairo_t *cr = cairo_create(surface);
+	
 	PangoLayout *layout;
 	PangoFontDescription *desc;
 	
-	cairo_translate(lualock.cr, x, y);
-	layout = pango_cairo_create_layout(lualock.cr);
+	cairo_translate(cr, x, y);
+	layout = pango_cairo_create_layout(cr);
 	
 	pango_layout_set_text(layout, text, strlen(text));
 	desc = pango_font_description_from_string(font);
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
 	
-	cairo_set_source_rgba(lualock.cr, r, g, b, a);
-	pango_cairo_update_layout(lualock.cr, layout);
-	pango_cairo_show_layout(lualock.cr, layout);
+	cairo_set_source_rgba(cr, r, g, b, a);
+	pango_cairo_update_layout(cr, layout);
+	pango_cairo_show_layout(cr, layout);
 	
 	g_object_unref(layout);
 }
