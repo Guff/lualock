@@ -1,5 +1,5 @@
 #include "lua_api.h"
-#include "globalconf.h"
+#include "lualock.h"
 
 bool lualock_lua_loadrc(lua_State *L, xdgHandle *xdg) {
     char *config = xdgConfigFind("lualock/rc.lua", xdg);

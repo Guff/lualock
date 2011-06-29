@@ -8,7 +8,7 @@
 #include <security/pam_appl.h>
 
 
-#include "globalconf.h"
+#include "lualock.h"
 #include "lua_api.h"
 
 extern void lualock_lua_background_init(lua_State *L);
@@ -155,7 +155,7 @@ void event_handler(Display *dpy, Window win) {
 }
 
 static int pam_conv_cb(int msgs, const struct pam_message **msg,
-                       struct pam_response **resp, void *appdata_ptr) {
+                       struct pam_response **resp, void *data) {
     
     event_handler(lualock.dpy, lualock.win);
     

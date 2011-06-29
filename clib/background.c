@@ -1,7 +1,7 @@
 #include <string.h>
 #include <cairo-xlib.h>
 
-#include "globalconf.h"
+#include "lualock.h"
 #include "background.h"
 #include "image.h"
 

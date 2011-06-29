@@ -3,7 +3,7 @@
 #include <librsvg/rsvg.h>
 #include <gdk/gdk.h>
 
-#include "globalconf.h"
+#include "lualock.h"
 #include "image.h"
 
 int image_get_width(image_t *image) {

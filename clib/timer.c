@@ -3,7 +3,7 @@
 #include <lauxlib.h>
 #include <unistd.h>
 
-#include "globalconf.h"
+#include "lualock.h"
 #include "timer.h"
 
 typedef struct {

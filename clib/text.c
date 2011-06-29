@@ -2,7 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "globalconf.h"
+#include "lualock.h"
 #include "text.h"
 
 void draw_text(const char *text, int x, int y, const char *font,
@@ -11,6 +11,8 @@ void draw_text(const char *text, int x, int y, const char *font,
 		cairo_xlib_surface_get_width(lualock.surface),
 		cairo_xlib_surface_get_height(lualock.surface));
 	cairo_t *cr = cairo_create(surface);
+	
+	add_surface(surface);
 	
 	PangoLayout *layout;
 	PangoFontDescription *desc;

@@ -10,7 +10,7 @@ LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 CFLAGS	:= -g -Wall -Wextra -std=gnu99 -I. $(INCS) $(CFLAGS) -pthread
 LDFLAGS	:= $(LIBS) $(LDFLAGS) -pthread
 
-SRCS := $(wildcard *.c)
+SRCS := $(wildcard *.c clib/*.c)
 OBJS := $(foreach obj,$(SRCS:.c=.o),$(obj))
 
 
