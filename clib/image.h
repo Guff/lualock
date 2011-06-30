@@ -3,8 +3,8 @@
 #include <gdk/gdk.h>
 
 typedef struct {
-	GdkPixbuf *pbuf;
-	cairo_surface_t *surface;
+    GdkPixbuf *pbuf;
+    cairo_surface_t *surface;
 } image_t;
 
 int image_get_width(image_t *image);

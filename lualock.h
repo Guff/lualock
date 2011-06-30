@@ -1,8 +1,6 @@
 #include <lua.h>
 #include <cairo-xlib.h>
 
-#define PW_BUFF_SIZE 32
-
 typedef struct {
     lua_State *L;
     
@@ -13,6 +11,8 @@ typedef struct {
     char *password;
     int pw_length;
     int pw_alloc;
+    
+    char *password_font;
     
     struct pam_handle *pam_handle;
     
@@ -26,4 +26,6 @@ typedef struct {
 
 extern lualock_t lualock;
 
+cairo_surface_t *create_surface();
 void add_surface(cairo_surface_t *surface);
+void remove_surface(cairo_surface_t *surface);

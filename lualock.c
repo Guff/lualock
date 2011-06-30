@@ -7,6 +7,8 @@
 #include <X11/Intrinsic.h>
 #include <security/pam_appl.h>
 
+#define PW_BUFF_SIZE 32
+#define DEFAULT_FONT "Sans 12"
 
 #include "lualock.h"
 #include "lua_api.h"
@@ -14,6 +16,13 @@
 extern void lualock_lua_background_init(lua_State *L);
 
 lualock_t lualock;
+
+cairo_surface_t *create_surface() {
+	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+		DisplayWidth(lualock.dpy, lualock.scr),
+		DisplayHeight(lualock.dpy, lualock.scr));
+    return surface;
+}    
 
 void add_surface(cairo_surface_t *surface) {
     int i = 0;
@@ -27,6 +36,19 @@ void add_surface(cairo_surface_t *surface) {
     
     lualock.surfaces[i] = surface;
     lualock.surfaces[i + 1] = NULL;
+}
+
+void remove_surface(cairo_surface_t *surface) {
+    int i = 0;
+    while (lualock.surfaces[i] != surface)
+        i++;
+    
+    int j = 0;
+    while (lualock.surfaces[i + j] != NULL) {
+        lualock.surfaces[i + j] = lualock.surfaces[i + j + 1];
+        j++;
+    }
+    
 }
 
 void init_display() {
@@ -136,29 +158,29 @@ void reset_password() {
     lualock.pw_length = 0;
 }
 
-void event_handler(Display *dpy, Window win) {
+void event_handler() {
     XEvent ev;
-    XGrabKeyboard(dpy, win, True, GrabModeAsync, GrabModeAsync, CurrentTime);
-    XGrabPointer(dpy, win, False, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
-                 GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
     
-    while (!XNextEvent(dpy, &ev)) {
-        if (ev.type == KeyPress) {
-            // if enter was pressed, leave so password can be checked
-            if (!on_key_press(ev)) {
+    while (True) {
+        XNextEvent(lualock.dpy, &ev);
+        switch (ev.type) {
+            case KeyPress:
+                // if enter was pressed, leave so password can be checked
+                if (!on_key_press(ev))
+                    return;
                 break;
-            }
-        } else if (ev.type == Expose) {
-            printf("exposed");
-            on_expose();
+            case Expose:
+                on_expose();
+                break;
+            default:
+                break;
         }
     }
 }
 
 static int pam_conv_cb(int msgs, const struct pam_message **msg,
                        struct pam_response **resp, void *data) {
-    
-    event_handler(lualock.dpy, lualock.win);
+    event_handler();
     
     *resp = (struct pam_response *) calloc(msgs, sizeof(struct pam_message));
     if (msgs == 0 || *resp == NULL)
@@ -198,8 +220,7 @@ int main() {
     XMapRaised(dpy, win);
     XClearWindow(dpy, win);
     
-    lualock.password = malloc(PW_BUFF_SIZE * sizeof(char));
-    lualock.password[0] = '\0';
+    lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
     lualock.pw_length = 0;
     lualock.pw_alloc = PW_BUFF_SIZE;
     
@@ -209,6 +230,12 @@ int main() {
     if (ret != PAM_SUCCESS)
         exit(EXIT_FAILURE);
         
+    XGrabKeyboard(dpy, lualock.win, True, GrabModeAsync, GrabModeAsync,
+                  CurrentTime);
+    XGrabPointer(dpy, lualock.win, False, ButtonPressMask | ButtonReleaseMask
+                 | PointerMotionMask, GrabModeAsync, GrabModeAsync, lualock.win,
+                 None, CurrentTime);
+
     on_expose();
     
     while (True) {

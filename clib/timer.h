@@ -2,12 +2,12 @@
 #include <stdbool.h>
 
 typedef struct {
-	pthread_t thread;
-	bool running;
-	int cycles;
-	int completed_cycles;
-	int int_us;
-	void (*cb)(void);
+    pthread_t thread;
+    bool running;
+    int cycles;
+    int completed_cycles;
+    int int_us;
+    void (*cb)(void);
 } l_timer_t;
 
 l_timer_t timer_new(unsigned int int_us, int cycles, void (*cb)(void));
