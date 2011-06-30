@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include <cairo-xlib.h>
-#include <X11/Intrinsic.h>
+#include <pango/pangocairo.h>
+#include <X11/keysym.h>
+#include <X11/Xutil.h>
 #include <security/pam_appl.h>
 
 #define PW_BUFF_SIZE 32
@@ -22,7 +25,7 @@ cairo_surface_t *create_surface() {
 		DisplayWidth(lualock.dpy, lualock.scr),
 		DisplayHeight(lualock.dpy, lualock.scr));
     return surface;
-}    
+}
 
 void add_surface(cairo_surface_t *surface) {
     int i = 0;
@@ -48,7 +51,29 @@ void remove_surface(cairo_surface_t *surface) {
         lualock.surfaces[i + j] = lualock.surfaces[i + j + 1];
         j++;
     }
-    
+}
+
+char* get_password_mask() {
+    char password_mask[strlen(lualock.password) + 1];
+    for (unsigned int i = 0; i < strlen(lualock.password); i++)
+        password_mask[i] = '*';
+    password_mask[strlen(lualock.password)] = '\0';
+    return strdup(password_mask);
+}
+
+void draw_password_mask() {
+    cairo_surface_flush(lualock.surface);
+    cairo_set_source_rgba(lualock.style.cr, 0, 0, 0, 0);
+    cairo_set_operator(lualock.style.cr, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(lualock.style.cr);
+    cairo_set_operator(lualock.style.cr, CAIRO_OPERATOR_OVER);
+    pango_layout_set_text(lualock.style.layout, get_password_mask(), -1);
+    cairo_set_source_rgba(lualock.style.cr, lualock.style.r, lualock.style.g,
+                          lualock.style.b, lualock.style.a);
+    pango_cairo_update_layout(lualock.style.cr, lualock.style.layout);
+    pango_cairo_show_layout(lualock.style.cr, lualock.style.layout);
+    //cairo_paint(lualock.style.cr);
+    //cairo_set_source_rgb(lualock.style.cr, 1, 1, 0);
 }
 
 void init_display() {
@@ -90,6 +115,33 @@ void init_cairo() {
     
 }
 
+void init_style() {
+    Display *dpy = lualock.dpy;
+    int scr = lualock.scr;
+    
+    lualock.style.font = DEFAULT_FONT;
+    lualock.style.x = 200;
+    lualock.style.y = 300;
+    lualock.style.r = 1;
+    lualock.style.g = 1;
+    lualock.style.b = 1;
+    lualock.style.a = 1;
+    
+    lualock.style.surface = cairo_xlib_surface_create(dpy, lualock.win,
+                                                      DefaultVisual(dpy, scr),
+                                                      DisplayWidth(dpy, scr),
+                                                      DisplayHeight(dpy, scr));
+    lualock.style.cr = cairo_create(lualock.style.surface);
+    lualock.style.layout = pango_cairo_create_layout(lualock.style.cr);
+    
+    PangoFontDescription *desc =
+        pango_font_description_from_string(lualock.style.font);
+    pango_layout_set_font_description(lualock.style.layout, desc);
+    pango_font_description_free(desc);
+    cairo_translate(lualock.style.cr, lualock.style.x, lualock.style.y);
+    
+}
+
 void init_lua() {
     xdgHandle xdg;
     xdgInitHandle(&xdg);
@@ -128,6 +180,13 @@ bool on_key_press(XEvent ev) {
             lualock.password[0] = '\0';
             lualock.pw_length = 0;
             break;
+        case XK_BackSpace:
+        case XK_KP_Delete:
+        case XK_Delete:
+            if (lualock.pw_length > 0) {
+                lualock.pw_length--;
+                lualock.password[lualock.pw_length] = '\0';
+            }
         default:
             if (isprint(ascii) && (keysym < XK_Shift_L || keysym > XK_Hyper_R)) {
                 // if we're running short on memory for the buffer, double it
@@ -140,6 +199,7 @@ bool on_key_press(XEvent ev) {
                 lualock.pw_length++;
             }
     }
+    draw_password_mask();
     
     return true;
 }
@@ -169,6 +229,7 @@ void event_handler() {
                 if (!on_key_press(ev))
                     return;
                 break;
+            case MappingNotify:
             case Expose:
                 on_expose();
                 break;
@@ -212,13 +273,13 @@ int main() {
     init_display();
     init_window();
     init_cairo();
+    init_style();
     init_lua();
     
     dpy = lualock.dpy;
     win = lualock.win;
     
-    XMapRaised(dpy, win);
-    XClearWindow(dpy, win);
+    XMapWindow(dpy, win);
     
     lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
     lualock.pw_length = 0;

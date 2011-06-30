@@ -1,6 +1,22 @@
 #include <lua.h>
 #include <cairo-xlib.h>
+#include <pango/pangocairo.h>
 
+typedef struct {
+    char *font;
+    
+    int x;
+    int y;
+    
+    double r;
+    double g;
+    double b;
+    double a;
+    
+    cairo_surface_t *surface;
+    cairo_t *cr;
+    PangoLayout *layout;
+} style_t;
 typedef struct {
     lua_State *L;
     
@@ -17,11 +33,12 @@ typedef struct {
     struct pam_handle *pam_handle;
     
     cairo_surface_t *surface;
+    cairo_t *cr;
     
     cairo_surface_t **surfaces;
     int surfaces_alloc;
 
-    cairo_t *cr;
+    style_t style;
 } lualock_t;
 
 extern lualock_t lualock;
