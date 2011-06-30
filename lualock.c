@@ -62,18 +62,20 @@ char* get_password_mask() {
 }
 
 void draw_password_mask() {
-    cairo_surface_flush(lualock.surface);
-    cairo_set_source_rgba(lualock.style.cr, 0, 0, 0, 0);
-    cairo_set_operator(lualock.style.cr, CAIRO_OPERATOR_CLEAR);
-    cairo_paint(lualock.style.cr);
-    cairo_set_operator(lualock.style.cr, CAIRO_OPERATOR_OVER);
-    pango_layout_set_text(lualock.style.layout, get_password_mask(), -1);
-    cairo_set_source_rgba(lualock.style.cr, lualock.style.r, lualock.style.g,
+    PangoLayout *layout = pango_cairo_create_layout(lualock.pw_cr);
+    
+    PangoFontDescription *desc =
+        pango_font_description_from_string(lualock.style.font);
+    pango_layout_set_font_description(layout, desc);
+    pango_font_description_free(desc);
+    cairo_set_source_rgba(lualock.pw_cr, lualock.style.r, lualock.style.g,
                           lualock.style.b, lualock.style.a);
-    pango_cairo_update_layout(lualock.style.cr, lualock.style.layout);
-    pango_cairo_show_layout(lualock.style.cr, lualock.style.layout);
-    //cairo_paint(lualock.style.cr);
-    //cairo_set_source_rgb(lualock.style.cr, 1, 1, 0);
+    cairo_translate(lualock.pw_cr, lualock.style.x, lualock.style.y);
+
+    pango_layout_set_text(layout, get_password_mask(), -1);
+    pango_cairo_update_layout(lualock.pw_cr, layout);
+    pango_cairo_layout_path(lualock.pw_cr, layout);
+    cairo_fill(lualock.pw_cr);
 }
 
 void init_display() {
@@ -113,12 +115,15 @@ void init_cairo() {
     
     lualock.cr = cairo_create(lualock.surface);
     
+    lualock.pw_surface = cairo_xlib_surface_create(dpy, lualock.win,
+                                                   DefaultVisual(dpy, scr),
+                                                   DisplayWidth(dpy, scr),
+                                                   DisplayHeight(dpy, scr));
+    lualock.pw_cr = cairo_create(lualock.pw_surface);
+    
 }
 
 void init_style() {
-    Display *dpy = lualock.dpy;
-    int scr = lualock.scr;
-    
     lualock.style.font = DEFAULT_FONT;
     lualock.style.x = 200;
     lualock.style.y = 300;
@@ -126,20 +131,6 @@ void init_style() {
     lualock.style.g = 1;
     lualock.style.b = 1;
     lualock.style.a = 1;
-    
-    lualock.style.surface = cairo_xlib_surface_create(dpy, lualock.win,
-                                                      DefaultVisual(dpy, scr),
-                                                      DisplayWidth(dpy, scr),
-                                                      DisplayHeight(dpy, scr));
-    lualock.style.cr = cairo_create(lualock.style.surface);
-    lualock.style.layout = pango_cairo_create_layout(lualock.style.cr);
-    
-    PangoFontDescription *desc =
-        pango_font_description_from_string(lualock.style.font);
-    pango_layout_set_font_description(lualock.style.layout, desc);
-    pango_font_description_free(desc);
-    cairo_translate(lualock.style.cr, lualock.style.x, lualock.style.y);
-    
 }
 
 void init_lua() {

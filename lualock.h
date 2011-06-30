@@ -12,10 +12,6 @@ typedef struct {
     double g;
     double b;
     double a;
-    
-    cairo_surface_t *surface;
-    cairo_t *cr;
-    PangoLayout *layout;
 } style_t;
 typedef struct {
     lua_State *L;
@@ -34,6 +30,9 @@ typedef struct {
     
     cairo_surface_t *surface;
     cairo_t *cr;
+    
+    cairo_surface_t *pw_surface;
+    cairo_t *pw_cr;
     
     cairo_surface_t **surfaces;
     int surfaces_alloc;

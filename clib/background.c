@@ -75,7 +75,6 @@ static int lualock_lua_background_set(lua_State *L) {
     cairo_scale(cr, scale_x, scale_y);
     gdk_cairo_set_source_pixbuf(cr, image->pbuf, 0, 0);
     cairo_paint(cr);
-    XClearWindow(lualock.dpy, lualock.win);
     return 0;
 }
 
