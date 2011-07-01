@@ -1,24 +1,22 @@
 #include <string.h>
 #include <cairo-xlib.h>
+#include <librsvg/rsvg.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
 
 #include "lualock.h"
 #include "background.h"
-#include "image.h"
 
 void background_set_color(const char *hex) {
-    cairo_surface_t *surface = create_surface();
+    cairo_surface_t *surface = cairo_xlib_surface_create(lualock.dpy, lualock.bg,
+        DefaultVisual(lualock.dpy, lualock.scr),
+        DisplayWidth(lualock.dpy, lualock.scr),
+        DisplayHeight(lualock.dpy, lualock.scr));
     cairo_t *cr = cairo_create(surface);
     
-    add_surface(surface);
-    
-    unsigned long packed_rgb;
-    // hex + 1 skips over the pound sign, which we don't need
-    sscanf(hex + 1, "%lx", &packed_rgb);
-    double r = (packed_rgb >> 16) / 256.0;
-    double g = (packed_rgb >> 8 & 0xff) / 256.0;
-    double b = (packed_rgb & 0xff) / 256.0;
-    
-    cairo_set_source_rgb(cr, r, g, b);
+    double r, g, b, a;
+    parse_color(hex, &r, &g, &b, &a);
+    cairo_set_source_rgba(cr, r, g, b, a);
     cairo_paint(cr);
 }
 
@@ -28,17 +26,23 @@ void background_set_color(const char *hex) {
 //}
 
 static int lualock_lua_background_set(lua_State *L) {
-    image_t *image = lua_touserdata(L, 1);
-    
-    // if parameter is not userdata, maybe the user wants a solid color
-    if (!image) {
+    const char *filename = luaL_checkstring(L, 1);
+    if (!strcmp(filename, "color")) {
         background_set_color(luaL_checkstring(L, 1));
         return 0;
     }
+    GError **error = NULL;
+    GdkPixbuf *pbuf = gdk_pixbuf_new_from_file(filename, error);
+    // if loading the image failed, try loading as an svg
+    if (!pbuf)
+        pbuf = rsvg_pixbuf_from_file(filename, error);
     
-    cairo_t *cr = cairo_create(image->surface);
+    cairo_surface_t *surface = cairo_xlib_surface_create(lualock.dpy, lualock.bg,
+        DefaultVisual(lualock.dpy, lualock.scr),
+        DisplayWidth(lualock.dpy, lualock.scr),
+        DisplayHeight(lualock.dpy, lualock.scr));
     
-    add_surface(image->surface);
+    cairo_t *cr = cairo_create(surface);
     
     const char *style = lua_tostring(L, 2);
     double width, height, win_width, win_height;
@@ -47,8 +51,8 @@ static int lualock_lua_background_set(lua_State *L) {
     double scale_x = 1;
     double scale_y = 1;
     
-    width = image_get_width(image);
-    height = image_get_height(image);
+    width = gdk_pixbuf_get_width(pbuf);
+    height = gdk_pixbuf_get_height(pbuf);
     win_width = DisplayWidth(lualock.dpy, lualock.scr);
     win_height = DisplayHeight(lualock.dpy, lualock.scr);
 
@@ -73,7 +77,7 @@ static int lualock_lua_background_set(lua_State *L) {
     }
     cairo_translate(cr, off_x, off_y);
     cairo_scale(cr, scale_x, scale_y);
-    gdk_cairo_set_source_pixbuf(cr, image->pbuf, 0, 0);
+    gdk_cairo_set_source_pixbuf(cr, pbuf, 0, 0);
     cairo_paint(cr);
     return 0;
 }

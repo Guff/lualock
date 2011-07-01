@@ -46,15 +46,11 @@ int lualock_lua_text_new(lua_State *L) {
     if (!hex)
         hex = "#000000";
     
-    unsigned long packed_rgb;
-    // hex + 1 skips over the pound sign, which we don't need
-    sscanf(hex + 1, "%lx", &packed_rgb);
-    double r = (packed_rgb >> 16) / 256.0;
-    double g = (packed_rgb >> 8 & 0xff) / 256.0;
-    double b = (packed_rgb & 0xff) / 256.0;
+    double r, g, b, a;
+    parse_color(hex, &r, &g, &b, &a);
     
     text_t *text_obj = lua_newuserdata(L, sizeof(text_t));
-    *text_obj = text_new(text, x, y, font, r, g, b, 1);
+    *text_obj = text_new(text, x, y, font, r, g, b, a);
     return 1;
 }
 

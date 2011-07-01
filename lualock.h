@@ -22,6 +22,7 @@ typedef struct {
     Display *dpy;
     int scr;
     Window win;
+    Pixmap bg;
     
     char *password;
     int pw_length;
@@ -47,3 +48,4 @@ extern lualock_t lualock;
 cairo_surface_t *create_surface();
 void add_surface(cairo_surface_t *surface);
 void remove_surface(cairo_surface_t *surface);
+void parse_color(const char *hex, double *r, double *g, double *b, double *a);

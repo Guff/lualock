@@ -53,6 +53,19 @@ void remove_surface(cairo_surface_t *surface) {
     }
 }
 
+void parse_color(const char *hex, double *r, double *g, double *b, double *a) {
+    unsigned long packed_rgb;
+    // hex + 1 skips over the pound sign, which we don't need
+    sscanf(hex + 1, "%lx", &packed_rgb);
+    *r = (packed_rgb >> 16) / 256.0;
+    *g = (packed_rgb >> 8 & 0xff) / 256.0;
+    *b = (packed_rgb & 0xff) / 256.0;
+    *a = 1;
+}
+
+//void draw_password_field() {
+    //cairo_t *cr = cairo_create(lualock.pw_surface)
+
 char* get_password_mask() {
     char password_mask[strlen(lualock.password) + 1];
     for (unsigned int i = 0; i < strlen(lualock.password); i++)
@@ -64,6 +77,9 @@ char* get_password_mask() {
 void draw_password_mask() {
     cairo_t *cr = cairo_create(lualock.pw_surface);
     
+    cairo_rectangle(cr, 0, 0, lualock.style.width, lualock.style.height);
+    cairo_set_source_rgb(cr, 1, 1, 1);
+    cairo_fill(cr);
     PangoLayout *layout = pango_cairo_create_layout(cr);
     
     PangoFontDescription *desc =
@@ -72,7 +88,7 @@ void draw_password_mask() {
     pango_font_description_free(desc);
     cairo_set_source_rgba(cr, lualock.style.r, lualock.style.g,
                           lualock.style.b, lualock.style.a);
-
+    cairo_move_to(cr, 3, 5);
     pango_layout_set_text(layout, get_password_mask(), -1);
     pango_cairo_update_layout(cr, layout);
     pango_cairo_layout_path(cr, layout);
@@ -99,6 +115,10 @@ void init_window() {
                                    0, DefaultDepth(dpy, scr),
                                    CopyFromParent, DefaultVisual(dpy, scr),
                                    attr_mask, &attrs);
+    
+    lualock.bg = XCreatePixmap(dpy, lualock.win, DisplayWidth(dpy, scr),
+                               DisplayHeight(dpy, scr), DefaultDepth(dpy, scr));
+    XSetWindowBackgroundPixmap(dpy, lualock.win, lualock.bg);
 }
 
 void init_cairo() {
@@ -122,13 +142,13 @@ void init_cairo() {
 
 void init_style() {
     lualock.style.font = DEFAULT_FONT;
-    lualock.style.x = 200;
-    lualock.style.y = 300;
-    lualock.style.width = 400;
-    lualock.style.height = 100;
-    lualock.style.r = 1;
-    lualock.style.g = 1;
-    lualock.style.b = 1;
+    lualock.style.x = 400;
+    lualock.style.y = 540;
+    lualock.style.width = 200;
+    lualock.style.height = 20;
+    lualock.style.r = 0;
+    lualock.style.g = 0;
+    lualock.style.b = 0;
     lualock.style.a = 1;
 }
 
