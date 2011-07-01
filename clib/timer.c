@@ -6,11 +6,6 @@
 #include "lualock.h"
 #include "timer.h"
 
-typedef struct {
-    l_timer_t timer;
-    lua_State *L;
-} timer_lua;
-
 l_timer_t timer_new(unsigned int int_us, int cycles, void (*cb)(void)) {
     l_timer_t timer = { .cycles = cycles, .completed_cycles = 0,
                         .running = false, .int_us = int_us, .cb = cb };

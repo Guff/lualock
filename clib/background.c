@@ -28,7 +28,7 @@ void background_set_color(const char *hex) {
 static int lualock_lua_background_set(lua_State *L) {
     const char *filename = luaL_checkstring(L, 1);
     if (!strcmp(filename, "color")) {
-        background_set_color(luaL_checkstring(L, 1));
+        background_set_color(luaL_checkstring(L, 2));
         return 0;
     }
     GError **error = NULL;

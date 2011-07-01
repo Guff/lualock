@@ -25,6 +25,7 @@ options:
 	@echo
 	@echo "build targets:"
 	@echo "SRCS = $(SRCS)"
+	@echo
 
 .c.o:
 	@echo $(CC) -c $< -o $@
