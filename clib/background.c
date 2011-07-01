@@ -56,7 +56,7 @@ static int lualock_lua_background_set(lua_State *L) {
     win_width = DisplayWidth(lualock.dpy, lualock.scr);
     win_height = DisplayHeight(lualock.dpy, lualock.scr);
 
-    cairo_set_source_rgba(cr, 0, 0, 0, 1);
+    //cairo_set_source_rgba(cr, 0, 0, 0, 1);
     cairo_paint(cr);
 
     if (style) {

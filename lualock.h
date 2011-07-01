@@ -32,6 +32,7 @@ typedef struct {
     
     struct pam_handle *pam_handle;
     
+    cairo_surface_t *surface_buf;
     cairo_surface_t *surface;
     cairo_t *cr;
     

@@ -63,8 +63,12 @@ void parse_color(const char *hex, double *r, double *g, double *b, double *a) {
     *a = 1;
 }
 
-//void draw_password_field() {
-    //cairo_t *cr = cairo_create(lualock.pw_surface)
+void draw_password_field() {
+    cairo_t *cr = cairo_create(lualock.pw_surface);
+    cairo_rectangle(cr, 0, 0, lualock.style.width, lualock.style.height);
+    cairo_set_source_rgb(cr, 1, 1, 1);
+    cairo_fill(cr);
+}
 
 char* get_password_mask() {
     char password_mask[strlen(lualock.password) + 1];
@@ -77,9 +81,8 @@ char* get_password_mask() {
 void draw_password_mask() {
     cairo_t *cr = cairo_create(lualock.pw_surface);
     
-    cairo_rectangle(cr, 0, 0, lualock.style.width, lualock.style.height);
-    cairo_set_source_rgb(cr, 1, 1, 1);
-    cairo_fill(cr);
+    draw_password_field();
+    
     PangoLayout *layout = pango_cairo_create_layout(cr);
     
     PangoFontDescription *desc =
@@ -135,6 +138,8 @@ void init_cairo() {
                                                 DisplayHeight(dpy, scr));
     
     lualock.cr = cairo_create(lualock.surface);
+    
+    lualock.surface_buf = create_surface();
     
     lualock.pw_surface = cairo_surface_create_for_rectangle(lualock.surface,
         lualock.style.x, lualock.style.y, lualock.style.width, lualock.style.height);
@@ -215,12 +220,26 @@ bool on_key_press(XEvent ev) {
 }
 
 void on_expose() {
+    cairo_t *cr = cairo_create(lualock.surface_buf);
     int i = 0;
+    cairo_set_source_rgba(lualock.cr, 0, 0, 0, 0);
+    cairo_set_operator(lualock.cr, CAIRO_OPERATOR_CLEAR);
+    cairo_set_source_rgba(cr, 0, 0, 0, 0);
+    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(cr);
+    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
     while (lualock.surfaces[i] != NULL) {
-        cairo_set_source_surface(lualock.cr, lualock.surfaces[i], 0, 0);
-        cairo_paint(lualock.cr);
+        cairo_set_source_surface(cr, lualock.surfaces[i], 0, 0);
+        cairo_paint(cr);
         i++;
     }
+    cairo_set_operator(lualock.cr, CAIRO_OPERATOR_OVER);
+    cairo_set_source_surface(lualock.cr, lualock.surface_buf, 0, 0);
+    cairo_paint(lualock.cr);
+    //cairo_set_operator(lualock.cr, CAIRO_OPERATOR_SOURCE);
+    cairo_destroy(cr);
+    
+    draw_password_field();
 }
 
 void reset_password() {
