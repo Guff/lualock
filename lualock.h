@@ -8,6 +8,9 @@ typedef struct {
     int x;
     int y;
     
+    int off_x;
+    int off_y;
+    
     int width;
     int height;
     
@@ -50,3 +53,4 @@ cairo_surface_t *create_surface();
 void add_surface(cairo_surface_t *surface);
 void remove_surface(cairo_surface_t *surface);
 void parse_color(const char *hex, double *r, double *g, double *b, double *a);
+void draw();

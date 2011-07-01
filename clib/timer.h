@@ -11,6 +11,6 @@ typedef struct {
 } l_timer_t;
 
 l_timer_t timer_new(unsigned int int_us, int cycles, void (*cb)(void));
-void *timer_run(void *data);
+void* timer_run(void *data);
 
 void lualock_lua_timer_init(lua_State *L);

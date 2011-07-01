@@ -67,7 +67,10 @@ void draw_password_field() {
     cairo_t *cr = cairo_create(lualock.pw_surface);
     cairo_rectangle(cr, 0, 0, lualock.style.width, lualock.style.height);
     cairo_set_source_rgb(cr, 1, 1, 1);
-    cairo_fill(cr);
+    cairo_fill_preserve(cr);
+    cairo_set_source_rgba(cr, 0, 0, 0, .6);
+    cairo_set_line_width(cr, 2.0);
+    cairo_stroke(cr);
 }
 
 char* get_password_mask() {
@@ -91,7 +94,7 @@ void draw_password_mask() {
     pango_font_description_free(desc);
     cairo_set_source_rgba(cr, lualock.style.r, lualock.style.g,
                           lualock.style.b, lualock.style.a);
-    cairo_move_to(cr, 3, 5);
+    cairo_move_to(cr, lualock.style.off_x, lualock.style.off_y);
     pango_layout_set_text(layout, get_password_mask(), -1);
     pango_cairo_update_layout(cr, layout);
     pango_cairo_layout_path(cr, layout);
@@ -149,8 +152,10 @@ void init_style() {
     lualock.style.font = DEFAULT_FONT;
     lualock.style.x = 400;
     lualock.style.y = 540;
+    lualock.style.off_x = 5;
+    lualock.style.off_y = 5;
     lualock.style.width = 200;
-    lualock.style.height = 20;
+    lualock.style.height = 24;
     lualock.style.r = 0;
     lualock.style.g = 0;
     lualock.style.b = 0;
@@ -176,6 +181,9 @@ void init_lua() {
     lua_pop(lualock.L, 1);
     
     lualock_lua_timer_init(lualock.L);
+    lua_pop(lualock.L, 1);
+    
+    lualock_lua_style_init(lualock.L);
     lua_pop(lualock.L, 1);
 
     lualock_lua_loadrc(lualock.L, &xdg);    
@@ -219,7 +227,7 @@ bool on_key_press(XEvent ev) {
     return true;
 }
 
-void on_expose() {
+void draw() {
     cairo_t *cr = cairo_create(lualock.surface_buf);
     int i = 0;
     cairo_set_source_rgba(lualock.cr, 0, 0, 0, 0);
@@ -239,7 +247,7 @@ void on_expose() {
     //cairo_set_operator(lualock.cr, CAIRO_OPERATOR_SOURCE);
     cairo_destroy(cr);
     
-    draw_password_field();
+    draw_password_mask();
 }
 
 void reset_password() {
@@ -260,7 +268,7 @@ void event_handler() {
                 break;
             case MappingNotify:
             case Expose:
-                on_expose();
+                draw();
                 break;
             default:
                 break;
@@ -326,7 +334,7 @@ int main() {
                  | PointerMotionMask, GrabModeAsync, GrabModeAsync, lualock.win,
                  None, CurrentTime);
 
-    on_expose();
+    draw();
     
     while (True) {
         if (authenticate_user())

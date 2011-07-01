@@ -17,7 +17,7 @@ l_timer_t timer_new(unsigned int int_us, int cycles, void (*cb)(void)) {
     return timer;
 }
 
-void *timer_run(void *data) {
+void* timer_run(void *data) {
         l_timer_t timer = *(l_timer_t *)data;
         while(timer.cycles == 0 || timer.completed_cycles < timer.cycles) {
             timer.cb();

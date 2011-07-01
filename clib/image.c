@@ -16,8 +16,10 @@ int image_get_height(image_t *image) {
 }
 
 void image_render(image_t *image, int x, int y) {
+    cairo_save(image->cr);
     cairo_translate(image->cr, x, y);
     cairo_paint(image->cr);
+    cairo_restore(image->cr);
 }
 
 void image_rotate(image_t *image, double angle) {
