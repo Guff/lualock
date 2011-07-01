@@ -62,20 +62,21 @@ char* get_password_mask() {
 }
 
 void draw_password_mask() {
-    PangoLayout *layout = pango_cairo_create_layout(lualock.pw_cr);
+    cairo_t *cr = cairo_create(lualock.pw_surface);
+    
+    PangoLayout *layout = pango_cairo_create_layout(cr);
     
     PangoFontDescription *desc =
         pango_font_description_from_string(lualock.style.font);
     pango_layout_set_font_description(layout, desc);
     pango_font_description_free(desc);
-    cairo_set_source_rgba(lualock.pw_cr, lualock.style.r, lualock.style.g,
+    cairo_set_source_rgba(cr, lualock.style.r, lualock.style.g,
                           lualock.style.b, lualock.style.a);
-    cairo_translate(lualock.pw_cr, lualock.style.x, lualock.style.y);
 
     pango_layout_set_text(layout, get_password_mask(), -1);
-    pango_cairo_update_layout(lualock.pw_cr, layout);
-    pango_cairo_layout_path(lualock.pw_cr, layout);
-    cairo_fill(lualock.pw_cr);
+    pango_cairo_update_layout(cr, layout);
+    pango_cairo_layout_path(cr, layout);
+    cairo_fill(cr);
 }
 
 void init_display() {
@@ -115,18 +116,16 @@ void init_cairo() {
     
     lualock.cr = cairo_create(lualock.surface);
     
-    lualock.pw_surface = cairo_xlib_surface_create(dpy, lualock.win,
-                                                   DefaultVisual(dpy, scr),
-                                                   DisplayWidth(dpy, scr),
-                                                   DisplayHeight(dpy, scr));
-    lualock.pw_cr = cairo_create(lualock.pw_surface);
-    
+    lualock.pw_surface = cairo_surface_create_for_rectangle(lualock.surface,
+        lualock.style.x, lualock.style.y, lualock.style.width, lualock.style.height);
 }
 
 void init_style() {
     lualock.style.font = DEFAULT_FONT;
     lualock.style.x = 200;
     lualock.style.y = 300;
+    lualock.style.width = 400;
+    lualock.style.height = 100;
     lualock.style.r = 1;
     lualock.style.g = 1;
     lualock.style.b = 1;
@@ -263,8 +262,8 @@ int main() {
     
     init_display();
     init_window();
-    init_cairo();
     init_style();
+    init_cairo();
     init_lua();
     
     dpy = lualock.dpy;

@@ -8,6 +8,9 @@ typedef struct {
     int x;
     int y;
     
+    int width;
+    int height;
+    
     double r;
     double g;
     double b;
@@ -32,7 +35,6 @@ typedef struct {
     cairo_t *cr;
     
     cairo_surface_t *pw_surface;
-    cairo_t *pw_cr;
     
     cairo_surface_t **surfaces;
     int surfaces_alloc;
