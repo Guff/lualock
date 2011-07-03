@@ -20,11 +20,6 @@ void background_set_color(const char *hex) {
     cairo_destroy(cr);
 }
 
-//void background_stretch(image_t *image, double width, double height,
-                        //double win_width, double win_height) {
-    
-//}
-
 static int lualock_lua_background_set(lua_State *L) {
     const char *filename = luaL_checkstring(L, 1);
     if (!strcmp(filename, "color")) {
@@ -78,6 +73,7 @@ static int lualock_lua_background_set(lua_State *L) {
     gdk_cairo_set_source_pixbuf(cr, pbuf, 0, 0);
     cairo_paint(cr);
     cairo_destroy(cr);
+    g_object_unref(pbuf);
     return 0;
 }
 

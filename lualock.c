@@ -134,10 +134,11 @@ bool on_key_press(XEvent ev) {
             }
         default:
             if (isprint(ascii) && (keysym < XK_Shift_L || keysym > XK_Hyper_R)) {
-                // if we're running short on memory for the buffer, double it
+                // if we're running short on memory for the buffer, grow it
                 if (lualock.pw_alloc <= lualock.pw_length + 1) {
-                    lualock.password = realloc(lualock.password, 2 * lualock.pw_alloc);
-                    lualock.pw_alloc *= 2;
+                    lualock.password = realloc(lualock.password,
+                        lualock.pw_alloc + PW_BUFF_SIZE);
+                    lualock.pw_alloc += PW_BUFF_SIZE;
                 }
                 lualock.password[lualock.pw_length] = ascii;
                 lualock.password[lualock.pw_length + 1] = '\0';
