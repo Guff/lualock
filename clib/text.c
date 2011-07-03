@@ -3,7 +3,8 @@
 #include <unistd.h>
 
 #include "lualock.h"
-#include "text.h"
+#include "misc.h"
+#include "clib/text.h"
 
 text_t text_new(const char *text, int x, int y, const char *font,
                 double r, double g, double b, double a) {
@@ -18,8 +19,8 @@ text_t text_new(const char *text, int x, int y, const char *font,
     text_t text_obj = { .text = text, .x = x, .y = y, .font = font, .r = r,
                         .g = g, .b = b, .a = a, .surface = surface,
                         .layout = layout };
-    return text_obj;
-    
+    cairo_destroy(cr);
+    return text_obj;    
 }
 
 void text_draw(text_t text_obj) {
@@ -32,6 +33,7 @@ void text_draw(text_t text_obj) {
     cairo_set_source_rgba(cr, text_obj.r, text_obj.g, text_obj.b, text_obj.a);
     pango_cairo_update_layout(cr, text_obj.layout);
     pango_cairo_show_layout(cr, text_obj.layout);
+    cairo_destroy(cr);
 }
 
 int lualock_lua_text_new(lua_State *L) {

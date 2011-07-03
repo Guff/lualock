@@ -1,7 +1,8 @@
 #include <string.h>
 
 #include "lualock.h"
-#include "style.h"
+#include "misc.h"
+#include "clib/style.h"
 
 void style_set(const char *font, int x, int y, int off_x, int off_y, int width,
 			   int height, double r, double g, double b, double a) {
@@ -20,9 +21,7 @@ void style_set(const char *font, int x, int y, int off_x, int off_y, int width,
 	
 	cairo_surface_finish(lualock.pw_surface);
 	cairo_surface_destroy(lualock.pw_surface);
-	lualock.pw_surface = cairo_surface_create_for_rectangle(lualock.surface,
-        lualock.style.x, lualock.style.y, lualock.style.width,
-        lualock.style.height);
+	lualock.pw_surface = create_surface();
 }
 
 int lualock_lua_style_set(lua_State *L) {

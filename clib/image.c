@@ -5,7 +5,9 @@
 #include <math.h>
 
 #include "lualock.h"
-#include "image.h"
+#include "misc.h"
+#include "drawing.h"
+#include "clib/image.h"
 
 int image_get_width(image_t *image) {
     return gdk_pixbuf_get_width(image->pbuf);
@@ -54,10 +56,6 @@ static int lualock_lua_image_new(lua_State *L) {
 
 static int lualock_lua_image_render(lua_State *L) {
     image_t *image = lua_touserdata(L, 1);
-    /* Neat thing is, lua_tointeger returns 0 if it fails. So if the user
-     * doesn't supply these two arguments, two nils are on the stack, which
-     * means two zeros are returned. So, the image is drawn at (0, 0), a
-     * convenient default. */
     image_render(image, lua_tointeger(L, 2), lua_tointeger(L, 3));
     return 0;
 }

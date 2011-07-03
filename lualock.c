@@ -14,64 +14,13 @@
 #define DEFAULT_FONT "Sans 12"
 
 #include "lualock.h"
+#include "misc.h"
+#include "drawing.h"
 #include "lua_api.h"
 
 extern void lualock_lua_background_init(lua_State *L);
 
 lualock_t lualock;
-
-cairo_surface_t *create_surface() {
-	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-		DisplayWidth(lualock.dpy, lualock.scr),
-		DisplayHeight(lualock.dpy, lualock.scr));
-    return surface;
-}
-
-void add_surface(cairo_surface_t *surface) {
-    int i = 0;
-    while (lualock.surfaces[i] != NULL)
-        i++;
-    
-    if (lualock.surfaces_alloc + 1 == i) {
-        lualock.surfaces_alloc += 20;
-        lualock.surfaces = realloc(lualock.surfaces, lualock.surfaces_alloc);
-    }
-    
-    lualock.surfaces[i] = surface;
-    lualock.surfaces[i + 1] = NULL;
-}
-
-void remove_surface(cairo_surface_t *surface) {
-    int i = 0;
-    while (lualock.surfaces[i] != surface)
-        i++;
-    
-    int j = 0;
-    while (lualock.surfaces[i + j] != NULL) {
-        lualock.surfaces[i + j] = lualock.surfaces[i + j + 1];
-        j++;
-    }
-}
-
-void parse_color(const char *hex, double *r, double *g, double *b, double *a) {
-    unsigned long packed_rgb;
-    // hex + 1 skips over the pound sign, which we don't need
-    sscanf(hex + 1, "%lx", &packed_rgb);
-    *r = (packed_rgb >> 16) / 256.0;
-    *g = (packed_rgb >> 8 & 0xff) / 256.0;
-    *b = (packed_rgb & 0xff) / 256.0;
-    *a = 1;
-}
-
-void draw_password_field() {
-    cairo_t *cr = cairo_create(lualock.pw_surface);
-    cairo_rectangle(cr, 0, 0, lualock.style.width, lualock.style.height);
-    cairo_set_source_rgb(cr, 1, 1, 1);
-    cairo_fill_preserve(cr);
-    cairo_set_source_rgba(cr, 0, 0, 0, .6);
-    cairo_set_line_width(cr, 2.0);
-    cairo_stroke(cr);
-}
 
 char* get_password_mask() {
     char password_mask[strlen(lualock.password) + 1];
@@ -79,26 +28,6 @@ char* get_password_mask() {
         password_mask[i] = '*';
     password_mask[strlen(lualock.password)] = '\0';
     return strdup(password_mask);
-}
-
-void draw_password_mask() {
-    cairo_t *cr = cairo_create(lualock.pw_surface);
-    
-    draw_password_field();
-    
-    PangoLayout *layout = pango_cairo_create_layout(cr);
-    
-    PangoFontDescription *desc =
-        pango_font_description_from_string(lualock.style.font);
-    pango_layout_set_font_description(layout, desc);
-    pango_font_description_free(desc);
-    cairo_set_source_rgba(cr, lualock.style.r, lualock.style.g,
-                          lualock.style.b, lualock.style.a);
-    cairo_move_to(cr, lualock.style.off_x, lualock.style.off_y);
-    pango_layout_set_text(layout, get_password_mask(), -1);
-    pango_cairo_update_layout(cr, layout);
-    pango_cairo_layout_path(cr, layout);
-    cairo_fill(cr);
 }
 
 void init_display() {
@@ -121,10 +50,6 @@ void init_window() {
                                    0, DefaultDepth(dpy, scr),
                                    CopyFromParent, DefaultVisual(dpy, scr),
                                    attr_mask, &attrs);
-    
-    lualock.bg = XCreatePixmap(dpy, lualock.win, DisplayWidth(dpy, scr),
-                               DisplayHeight(dpy, scr), DefaultDepth(dpy, scr));
-    XSetWindowBackgroundPixmap(dpy, lualock.win, lualock.bg);
 }
 
 void init_cairo() {
@@ -144,8 +69,7 @@ void init_cairo() {
     
     lualock.surface_buf = create_surface();
     
-    lualock.pw_surface = cairo_surface_create_for_rectangle(lualock.surface,
-        lualock.style.x, lualock.style.y, lualock.style.width, lualock.style.height);
+    lualock.pw_surface = create_surface();
 }
 
 void init_style() {
@@ -227,32 +151,10 @@ bool on_key_press(XEvent ev) {
     return true;
 }
 
-void draw() {
-    cairo_t *cr = cairo_create(lualock.surface_buf);
-    int i = 0;
-    cairo_set_source_rgba(lualock.cr, 0, 0, 0, 0);
-    cairo_set_operator(lualock.cr, CAIRO_OPERATOR_CLEAR);
-    cairo_set_source_rgba(cr, 0, 0, 0, 0);
-    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-    cairo_paint(cr);
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-    while (lualock.surfaces[i] != NULL) {
-        cairo_set_source_surface(cr, lualock.surfaces[i], 0, 0);
-        cairo_paint(cr);
-        i++;
-    }
-    cairo_set_operator(lualock.cr, CAIRO_OPERATOR_OVER);
-    cairo_set_source_surface(lualock.cr, lualock.surface_buf, 0, 0);
-    cairo_paint(lualock.cr);
-    //cairo_set_operator(lualock.cr, CAIRO_OPERATOR_SOURCE);
-    cairo_destroy(cr);
-    
-    draw_password_mask();
-}
-
 void reset_password() {
     lualock.password[0] = '\0';
     lualock.pw_length = 0;
+    draw();
 }
 
 void event_handler() {
@@ -265,6 +167,7 @@ void event_handler() {
                 // if enter was pressed, leave so password can be checked
                 if (!on_key_press(ev))
                     return;
+                draw();
                 break;
             case MappingNotify:
             case Expose:
@@ -295,7 +198,7 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
     }
     
     reset_password();
-
+    
     return 0;
 }
 
@@ -307,6 +210,10 @@ int main() {
     Display *dpy;
     Window win;
     
+    lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
+    lualock.pw_length = 0;
+    lualock.pw_alloc = PW_BUFF_SIZE;
+    
     init_display();
     init_window();
     init_style();
@@ -317,10 +224,6 @@ int main() {
     win = lualock.win;
     
     XMapWindow(dpy, win);
-    
-    lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
-    lualock.pw_length = 0;
-    lualock.pw_alloc = PW_BUFF_SIZE;
     
     struct pam_conv conv = {pam_conv_cb, NULL};
     int ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
