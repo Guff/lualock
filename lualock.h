@@ -36,7 +36,6 @@ typedef struct {
     
     cairo_surface_t *surface_buf;
     cairo_surface_t *surface;
-    cairo_t *cr;
     
     cairo_surface_t *pw_surface;
     cairo_t *pw_cr;

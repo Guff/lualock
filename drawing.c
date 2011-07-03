@@ -51,9 +51,12 @@ void draw() {
     draw_password_mask();
     cairo_set_source_surface(cr, lualock.pw_surface, 0, 0);
     cairo_paint(cr);
-    cairo_set_source_surface(lualock.cr, lualock.surface_buf, 0, 0);
-    cairo_set_operator(lualock.cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(lualock.cr);
     cairo_destroy(cr);
+    
+    cairo_t *crw = cairo_create(lualock.surface);
+    cairo_set_source_surface(crw, lualock.surface_buf, 0, 0);
+    cairo_set_operator(crw, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(crw);
+    cairo_destroy(crw);
 }
 

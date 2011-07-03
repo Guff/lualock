@@ -65,8 +65,6 @@ void init_cairo() {
                                                 DisplayWidth(dpy, scr),
                                                 DisplayHeight(dpy, scr));
     
-    lualock.cr = cairo_create(lualock.surface);
-    
     lualock.surface_buf = create_surface();
     
     lualock.pw_surface = create_surface();
