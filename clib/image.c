@@ -18,10 +18,11 @@ int image_get_height(image_t *image) {
 }
 
 void image_render(image_t *image, int x, int y) {
-    cairo_save(image->cr);
-    cairo_translate(image->cr, x, y);
-    cairo_paint(image->cr);
-    cairo_restore(image->cr);
+    cairo_t *cr = cairo_create(image->surface);
+    cairo_translate(cr, x, y);
+    cairo_rotate(cr, image->angle);
+    gdk_cairo_set_source_pixbuf(cr, image->pbuf, 0, 0);
+    cairo_paint(cr);
 }
 
 void image_rotate(image_t *image, double angle) {
