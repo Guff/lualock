@@ -57,7 +57,7 @@ void draw() {
     cairo_paint(cr);
     cairo_destroy(cr);
     
-    cairo_t *crw = cairo_create(lualock.surface);
+    cairo_t *crw = gdk_cairo_create(lualock.win);
     cairo_set_source_surface(crw, lualock.surface_buf, 0, 0);
     cairo_set_operator(crw, CAIRO_OPERATOR_SOURCE);
     cairo_paint(crw);

@@ -46,8 +46,8 @@ static int lualock_lua_background_set(lua_State *L) {
     
     width = gdk_pixbuf_get_width(pbuf);
     height = gdk_pixbuf_get_height(pbuf);
-    win_width = DisplayWidth(lualock.dpy, lualock.scr);
-    win_height = DisplayHeight(lualock.dpy, lualock.scr);
+    win_width = gdk_screen_get_width(lualock.scr);
+    win_height = gdk_screen_get_height(lualock.scr);
 
     //cairo_set_source_rgba(cr, 0, 0, 0, 1);
     cairo_paint(cr);

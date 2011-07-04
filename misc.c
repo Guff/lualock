@@ -6,8 +6,8 @@
 
 cairo_surface_t* create_surface() {
 	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-		DisplayWidth(lualock.dpy, lualock.scr),
-		DisplayHeight(lualock.dpy, lualock.scr));
+		gdk_screen_get_width(lualock.scr),
+		gdk_screen_get_height(lualock.scr));
     return surface;
 }
 

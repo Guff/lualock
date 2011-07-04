@@ -1,5 +1,5 @@
 #include <lua.h>
-#include <cairo-xlib.h>
+#include <gdk/gdk.h>
 #include <pango/pangocairo.h>
 
 typedef struct {
@@ -22,9 +22,9 @@ typedef struct {
 typedef struct {
     lua_State *L;
     
-    Display *dpy;
-    int scr;
-    Window win;
+    GdkDisplay *dpy;
+    GdkScreen *scr;
+    GdkWindow *win;
     
     char *password;
     int pw_length;
