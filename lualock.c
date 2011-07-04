@@ -22,13 +22,8 @@ extern void lualock_lua_background_init(lua_State *L);
 
 lualock_t lualock;
 
-char* get_password_mask() {
-    char password_mask[strlen(lualock.password) + 1];
-    for (unsigned int i = 0; i < strlen(lualock.password); i++)
-        password_mask[i] = '*';
-    password_mask[strlen(lualock.password)] = '\0';
-    return strdup(password_mask);
-}
+time_t test_timer;
+int frames_drawn;
 
 void init_display() {
     lualock.dpy = XOpenDisplay(NULL);
@@ -107,20 +102,19 @@ void init_lua() {
     
     lualock_lua_style_init(lualock.L);
     lua_pop(lualock.L, 1);
-
+    
     lualock_lua_loadrc(lualock.L, &xdg);    
 }
 
-bool on_key_press(XEvent ev) {
-    char ascii;
+Bool on_key_press(XEvent ev) {
+    char buf[32];
     KeySym keysym;
-    XComposeStatus compstatus;
-    XLookupString(&ev.xkey, &ascii, 1, &keysym, &compstatus);
+    XLookupString(&ev.xkey, buf, sizeof(buf), &keysym, NULL);
     
     switch(keysym) {
         case XK_Return:
         case XK_KP_Enter:
-            return false;
+            return False;
         case XK_Escape:
             lualock.password[0] = '\0';
             lualock.pw_length = 0;
@@ -133,44 +127,41 @@ bool on_key_press(XEvent ev) {
                 lualock.password[lualock.pw_length] = '\0';
             }
         default:
-            if (isprint(ascii) && (keysym < XK_Shift_L || keysym > XK_Hyper_R)) {
+            if (isprint(buf[0]) && (keysym < XK_Shift_L || keysym > XK_Hyper_R)) {
                 // if we're running short on memory for the buffer, grow it
-                if (lualock.pw_alloc <= lualock.pw_length + 1) {
+                if (lualock.pw_alloc <= lualock.pw_length + strlen(buf)) {
                     lualock.password = realloc(lualock.password,
                         lualock.pw_alloc + PW_BUFF_SIZE);
                     lualock.pw_alloc += PW_BUFF_SIZE;
                 }
-                lualock.password[lualock.pw_length] = ascii;
-                lualock.password[lualock.pw_length + 1] = '\0';
+                strcat(lualock.password, buf);
+                lualock.password[lualock.pw_length + strlen(buf)] = '\0';
                 lualock.pw_length++;
             }
     }
     draw_password_mask();
     
-    return true;
+    return True;
 }
 
 void reset_password() {
     lualock.password[0] = '\0';
     lualock.pw_length = 0;
-    draw();
 }
 
 void event_handler() {
     XEvent ev;
     
-    while (True) {
-        XNextEvent(lualock.dpy, &ev);
+    while (!XNextEvent(lualock.dpy, &ev)) {
         switch (ev.type) {
             case KeyPress:
                 // if enter was pressed, leave so password can be checked
-                if (!on_key_press(ev))
+                if (!on_key_press(ev)) {
                     return;
-                draw();
+                }
                 break;
-            case MappingNotify:
             case Expose:
-                draw();
+                //draw();
                 break;
             default:
                 break;
@@ -216,13 +207,14 @@ int main() {
     init_display();
     init_window();
     init_style();
-    init_cairo();
-    init_lua();
     
     dpy = lualock.dpy;
     win = lualock.win;
     
     XMapWindow(dpy, win);
+
+    init_cairo();
+    init_lua();
     
     struct pam_conv conv = {pam_conv_cb, NULL};
     int ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
@@ -236,7 +228,7 @@ int main() {
                  | PointerMotionMask, GrabModeAsync, GrabModeAsync, lualock.win,
                  None, CurrentTime);
 
-    draw();
+    start_drawing();
     
     while (True) {
         if (authenticate_user())

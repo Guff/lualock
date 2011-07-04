@@ -18,10 +18,6 @@ void style_set(const char *font, int x, int y, int off_x, int off_y, int width,
 	lualock.style.g = g;
 	lualock.style.b = b;
 	lualock.style.a = a;
-	
-	cairo_surface_finish(lualock.pw_surface);
-	cairo_surface_destroy(lualock.pw_surface);
-	lualock.pw_surface = create_surface();
 }
 
 int lualock_lua_style_set(lua_State *L) {

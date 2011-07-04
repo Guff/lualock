@@ -47,5 +47,3 @@ typedef struct {
 } lualock_t;
 
 extern lualock_t lualock;
-
-char* get_password_mask();

@@ -18,28 +18,29 @@ int image_get_height(image_t *image) {
 }
 
 void image_render(image_t *image, int x, int y) {
-    cairo_save(image->cr);
-    cairo_translate(image->cr, x, y);
-    cairo_paint(image->cr);
-    cairo_restore(image->cr);
+    cairo_t *cr = cairo_create(image->surface);
+    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(cr);
+    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    cairo_translate(cr, x, y);
+    cairo_rotate(cr, image->angle);
+    gdk_cairo_set_source_pixbuf(cr, image->pbuf, 0, 0);
+    cairo_paint(cr);
 }
 
 void image_rotate(image_t *image, double angle) {
     image->angle += 2 * M_PI * angle / 360;
-    cairo_rotate(image->cr, image->angle);
+    //cairo_rotate(image->cr, image->angle);
 }
 
 bool image_new(const char *filename, image_t *image) {
     GError **error = NULL;
     image->pbuf = gdk_pixbuf_new_from_file(filename, error);
     image->surface = create_surface();
-    image->cr = cairo_create(image->surface);
     // if loading the image didn't work, maybe it's an svg
     if (!(image->pbuf)) {
         image->pbuf = rsvg_pixbuf_from_file(filename, error);
     }
-    
-    gdk_cairo_set_source_pixbuf(image->cr, image->pbuf, 0, 0);
     
     image->width = gdk_pixbuf_get_width(image->pbuf);
     image->height = gdk_pixbuf_get_height(image->pbuf);

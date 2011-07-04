@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "lualock.h"
 #include "misc.h"
@@ -15,7 +16,7 @@ void add_surface(cairo_surface_t *surface) {
     while (i < lualock.surfaces_alloc && lualock.surfaces[i] != NULL)
         i++;
     
-    if (lualock.surfaces_alloc + 1 == i) {
+    if (i >= lualock.surfaces_alloc) {
         lualock.surfaces_alloc += 20;
         lualock.surfaces = realloc(lualock.surfaces, lualock.surfaces_alloc);
     }
@@ -46,3 +47,10 @@ void parse_color(const char *hex, double *r, double *g, double *b, double *a) {
     *a = 1;
 }
 
+char* get_password_mask() {
+    char password_mask[strlen(lualock.password) + 1];
+    for (unsigned int i = 0; i < strlen(lualock.password); i++)
+        password_mask[i] = '*';
+    password_mask[strlen(lualock.password)] = '\0';
+    return strdup(password_mask);
+}
