@@ -10,11 +10,11 @@
 #include "clib/image.h"
 
 int image_get_width(image_t *image) {
-    return gdk_pixbuf_get_width(image->pbuf);
+    return image->width;
 }
 
 int image_get_height(image_t *image) {
-    return gdk_pixbuf_get_height(image->pbuf);
+    return image->height;
 }
 
 void image_render(image_t *image, int x, int y) {
@@ -25,7 +25,8 @@ void image_render(image_t *image, int x, int y) {
 }
 
 void image_rotate(image_t *image, double angle) {
-    cairo_rotate(image->cr, 2 * M_PI * angle / 360);
+    image->angle += 2 * M_PI * angle / 360;
+    cairo_rotate(image->cr, image->angle);
 }
 
 bool image_new(const char *filename, image_t *image) {
@@ -39,6 +40,9 @@ bool image_new(const char *filename, image_t *image) {
     }
     
     gdk_cairo_set_source_pixbuf(image->cr, image->pbuf, 0, 0);
+    
+    image->width = gdk_pixbuf_get_width(image->pbuf);
+    image->height = gdk_pixbuf_get_height(image->pbuf);
 
     add_surface(image->surface);
 

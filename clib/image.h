@@ -6,6 +6,10 @@ typedef struct {
     GdkPixbuf *pbuf;
     cairo_surface_t *surface;
     cairo_t *cr;
+    
+    int width;
+    int height;
+    double angle;
 } image_t;
 
 int image_get_width(image_t *image);
