@@ -1,38 +1,53 @@
 #include <stdlib.h>
 #include <string.h>
+#include <X11/Xlib.h>
 
-#include "lualock.h"
 #include "misc.h"
 
 cairo_surface_t* create_surface() {
-	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-		gdk_screen_get_width(lualock.scr),
-		gdk_screen_get_height(lualock.scr));
+    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+        gdk_screen_get_width(lualock.scr),
+        gdk_screen_get_height(lualock.scr));
     return surface;
 }
 
-void add_surface(cairo_surface_t *surface) {
-    int i = 0;
-    while (i < lualock.surfaces_alloc && lualock.surfaces[i] != NULL)
-        i++;
+layer_t* create_layer(int width, int height) {
+	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+		width,
+		height);
     
-    if (i >= lualock.surfaces_alloc) {
-        lualock.surfaces_alloc += 20;
-        lualock.surfaces = realloc(lualock.surfaces, lualock.surfaces_alloc);
-    }
-    
-    lualock.surfaces[i] = surface;
-    lualock.surfaces[i + 1] = NULL;
+    layer_t *layer = malloc(sizeof(layer_t));
+    layer->surface = surface;
+    layer->width = width;
+    layer->height = height;
+    layer->x = 0;
+    layer->y = 0;
+    layer->angle = 0;
+    return layer;
 }
 
-void remove_surface(cairo_surface_t *surface) {
+void add_layer(layer_t *layer) {
     int i = 0;
-    while (lualock.surfaces[i] != surface)
+    while (i < lualock.layers_alloc && lualock.layers[i] != NULL)
+        i++;
+    
+    if (i >= lualock.layers_alloc) {
+        lualock.layers_alloc += 20;
+        lualock.layers = realloc(lualock.layers, lualock.layers_alloc);
+    }
+    
+    lualock.layers[i] = layer;
+    lualock.layers[i + 1] = NULL;
+}
+
+void remove_layer(layer_t *layer) {
+    int i = 0;
+    while (lualock.layers[i] != layer)
         i++;
     
     int j = 0;
-    while (lualock.surfaces[i + j] != NULL) {
-        lualock.surfaces[i + j] = lualock.surfaces[i + j + 1];
+    while (lualock.layers[i + j] != NULL) {
+        lualock.layers[i + j] = lualock.layers[i + j + 1];
         j++;
     }
 }

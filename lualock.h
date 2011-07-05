@@ -1,3 +1,6 @@
+#ifndef LUALOCK_H
+#define LUALOCK_H
+
 #include <lua.h>
 #include <gdk/gdk.h>
 #include <pango/pangocairo.h>
@@ -19,6 +22,16 @@ typedef struct {
     double b;
     double a;
 } style_t;
+
+typedef struct {
+	cairo_surface_t *surface;
+	int x;
+	int y;
+	int width;
+	int height;
+	double angle;
+} layer_t;
+
 typedef struct {
     lua_State *L;
     
@@ -40,10 +53,12 @@ typedef struct {
     cairo_surface_t *pw_surface;
     cairo_t *pw_cr;
     
-    cairo_surface_t **surfaces;
-    int surfaces_alloc;
+    layer_t **layers;
+    int layers_alloc;
 
     style_t style;
 } lualock_t;
 
 extern lualock_t lualock;
+
+#endif

@@ -4,8 +4,6 @@
 #include <gdk/gdk.h>
 #include <math.h>
 
-#include "lualock.h"
-#include "misc.h"
 #include "drawing.h"
 #include "clib/image.h"
 
@@ -29,7 +27,7 @@ void image_render(image_t *image, int x, int y) {
     cairo_paint(cr);
     cairo_destroy(cr);
     
-    cairo_t *crb = cairo_create(image->surface);
+    cairo_t *crb = cairo_create(image->layer->surface);
     cairo_set_source_surface(crb, surface, 0, 0);
     cairo_set_operator(crb, CAIRO_OPERATOR_SOURCE);
     cairo_paint(crb);
@@ -44,7 +42,6 @@ void image_rotate(image_t *image, double angle) {
 bool image_new(const char *filename, image_t *image) {
     GError **error = NULL;
     image->pbuf = gdk_pixbuf_new_from_file(filename, error);
-    image->surface = create_surface();
     // if loading the image didn't work, maybe it's an svg
     if (!(image->pbuf)) {
         image->pbuf = rsvg_pixbuf_from_file(filename, error);
@@ -52,8 +49,9 @@ bool image_new(const char *filename, image_t *image) {
     
     image->width = gdk_pixbuf_get_width(image->pbuf);
     image->height = gdk_pixbuf_get_height(image->pbuf);
+    image->layer = create_layer(image->width, image->height);
 
-    add_surface(image->surface);
+    add_layer(image->layer);
 
     return true;
 }

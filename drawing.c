@@ -48,8 +48,8 @@ gboolean draw(void *data) {
     cairo_paint(cr);
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
     int i = 0;
-    while (i < lualock.surfaces_alloc && lualock.surfaces[i] != NULL) {
-        cairo_set_source_surface(cr, lualock.surfaces[i], 0, 0);
+    while (i < lualock.layers_alloc && lualock.layers[i] != NULL) {
+        cairo_set_source_surface(cr, lualock.layers[i]->surface, 0, 0);
         cairo_paint(cr);
         i++;
     }

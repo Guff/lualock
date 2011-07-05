@@ -2,14 +2,14 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "lualock.h"
 #include "misc.h"
 #include "clib/text.h"
 
 text_t text_new(const char *text, int x, int y, const char *font,
                 double r, double g, double b, double a) {
-    cairo_surface_t *surface = create_surface();
-    cairo_t *cr = cairo_create(surface);
+    layer_t *layer = create_layer(gdk_screen_get_width(lualock.scr),
+                                 gdk_screen_get_height(lualock.scr));
+    cairo_t *cr = cairo_create(layer->surface);
     PangoLayout *layout = pango_cairo_create_layout(cr);
     PangoFontDescription *desc = pango_font_description_from_string(font);
     pango_layout_set_font_description(layout, desc);
@@ -17,16 +17,16 @@ text_t text_new(const char *text, int x, int y, const char *font,
     pango_layout_set_text(layout, text, strlen(text));
 
     text_t text_obj = { .text = text, .x = x, .y = y, .font = font, .r = r,
-                        .g = g, .b = b, .a = a, .surface = surface,
+                        .g = g, .b = b, .a = a, .layer = layer,
                         .layout = layout };
     cairo_destroy(cr);
     return text_obj;    
 }
 
 void text_draw(text_t text_obj) {
-    cairo_t *cr = cairo_create(text_obj.surface);
+    cairo_t *cr = cairo_create(text_obj.layer->surface);
     
-    add_surface(text_obj.surface);
+    add_layer(text_obj.layer);
     
     cairo_translate(cr, text_obj.x, text_obj.y);
     

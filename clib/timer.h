@@ -1,3 +1,6 @@
+#ifndef CLIB_TIMER_H
+#define CLIB_TIMER_H
+
 #include <pthread.h>
 #include <stdbool.h>
 
@@ -14,3 +17,5 @@ void timer_new(l_timer_t *timer, unsigned int int_us, int cycles, void (*cb)(voi
 void* timer_run(void *data);
 
 void lualock_lua_timer_init(lua_State *L);
+
+#endif

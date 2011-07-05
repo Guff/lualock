@@ -12,7 +12,6 @@
 #define PW_BUFF_SIZE 32
 #define DEFAULT_FONT "Sans 12"
 
-#include "lualock.h"
 #include "misc.h"
 #include "drawing.h"
 #include "lua_api.h"
@@ -46,9 +45,9 @@ void init_window() {
 }
 
 void init_cairo() {
-    lualock.surfaces_alloc = 20;
-    lualock.surfaces = malloc(lualock.surfaces_alloc * sizeof(cairo_surface_t *));
-    lualock.surfaces[0] = NULL;
+    lualock.layers_alloc = 20;
+    lualock.layers = malloc(lualock.layers_alloc * sizeof(layer_t));
+    lualock.layers[0] = NULL;
     
     lualock.surface_buf = create_surface();
     

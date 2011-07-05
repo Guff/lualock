@@ -4,14 +4,14 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 
-#include "lualock.h"
 #include "misc.h"
 #include "background.h"
 
 void background_set_color(const char *hex) {
-    cairo_surface_t *surface = create_surface();
-    add_surface(surface);
-    cairo_t *cr = cairo_create(surface);
+    layer_t *layer = create_layer(gdk_screen_get_width(lualock.scr),
+                                  gdk_screen_get_height(lualock.scr));
+    add_layer(layer);
+    cairo_t *cr = cairo_create(layer->surface);
     
     double r, g, b, a;
     parse_color(hex, &r, &g, &b, &a);
@@ -32,10 +32,6 @@ static int lualock_lua_background_set(lua_State *L) {
     if (!pbuf)
         pbuf = rsvg_pixbuf_from_file(filename, error);
     
-    cairo_surface_t *surface = create_surface();
-    add_surface(surface);
-    
-    cairo_t *cr = cairo_create(surface);
     
     const char *style = lua_tostring(L, 2);
     double width, height, win_width, win_height;
@@ -49,8 +45,13 @@ static int lualock_lua_background_set(lua_State *L) {
     win_width = gdk_screen_get_width(lualock.scr);
     win_height = gdk_screen_get_height(lualock.scr);
 
+    layer_t *layer = create_layer(gdk_screen_get_width(lualock.scr),
+                                  gdk_screen_get_height(lualock.scr));
+    add_layer(layer);
+    
+    cairo_t *cr = cairo_create(layer->surface);
     //cairo_set_source_rgba(cr, 0, 0, 0, 1);
-    cairo_paint(cr);
+    //cairo_paint(cr);
 
     if (style) {
         if (!strcmp(style, "stretch")) {
