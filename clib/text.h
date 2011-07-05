@@ -22,8 +22,8 @@ typedef struct {
     PangoLayout *layout;
 } text_t;
 
-text_t text_new(const char *text, int x, int y, const char *font,
-                double r, double g, double b, double a);
+text_t* text_new(text_t *text_obj, const char *text, int x, int y,
+                const char *font, double r, double g, double b, double a);
 
 void lualock_lua_text_init(lua_State *L);
 
