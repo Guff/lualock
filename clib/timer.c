@@ -10,23 +10,21 @@
 void timer_new(l_timer_t *timer, unsigned int int_us, int cycles, void (*cb)(void)) {
     timer->cycles = cycles;
     timer->completed_cycles = 0,
-    timer->running = false;
+    timer->running = TRUE;
     timer->int_us = int_us;
     timer->cb = cb;
-    int err = pthread_create(&timer->thread, NULL, timer_run, timer);
-    if (err){
-        printf("Oops, couldn't make a thread: error %i\n", err);
-    }
+    timer_run(timer);
+    int source_id = g_timeout_add(int_us / 1000.0, timer_run, timer);
 }
     
-void* timer_run(void *data) {
-        l_timer_t *timer = (l_timer_t *)data;
-        while(timer->cycles == 0 || timer->completed_cycles < timer->cycles) {
-            timer->cb();
-            usleep(timer->int_us);
-            timer->completed_cycles++;
-        }
-        return NULL;
+gboolean timer_run(void *data) {
+    l_timer_t *timer = (l_timer_t *)data;
+    if (timer->cycles != 0 && timer->completed_cycles >= timer->cycles)
+        return FALSE;
+    else
+        timer->cb();
+    timer->completed_cycles++;
+    return TRUE;
 }
 
 void timer_run_lua_function() {
