@@ -6,7 +6,7 @@
 #include "drawing.h"
 
 void draw_password_field(cairo_t *cr) {
-    cairo_rectangle(cr, lualock.style.x, lualock.style.y, lualock.style.width,
+    cairo_rectangle(cr, 0, 0, lualock.style.width,
 					lualock.style.height);
 	cairo_clip_preserve(cr);
     cairo_set_source_rgb(cr, 1, 1, 1);
@@ -31,8 +31,7 @@ void draw_password_mask() {
     pango_font_description_free(desc);
     cairo_set_source_rgba(cr, lualock.style.r, lualock.style.g,
                           lualock.style.b, lualock.style.a);
-    cairo_move_to(cr, lualock.style.x + lualock.style.off_x,
-				  lualock.style.y + lualock.style.off_y);
+    cairo_move_to(cr, lualock.style.off_x, lualock.style.off_y);
     pango_layout_set_text(layout, get_password_mask(), -1);
     pango_cairo_update_layout(cr, layout);
     pango_cairo_layout_path(cr, layout);
@@ -58,6 +57,7 @@ gboolean draw(void *data) {
         i++;
     }
     draw_password_mask();
+    cairo_translate(cr, lualock.style.x, lualock.style.y);
     cairo_set_source_surface(cr, lualock.pw_surface, 0, 0);
     cairo_paint(cr);
     cairo_destroy(cr);
