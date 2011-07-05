@@ -34,6 +34,7 @@ void image_render(image_t *image, int x, int y) {
     cairo_set_operator(crb, CAIRO_OPERATOR_SOURCE);
     cairo_paint(crb);
     cairo_destroy(crb);
+    cairo_surface_destroy(surface);
 }
 
 void image_rotate(image_t *image, double angle) {
