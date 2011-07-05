@@ -46,9 +46,6 @@ void init_window() {
 }
 
 void init_cairo() {
-    Display *dpy = lualock.dpy;
-    int scr = lualock.scr;
-    
     lualock.surfaces_alloc = 20;
     lualock.surfaces = malloc(lualock.surfaces_alloc * sizeof(cairo_surface_t *));
     lualock.surfaces[0] = NULL;
@@ -99,12 +96,24 @@ void init_lua() {
     lualock_lua_loadrc(lualock.L, &xdg);    
 }
 
+void reset_password() {
+    lualock.password[0] = '\0';
+    lualock.pw_length = 0;
+}
+
 gboolean on_key_press(GdkEvent *ev) {
     guint keyval = ((GdkEventKey *)ev)->keyval;
     switch(keyval) {
         case GDK_KEY_Return:
         case GDK_KEY_KP_Enter:
             return FALSE;
+        case GDK_KEY_BackSpace:
+            lualock.pw_length--;
+            lualock.password[lualock.pw_length] = '\0';
+            break;
+        case GDK_KEY_Escape:
+            reset_password();
+            break;
         default:
             if (isprint(gdk_keyval_to_unicode(keyval))) {
                 // if we're running short on memory for the buffer, grow it
@@ -118,13 +127,11 @@ gboolean on_key_press(GdkEvent *ev) {
             }
     }
     
+    draw_password_mask();
+    
     return TRUE;
 }
 
-void reset_password() {
-    lualock.password[0] = '\0';
-    lualock.pw_length = 0;
-}
 
 gboolean authenticate_user() {
     return (pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
@@ -203,8 +210,9 @@ int main(int argc, char **argv) {
     gdk_pointer_grab(win, TRUE, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK
                      | GDK_POINTER_MOTION_MASK, NULL, NULL, GDK_CURRENT_TIME);
     //gdk_window_add_filter(NULL, GdkFilterFunc(event_filter), NULL);
-    start_drawing();
+    //start_drawing();
     
+    g_timeout_add(1000.0 / 10, draw, NULL);
     g_main_run(g_main_new(TRUE));
     
     gdk_display_close(dpy);

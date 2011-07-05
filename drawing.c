@@ -38,9 +38,10 @@ void draw_password_mask() {
     pango_cairo_layout_path(cr, layout);
     cairo_fill(cr);
     cairo_destroy(cr);
+    g_object_unref(layout);
 }
 
-void draw() {
+gboolean draw(void *data) {
     cairo_t *cr = cairo_create(lualock.surface_buf);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
@@ -62,11 +63,12 @@ void draw() {
     cairo_set_operator(crw, CAIRO_OPERATOR_SOURCE);
     cairo_paint(crw);
     cairo_destroy(crw);
+    return TRUE;
 }
 
 void* draw_frames(void *data) {
 	while(1) {
-		draw();
+		draw(NULL);
 		usleep(1000000 / 10);
 	}
 }

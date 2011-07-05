@@ -18,7 +18,8 @@ int image_get_height(image_t *image) {
 }
 
 void image_render(image_t *image, int x, int y) {
-    cairo_t *cr = cairo_create(image->surface);
+    cairo_surface_t *surface = create_surface();
+    cairo_t *cr = cairo_create(surface);
     cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
     cairo_paint(cr);
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
@@ -26,11 +27,17 @@ void image_render(image_t *image, int x, int y) {
     cairo_rotate(cr, image->angle);
     gdk_cairo_set_source_pixbuf(cr, image->pbuf, 0, 0);
     cairo_paint(cr);
+    cairo_destroy(cr);
+    
+    cairo_t *crb = cairo_create(image->surface);
+    cairo_set_source_surface(crb, surface, 0, 0);
+    cairo_set_operator(crb, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(crb);
+    cairo_destroy(crb);
 }
 
 void image_rotate(image_t *image, double angle) {
     image->angle += 2 * M_PI * angle / 360;
-    //cairo_rotate(image->cr, image->angle);
 }
 
 bool image_new(const char *filename, image_t *image) {
