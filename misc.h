@@ -6,3 +6,4 @@ void remove_surface(cairo_surface_t *surface);
 
 void parse_color(const char *hex, double *r, double *g, double *b, double *a);
 
+char* get_password_mask();

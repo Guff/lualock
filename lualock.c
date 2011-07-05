@@ -6,8 +6,7 @@
 #include <stdbool.h>
 #include <cairo-xlib.h>
 #include <pango/pangocairo.h>
-#include <X11/keysym.h>
-#include <X11/Xutil.h>
+#include <gdk/gdkkeysyms.h>
 #include <security/pam_appl.h>
 
 #define PW_BUFF_SIZE 32
@@ -22,48 +21,34 @@ extern void lualock_lua_background_init(lua_State *L);
 
 lualock_t lualock;
 
-char* get_password_mask() {
-    char password_mask[strlen(lualock.password) + 1];
-    for (unsigned int i = 0; i < strlen(lualock.password); i++)
-        password_mask[i] = '*';
-    password_mask[strlen(lualock.password)] = '\0';
-    return strdup(password_mask);
-}
+time_t test_timer;
+int frames_drawn;
 
 void init_display() {
-    lualock.dpy = XOpenDisplay(NULL);
-    lualock.scr = DefaultScreen(lualock.dpy);
+    lualock.dpy = gdk_display_get_default();
+    lualock.scr = gdk_screen_get_default();
 }
 
 void init_window() {
-    Display *dpy = lualock.dpy;
-    int scr = lualock.scr;
+    GdkWindowAttr attrs;
+    attrs.override_redirect = TRUE;
+    attrs.width = gdk_screen_get_width(lualock.scr);
+    attrs.height = gdk_screen_get_height(lualock.scr);
+    attrs.window_type = GDK_WINDOW_TOPLEVEL;
+    attrs.wclass = GDK_INPUT_OUTPUT;
+    attrs.x = 0;
+    attrs.y = 0;
+    unsigned long attr_mask = GDK_WA_NOREDIR | GDK_WA_X | GDK_WA_Y;
     
-    XSetWindowAttributes attrs;
-    attrs.override_redirect = 1;
-    attrs.background_pixel = BlackPixel(dpy, scr);
-    unsigned long attr_mask = CWOverrideRedirect | CWBackPixel;
-    
-    lualock.win = XCreateWindow(dpy, RootWindow(dpy, scr), 0, 0,
-                                   DisplayWidth(dpy, scr),
-                                   DisplayHeight(dpy, scr),
-                                   0, DefaultDepth(dpy, scr),
-                                   CopyFromParent, DefaultVisual(dpy, scr),
-                                   attr_mask, &attrs);
+    lualock.win = gdk_window_new(gdk_get_default_root_window(), &attrs, attr_mask);
+                                 
+    gdk_window_show(lualock.win);
 }
 
 void init_cairo() {
-    Display *dpy = lualock.dpy;
-    int scr = lualock.scr;
-    
     lualock.surfaces_alloc = 20;
     lualock.surfaces = malloc(lualock.surfaces_alloc * sizeof(cairo_surface_t *));
     lualock.surfaces[0] = NULL;
-    
-    lualock.surface = cairo_xlib_surface_create(dpy, lualock.win,
-                                                DefaultVisual(dpy, scr),
-                                                DisplayWidth(dpy, scr),
-                                                DisplayHeight(dpy, scr));
     
     lualock.surface_buf = create_surface();
     
@@ -107,81 +92,70 @@ void init_lua() {
     
     lualock_lua_style_init(lualock.L);
     lua_pop(lualock.L, 1);
-
+    
     lualock_lua_loadrc(lualock.L, &xdg);    
-}
-
-bool on_key_press(XEvent ev) {
-    char ascii;
-    KeySym keysym;
-    XComposeStatus compstatus;
-    XLookupString(&ev.xkey, &ascii, 1, &keysym, &compstatus);
-    
-    switch(keysym) {
-        case XK_Return:
-        case XK_KP_Enter:
-            return false;
-        case XK_Escape:
-            lualock.password[0] = '\0';
-            lualock.pw_length = 0;
-            break;
-        case XK_BackSpace:
-        case XK_KP_Delete:
-        case XK_Delete:
-            if (lualock.pw_length > 0) {
-                lualock.pw_length--;
-                lualock.password[lualock.pw_length] = '\0';
-            }
-        default:
-            if (isprint(ascii) && (keysym < XK_Shift_L || keysym > XK_Hyper_R)) {
-                // if we're running short on memory for the buffer, grow it
-                if (lualock.pw_alloc <= lualock.pw_length + 1) {
-                    lualock.password = realloc(lualock.password,
-                        lualock.pw_alloc + PW_BUFF_SIZE);
-                    lualock.pw_alloc += PW_BUFF_SIZE;
-                }
-                lualock.password[lualock.pw_length] = ascii;
-                lualock.password[lualock.pw_length + 1] = '\0';
-                lualock.pw_length++;
-            }
-    }
-    draw_password_mask();
-    
-    return true;
 }
 
 void reset_password() {
     lualock.password[0] = '\0';
     lualock.pw_length = 0;
-    draw();
 }
 
-void event_handler() {
-    XEvent ev;
+gboolean on_key_press(GdkEvent *ev) {
+    guint keyval = ((GdkEventKey *)ev)->keyval;
+    switch(keyval) {
+        case GDK_KEY_Return:
+        case GDK_KEY_KP_Enter:
+            return FALSE;
+        case GDK_KEY_BackSpace:
+            lualock.pw_length--;
+            lualock.password[lualock.pw_length] = '\0';
+            break;
+        case GDK_KEY_Escape:
+            reset_password();
+            break;
+        default:
+            if (isprint(gdk_keyval_to_unicode(keyval))) {
+                // if we're running short on memory for the buffer, grow it
+                if (lualock.pw_alloc <= lualock.pw_length + 1) {
+                    lualock.password = realloc(lualock.password, lualock.pw_alloc + 32);
+                    lualock.pw_alloc += 32;
+                }
+                lualock.password[lualock.pw_length] = gdk_keyval_to_unicode(keyval);
+                lualock.password[lualock.pw_length + 1] = '\0';
+                lualock.pw_length++;
+            }
+    }
     
-    while (True) {
-        XNextEvent(lualock.dpy, &ev);
-        switch (ev.type) {
-            case KeyPress:
-                // if enter was pressed, leave so password can be checked
-                if (!on_key_press(ev))
-                    return;
-                draw();
-                break;
-            case MappingNotify:
-            case Expose:
-                draw();
-                break;
-            default:
-                break;
-        }
+    draw_password_mask();
+    
+    return TRUE;
+}
+
+
+gboolean authenticate_user() {
+    return (pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
+}
+
+void event_handler(GdkEvent *ev) {
+    switch (ev->type) {
+        case GDK_KEY_PRESS:
+        // if enter was pressed, check password
+            if (!on_key_press(ev))
+                if (authenticate_user())
+                    exit(0);
+            break;
+        case GDK_EXPOSE:
+            //on_expose();
+            break;
+        default:
+            //on_expose();
+            break;
     }
 }
 
 static int pam_conv_cb(int msgs, const struct pam_message **msg,
                        struct pam_response **resp, void *data) {
-    event_handler();
-    
     *resp = (struct pam_response *) calloc(msgs, sizeof(struct pam_message));
     if (msgs == 0 || *resp == NULL)
         return 1;
@@ -201,13 +175,12 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
     return 0;
 }
 
-bool authenticate_user() {
-    return (pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
-}
 
-int main() {    
-    Display *dpy;
-    Window win;
+int main(int argc, char **argv) {    
+    GdkDisplay *dpy;
+    GdkWindow *win;
+    
+    gdk_init(&argc, &argv);
     
     lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
     lualock.pw_length = 0;
@@ -217,12 +190,15 @@ int main() {
     init_window();
     init_style();
     init_cairo();
-    init_lua();
     
     dpy = lualock.dpy;
     win = lualock.win;
     
-    XMapWindow(dpy, win);
+    gdk_window_show(win);
+    
+    gdk_event_handler_set((GdkEventFunc)event_handler, NULL, NULL);
+
+    init_lua();
     
     struct pam_conv conv = {pam_conv_cb, NULL};
     int ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
@@ -230,20 +206,16 @@ int main() {
     if (ret != PAM_SUCCESS)
         exit(EXIT_FAILURE);
         
-    XGrabKeyboard(dpy, lualock.win, True, GrabModeAsync, GrabModeAsync,
-                  CurrentTime);
-    XGrabPointer(dpy, lualock.win, False, ButtonPressMask | ButtonReleaseMask
-                 | PointerMotionMask, GrabModeAsync, GrabModeAsync, lualock.win,
-                 None, CurrentTime);
-
-    draw();
+    gdk_keyboard_grab(win, TRUE, GDK_CURRENT_TIME);
+    gdk_pointer_grab(win, TRUE, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK
+                     | GDK_POINTER_MOTION_MASK, NULL, NULL, GDK_CURRENT_TIME);
+    //gdk_window_add_filter(NULL, GdkFilterFunc(event_filter), NULL);
+    //start_drawing();
     
-    while (True) {
-        if (authenticate_user())
-            break;
-    }
+    g_timeout_add(1000.0 / 10, draw, NULL);
+    g_main_run(g_main_new(TRUE));
     
-    XCloseDisplay(dpy);
+    gdk_display_close(dpy);
     
     return 0;
 }
