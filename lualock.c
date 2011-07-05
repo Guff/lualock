@@ -49,9 +49,9 @@ void init_cairo() {
     lualock.layers = malloc(lualock.layers_alloc * sizeof(layer_t));
     lualock.layers[0] = NULL;
     
-    lualock.surface_buf = create_surface();
+    lualock.surface_buf = create_surface(0, 0);
     
-    lualock.pw_surface = create_surface();
+    lualock.pw_surface = create_surface(0, 0);
 }
 
 void init_style() {

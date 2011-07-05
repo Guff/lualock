@@ -28,7 +28,8 @@ void text_draw(text_t text_obj) {
     
     add_layer(text_obj.layer);
     
-    cairo_translate(cr, text_obj.x, text_obj.y);
+    text_obj.layer->x = text_obj.x;
+    text_obj.layer->y = text_obj.y;
     
     cairo_set_source_rgba(cr, text_obj.r, text_obj.g, text_obj.b, text_obj.a);
     pango_cairo_update_layout(cr, text_obj.layout);

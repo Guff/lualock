@@ -4,10 +4,10 @@
 
 #include "misc.h"
 
-cairo_surface_t* create_surface() {
+cairo_surface_t* create_surface(int width, int height) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-        gdk_screen_get_width(lualock.scr),
-        gdk_screen_get_height(lualock.scr));
+        width ? : gdk_screen_get_width(lualock.scr),
+        height ? : gdk_screen_get_height(lualock.scr));
     return surface;
 }
 

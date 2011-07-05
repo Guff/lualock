@@ -5,7 +5,7 @@
 
 #include "lualock.h"
 
-cairo_surface_t* create_surface();
+cairo_surface_t* create_surface(int width, int height);
 layer_t* create_layer(int width, int height);
 void add_layer(layer_t *layer);
 void remove_layer(layer_t *layer);

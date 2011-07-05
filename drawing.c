@@ -49,8 +49,12 @@ gboolean draw(void *data) {
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
     int i = 0;
     while (i < lualock.layers_alloc && lualock.layers[i] != NULL) {
+        cairo_save(cr);
+        cairo_rotate(cr, lualock.layers[i]->angle);
+        cairo_translate(cr, lualock.layers[i]->x, lualock.layers[i]->y);
         cairo_set_source_surface(cr, lualock.layers[i]->surface, 0, 0);
         cairo_paint(cr);
+        cairo_restore(cr);
         i++;
     }
     draw_password_mask();
