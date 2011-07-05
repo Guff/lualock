@@ -7,6 +7,12 @@
 
 text_t* text_new(text_t *text_obj, const char *text, int x, int y,
                  const char *font, double r, double g, double b, double a) {
+    /* This is a horribly inelegant solution, but it was the first, and so far
+     * the only I could think of. Because we want the text layer to only be as
+     * big as it needs to, we need to get the extents of the text. But we can't
+     * do that without actually creating a layout. Which needs a cairo surface.
+     * So, create a tiny dummy surface, use that, then make the real layer 
+     * later. */ 
     cairo_surface_t *surface = create_surface(1, 1);
     cairo_t *cr = cairo_create(surface);
     PangoLayout *layout = pango_cairo_create_layout(cr);
@@ -19,7 +25,8 @@ text_t* text_new(text_t *text_obj, const char *text, int x, int y,
     pango_layout_get_pixel_extents(layout, &ink_rect, &log_rect);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
-
+    
+    // Now the real stuff
     layer_t *layer = create_layer(log_rect.width, log_rect.height);
     cairo_t *crl = cairo_create(layer->surface);
     PangoLayout *layoutl = pango_cairo_create_layout(crl);
@@ -36,6 +43,7 @@ text_t* text_new(text_t *text_obj, const char *text, int x, int y,
 }
 
 void text_draw(text_t *text_obj) {
+    // Double buffering
     cairo_surface_t *surface = create_surface(text_obj->layer->width,
                                               text_obj->layer->height);
     cairo_t *cr = cairo_create(surface);

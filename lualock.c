@@ -145,10 +145,8 @@ void event_handler(GdkEvent *ev) {
                     exit(0);
             break;
         case GDK_EXPOSE:
-            //on_expose();
             break;
         default:
-            //on_expose();
             break;
     }
 }
