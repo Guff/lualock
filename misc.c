@@ -29,9 +29,9 @@ layer_t* create_layer(int width, int height) {
 }
 
 void add_layer(layer_t *layer) {
+    // find the index of the layer at the end of the array
     int i = 0;
-    while (i < lualock.layers_alloc && lualock.layers[i] != NULL)
-        i++;
+    for (; i < lualock.layers_alloc && lualock.layers[i] != NULL; i++);
     
     if (i >= lualock.layers_alloc) {
         lualock.layers_alloc += 20;
@@ -40,6 +40,13 @@ void add_layer(layer_t *layer) {
     
     lualock.layers[i] = layer;
     lualock.layers[i + 1] = NULL;
+}
+
+void update_layer(layer_t *layer, layer_t *new) {
+    for (int i = 0; i < lualock.layers_alloc && lualock.layers[i] != NULL; i++) {
+        if (lualock.layers[i] == layer)
+            lualock.layers[i] = new;
+    }
 }
 
 void remove_layer(layer_t *layer) {

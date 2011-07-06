@@ -5,8 +5,8 @@
 #include "misc.h"
 #include "clib/text.h"
 
-text_t* text_new(text_t *text_obj, const char *text, int x, int y,
-                 const char *font, double r, double g, double b, double a) {
+static void get_extents_for_string(const char *text, const char *font,
+                                   int *width, int *height) {
     /* This is a horribly inelegant solution, but it was the first, and so far
      * the only I could think of. Because we want the text layer to only be as
      * big as it needs to, we need to get the extents of the text. But we can't
@@ -21,23 +21,31 @@ text_t* text_new(text_t *text_obj, const char *text, int x, int y,
     pango_font_description_free(desc);
     pango_layout_set_text(layout, text, strlen(text));
     
-    PangoRectangle ink_rect, log_rect;
-    pango_layout_get_pixel_extents(layout, &ink_rect, &log_rect);
+    PangoRectangle log_rect;
+    pango_layout_get_pixel_extents(layout, NULL, &log_rect);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
     
-    // Now the real stuff
-    layer_t *layer = create_layer(log_rect.width, log_rect.height);
-    cairo_t *crl = cairo_create(layer->surface);
-    PangoLayout *layoutl = pango_cairo_create_layout(crl);
-    PangoFontDescription *descl = pango_font_description_from_string(font);
-    pango_layout_set_font_description(layoutl, descl);
-    pango_font_description_free(descl);
-    pango_layout_set_text(layoutl, text, -1);
+    *width = log_rect.width;
+    *height = log_rect.height;
+}
+
+text_t* text_new(text_t *text_obj, const char *text, int x, int y,
+                 const char *font, double r, double g, double b, double a) {
+    
+    int width, height;
+    get_extents_for_string(text, font, &width, &height);
+    layer_t *layer = create_layer(width, height);
+    cairo_t *cr = cairo_create(layer->surface);
+    PangoLayout *layout = pango_cairo_create_layout(cr);
+    PangoFontDescription *desc = pango_font_description_from_string(font);
+    pango_layout_set_font_description(layout, desc);
+    pango_font_description_free(desc);
+    pango_layout_set_text(layout, text, -1);
 
     *text_obj = (text_t) { .text = text, .x = x, .y = y, .font = font, .r = r,
                         .g = g, .b = b, .a = a, .layer = layer,
-                        .layout = layoutl };
+                        .layout = layout };
     add_layer(text_obj->layer);
     return text_obj;    
 }
@@ -58,6 +66,7 @@ void text_draw(text_t *text_obj) {
     pango_cairo_show_layout(cr, text_obj->layout);
     cairo_destroy(cr);
     
+    // Now we draw to the actual surface
     cairo_t *crl = cairo_create(text_obj->layer->surface);
     cairo_set_operator(crl, CAIRO_OPERATOR_SOURCE);
     cairo_set_source_surface(crl, surface, 0, 0);
