@@ -35,12 +35,12 @@ void image_render(image_t *image, int x, int y) {
     image->layer->x = x;
     image->layer->y = y;
     
-    lualock.need_updates++;
+    lualock.need_updates = TRUE;
 }
 
 void image_rotate(image_t *image, double angle) {
     image->layer->angle += 2 * M_PI * angle / 360;
-    lualock.need_updates++;
+    lualock.need_updates = TRUE;
 }
 
 void image_scale(image_t *image, double sx, double sy) {
@@ -49,8 +49,8 @@ void image_scale(image_t *image, double sx, double sy) {
 }
 
 void image_resize(image_t *image, int width, int height) {
-    image->layer->scale_x = width / (float) image->layer->width;
-    image->layer->scale_y = height / (float) image->layer->height;
+    image_scale(image, width / (float) image->layer->width,
+                height / (float) image->layer->height);
 }
 
 bool image_new(const char *filename, image_t *image) {

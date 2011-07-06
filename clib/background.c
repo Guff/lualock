@@ -19,7 +19,7 @@ void background_set_color(const char *hex) {
     cairo_paint(cr);
     cairo_destroy(cr);
     
-    lualock.need_updates++;
+    lualock.need_updates = TRUE;
 }
 
 static int lualock_lua_background_set(lua_State *L) {
@@ -52,8 +52,6 @@ static int lualock_lua_background_set(lua_State *L) {
     add_layer(layer);
     
     cairo_t *cr = cairo_create(layer->surface);
-    //cairo_set_source_rgba(cr, 0, 0, 0, 1);
-    //cairo_paint(cr);
 
     if (style) {
         if (!strcmp(style, "stretch")) {
@@ -78,7 +76,7 @@ static int lualock_lua_background_set(lua_State *L) {
     cairo_destroy(cr);
     g_object_unref(pbuf);
     
-    lualock.need_updates++;
+    lualock.need_updates = TRUE;
     return 0;
 }
 

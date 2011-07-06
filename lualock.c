@@ -126,7 +126,7 @@ gboolean on_key_press(GdkEvent *ev) {
             }
     }
     
-    lualock.need_updates++;
+    lualock.need_updates = TRUE;
     draw_password_mask();
     
     return TRUE;
@@ -146,7 +146,7 @@ void event_handler(GdkEvent *ev) {
                     exit(0);
             break;
         case GDK_EXPOSE:
-            lualock.need_updates++;
+            lualock.need_updates = TRUE;
             break;
         default:
             break;
@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
     lualock.pw_length = 0;
     lualock.pw_alloc = PW_BUFF_SIZE;
     
-    lualock.need_updates = 0;
+    lualock.need_updates = FALSE;
     
     init_display();
     init_window();

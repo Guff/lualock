@@ -53,11 +53,10 @@ typedef struct {
     cairo_surface_t *surface;
     
     cairo_surface_t *pw_surface;
-    cairo_t *pw_cr;
     
     layer_t **layers;
     int layers_alloc;
-    int need_updates;
+    gboolean need_updates;
 
     style_t style;
 } lualock_t;
