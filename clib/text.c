@@ -38,10 +38,6 @@ text_t* text_new(text_t *text_obj, const char *text, int x, int y,
     layer_t *layer = create_layer(width, height);
     cairo_t *cr = cairo_create(layer->surface);
     PangoLayout *layout = pango_cairo_create_layout(cr);
-    PangoFontDescription *desc = pango_font_description_from_string(font);
-    pango_layout_set_font_description(layout, desc);
-    pango_font_description_free(desc);
-    pango_layout_set_text(layout, text, -1);
 
     *text_obj = (text_t) { .text = text, .x = x, .y = y, .font = font, .r = r,
                         .g = g, .b = b, .a = a, .layer = layer,
@@ -52,19 +48,27 @@ text_t* text_new(text_t *text_obj, const char *text, int x, int y,
 
 void text_draw(text_t *text_obj) {
     // Double buffering
-    cairo_surface_t *surface = create_surface(text_obj->layer->width,
-                                              text_obj->layer->height);
+    int width, height;
+    get_extents_for_string(text_obj->text, text_obj->font, &width, &height);
+    cairo_surface_t *surface = create_surface(width, height);
     cairo_t *cr = cairo_create(surface);
+    PangoFontDescription *desc = pango_font_description_from_string(text_obj->font);
+    pango_layout_set_font_description(text_obj->layout, desc);
+    pango_font_description_free(desc);
     
     pango_layout_set_text(text_obj->layout, text_obj->text, -1);
-    
-    text_obj->layer->x = text_obj->x;
-    text_obj->layer->y = text_obj->y;
     
     cairo_set_source_rgba(cr, text_obj->r, text_obj->g, text_obj->b, text_obj->a);
     pango_cairo_update_layout(cr, text_obj->layout);
     pango_cairo_show_layout(cr, text_obj->layout);
     cairo_destroy(cr);
+    
+    // Update the layer
+    layer_t *new_layer = create_layer(width, height);
+    update_layer(text_obj->layer, new_layer);
+    text_obj->layer = new_layer;
+    text_obj->layer->x = text_obj->x;
+    text_obj->layer->y = text_obj->y;
     
     // Now we draw to the actual surface
     cairo_t *crl = cairo_create(text_obj->layer->surface);
@@ -106,9 +110,8 @@ int lualock_lua_text_draw(lua_State *L) {
 int lualock_lua_text_set(lua_State *L) {
     text_t *text_obj = lua_touserdata(L, 1);
     text_obj->text = luaL_checkstring(L, 2);
-    text_draw(text_obj);
-    
-    return 0;
+    lua_pushlightuserdata(L, text_obj);
+    return 1;
 }
 
 void lualock_lua_text_init(lua_State *L) {
