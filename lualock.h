@@ -29,6 +29,8 @@ typedef struct {
 	int y;
 	int width;
 	int height;
+    double scale_x;
+    double scale_y;
 	double angle;
 } layer_t;
 
@@ -55,6 +57,7 @@ typedef struct {
     
     layer_t **layers;
     int layers_alloc;
+    int need_updates;
 
     style_t style;
 } lualock_t;

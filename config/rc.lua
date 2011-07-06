@@ -17,10 +17,9 @@ clock_timer = timer.new(function ()
     text.set(text_clock, os.date("%a %b %d, %l:%M:%S %p"))
 end, 1)
 
---function rotate10 ()
-    --image.rotate(im2, 3)
+function rotate_image ()
+    image.rotate(im2, 3)
     --image.render(im2)
---end
+end
 
---t = timer.new(rotate10, 0.05);
---t = timer.new(function () print("hi") end, 1);
+t = timer.new(rotate_image, 0.05);

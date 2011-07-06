@@ -20,6 +20,8 @@ layer_t* create_layer(int width, int height) {
     layer->surface = surface;
     layer->width = width;
     layer->height = height;
+    layer->scale_x = 1;
+    layer->scale_y = 1;
     layer->x = 0;
     layer->y = 0;
     layer->angle = 0;

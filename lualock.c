@@ -126,6 +126,7 @@ gboolean on_key_press(GdkEvent *ev) {
             }
     }
     
+    lualock.need_updates++;
     draw_password_mask();
     
     return TRUE;
@@ -145,6 +146,7 @@ void event_handler(GdkEvent *ev) {
                     exit(0);
             break;
         case GDK_EXPOSE:
+            lualock.need_updates++;
             break;
         default:
             break;
@@ -183,6 +185,8 @@ int main(int argc, char **argv) {
     lualock.pw_length = 0;
     lualock.pw_alloc = PW_BUFF_SIZE;
     
+    lualock.need_updates = 0;
+    
     init_display();
     init_window();
     init_style();
@@ -206,8 +210,6 @@ int main(int argc, char **argv) {
     gdk_keyboard_grab(win, TRUE, GDK_CURRENT_TIME);
     gdk_pointer_grab(win, TRUE, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK
                      | GDK_POINTER_MOTION_MASK, NULL, NULL, GDK_CURRENT_TIME);
-    //gdk_window_add_filter(NULL, GdkFilterFunc(event_filter), NULL);
-    //start_drawing();
     
     g_timeout_add(1000.0 / 10, draw, NULL);
     g_main_run(g_main_new(TRUE));

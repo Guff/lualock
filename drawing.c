@@ -41,6 +41,8 @@ void draw_password_mask() {
 }
 
 gboolean draw(void *data) {
+    if (lualock.need_updates <= 0)
+        return TRUE;
     cairo_t *cr = cairo_create(lualock.surface_buf);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
@@ -67,6 +69,8 @@ gboolean draw(void *data) {
     cairo_set_operator(crw, CAIRO_OPERATOR_SOURCE);
     cairo_paint(crw);
     cairo_destroy(crw);
+    
+    lualock.need_updates--;
     return TRUE;
 }
 

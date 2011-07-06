@@ -64,6 +64,8 @@ void text_draw(text_t *text_obj) {
     cairo_paint(crl);
     cairo_destroy(crl);
     cairo_surface_destroy(surface);
+    
+    lualock.need_updates++;
 }
 
 int lualock_lua_text_new(lua_State *L) {
