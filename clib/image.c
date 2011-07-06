@@ -71,6 +71,8 @@ bool image_new(const char *filename, image_t *image) {
 
 static int lualock_lua_image_new(lua_State *L) {
     image_t *image = lua_newuserdata(L, sizeof(image_t));
+    luaL_getmetatable(L, "lualock.image");
+    lua_setmetatable(L, -2);
     
     const char *filename = luaL_checkstring(L, 1);
     bool loaded = image_new(filename, image);
@@ -79,37 +81,37 @@ static int lualock_lua_image_new(lua_State *L) {
 }
 
 static int lualock_lua_image_render(lua_State *L) {
-    image_t *image = lua_touserdata(L, 1);
+    image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_render(image, lua_tointeger(L, 2), lua_tointeger(L, 3));
     return 0;
 }
 
 static int lualock_lua_image_rotate(lua_State *L) {
-    image_t *image = lua_touserdata(L, 1);
+    image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_rotate(image, lua_tonumber(L, 2));
     return 0;
 }
 
 static int lualock_lua_image_scale(lua_State *L) {
-    image_t *image = lua_touserdata(L, 1);
+    image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_scale(image, lua_tonumber(L, 2), lua_tonumber(L, 3));
     return 0;
 }
 
 static int lualock_lua_image_resize(lua_State *L) {
-    image_t *image = lua_touserdata(L, 1);
+    image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_resize(image, lua_tonumber(L, 2), lua_tonumber(L, 3));
     return 0;
 }
 
 static int lualock_lua_image_get_width(lua_State *L) {
-    image_t *image = lua_touserdata(L, 1);
+    image_t *image = luaL_checkudata(L, 1, "lualock.image");
     lua_pushinteger(L, image_get_width(image));
     return 1;
 }
 
 static int lualock_lua_image_get_height(lua_State *L) {
-    image_t *image = lua_touserdata(L, 1);
+    image_t *image = luaL_checkudata(L, 1, "lualock.image");
     lua_pushinteger(L, image_get_height(image));
     return 1;
 }
@@ -127,6 +129,7 @@ void lualock_lua_image_init(lua_State *L) {
         { "get_height", lualock_lua_image_get_height },
         { NULL, NULL }
     };
+    luaL_newmetatable(L, "lualock.image");
     luaL_register(L, "image", lualock_image_lib);
 }
     

@@ -112,10 +112,7 @@ int lualock_lua_text_draw(lua_State *L) {
 int lualock_lua_text_set(lua_State *L) {
     text_t *text_obj = luaL_checkudata(L, 1, "lualock.text");
     text_obj->text = luaL_checkstring(L, 2);
-    lua_pushlightuserdata(L, text_obj);
-    luaL_getmetatable(L, "lualock.text");
-    lua_setmetatable(L, -2);
-    return 1;
+    return 0;
 }
 
 void lualock_lua_text_init(lua_State *L) {

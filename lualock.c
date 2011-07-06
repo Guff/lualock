@@ -74,24 +74,6 @@ void init_lua() {
 
     lualock.L = luaL_newstate();
     
-    luaL_openlibs(lualock.L);
-    
-    lualock_lua_image_init(lualock.L);
-    // stuff's already loaded; don't need it on the stack
-    lua_pop(lualock.L, 1);
-    
-    lualock_lua_background_init(lualock.L);
-    lua_pop(lualock.L, 1);
-    
-    lualock_lua_text_init(lualock.L);
-    lua_pop(lualock.L, 1);
-    
-    lualock_lua_timer_init(lualock.L);
-    lua_pop(lualock.L, 1);
-    
-    lualock_lua_style_init(lualock.L);
-    lua_pop(lualock.L, 1);
-    
     lualock_lua_loadrc(lualock.L, &xdg);    
 }
 
