@@ -97,20 +97,24 @@ int lualock_lua_text_new(lua_State *L) {
     parse_color(hex, &r, &g, &b, &a);
     
     text_t *text_obj = lua_newuserdata(L, sizeof(text_t));
+    luaL_getmetatable(L, "lualock.text");
+    lua_setmetatable(L, -2);
     text_new(text_obj, text, x, y, font, r, g, b, a);
     return 1;
 }
 
 int lualock_lua_text_draw(lua_State *L) {
-    text_t *text_obj = lua_touserdata(L, 1);
+    text_t *text_obj = luaL_checkudata(L, 1, "lualock.text");
     text_draw(text_obj);
     return 0;
 }
 
 int lualock_lua_text_set(lua_State *L) {
-    text_t *text_obj = lua_touserdata(L, 1);
+    text_t *text_obj = luaL_checkudata(L, 1, "lualock.text");
     text_obj->text = luaL_checkstring(L, 2);
     lua_pushlightuserdata(L, text_obj);
+    luaL_getmetatable(L, "lualock.text");
+    lua_setmetatable(L, -2);
     return 1;
 }
 
@@ -122,6 +126,8 @@ void lualock_lua_text_init(lua_State *L) {
         { "set", lualock_lua_text_set },
         { NULL, NULL }
     };
+    
+    luaL_newmetatable(L, "lualock.text");
     luaL_register(L, "text", lualock_text_lib);
 }
 
