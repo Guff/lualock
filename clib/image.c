@@ -8,15 +8,16 @@
 #include "clib/image.h"
 
 int image_get_width(image_t *image) {
-    return image->width;
+    return image->layer->width * image->layer->scale_x;
 }
 
 int image_get_height(image_t *image) {
-    return image->height;
+    return image->layer->height * image->layer->scale_y;
 }
 
 void image_render(image_t *image, int x, int y) {
-    cairo_surface_t *surface = create_surface(image->width, image->height);
+    cairo_surface_t *surface = create_surface(image->layer->width,
+                                              image->layer->height);
     cairo_t *cr = cairo_create(surface);
     cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
     cairo_paint(cr);
@@ -42,6 +43,16 @@ void image_rotate(image_t *image, double angle) {
     lualock.need_updates++;
 }
 
+void image_scale(image_t *image, double sx, double sy) {
+    image->layer->scale_x = sx;
+    image->layer->scale_y = sy;
+}
+
+void image_resize(image_t *image, int width, int height) {
+    image->layer->scale_x = width / (float) image->layer->width;
+    image->layer->scale_y = height / (float) image->layer->height;
+}
+
 bool image_new(const char *filename, image_t *image) {
     GError **error = NULL;
     image->pbuf = gdk_pixbuf_new_from_file(filename, error);
@@ -50,9 +61,8 @@ bool image_new(const char *filename, image_t *image) {
         image->pbuf = rsvg_pixbuf_from_file(filename, error);
     }
     
-    image->width = gdk_pixbuf_get_width(image->pbuf);
-    image->height = gdk_pixbuf_get_height(image->pbuf);
-    image->layer = create_layer(image->width, image->height);
+    image->layer = create_layer(gdk_pixbuf_get_width(image->pbuf),
+                                gdk_pixbuf_get_height(image->pbuf));
 
     add_layer(image->layer);
 
@@ -80,6 +90,30 @@ static int lualock_lua_image_rotate(lua_State *L) {
     return 0;
 }
 
+static int lualock_lua_image_scale(lua_State *L) {
+    image_t *image = lua_touserdata(L, 1);
+    image_scale(image, lua_tonumber(L, 2), lua_tonumber(L, 3));
+    return 0;
+}
+
+static int lualock_lua_image_resize(lua_State *L) {
+    image_t *image = lua_touserdata(L, 1);
+    image_resize(image, lua_tonumber(L, 2), lua_tonumber(L, 3));
+    return 0;
+}
+
+static int lualock_lua_image_get_width(lua_State *L) {
+    image_t *image = lua_touserdata(L, 1);
+    lua_pushinteger(L, image_get_width(image));
+    return 1;
+}
+
+static int lualock_lua_image_get_height(lua_State *L) {
+    image_t *image = lua_touserdata(L, 1);
+    lua_pushinteger(L, image_get_height(image));
+    return 1;
+}
+
 void lualock_lua_image_init(lua_State *L) {
     gdk_init(NULL, NULL);
     const struct luaL_reg lualock_image_lib[] =
@@ -87,6 +121,10 @@ void lualock_lua_image_init(lua_State *L) {
         { "new", lualock_lua_image_new },
         { "render", lualock_lua_image_render },
         { "rotate", lualock_lua_image_rotate },
+        { "scale", lualock_lua_image_scale },
+        { "resize", lualock_lua_image_resize },
+        { "get_width", lualock_lua_image_get_width },
+        { "get_height", lualock_lua_image_get_height },
         { NULL, NULL }
     };
     luaL_register(L, "image", lualock_image_lib);

@@ -53,6 +53,7 @@ gboolean draw(void *data) {
         cairo_save(cr);
         cairo_rotate(cr, lualock.layers[i]->angle);
         cairo_translate(cr, lualock.layers[i]->x, lualock.layers[i]->y);
+        cairo_scale(cr, lualock.layers[i]->scale_x, lualock.layers[i]->scale_y);
         cairo_set_source_surface(cr, lualock.layers[i]->surface, 0, 0);
         cairo_paint(cr);
         cairo_restore(cr);
