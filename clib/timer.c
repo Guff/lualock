@@ -39,7 +39,7 @@ static int lualock_lua_timer_new(lua_State *L) {
     
     int interval = luaL_checknumber(L, 2) * 1000;
     int run_times = lua_tonumber(L, 3);
-    lua_pop(L, 2);
+    lua_pushvalue(L, 1);
     
     timer->L = L;
     timer->r = luaL_ref(L, LUA_REGISTRYINDEX);
