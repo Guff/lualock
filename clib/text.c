@@ -82,11 +82,19 @@ void text_draw(text_t *text_obj) {
 }
 
 int lualock_lua_text_new(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
-    int x = lua_tonumber(L, 2);
-    int y = lua_tonumber(L, 3);
-    const char *font = lua_tostring(L, 4);
-    const char *hex = lua_tostring(L, 5);
+    if (!lua_istable(L, 1))
+        luaL_typerror(L, 1, "table");
+    lua_getfield(L, 1, "text");
+    lua_getfield(L, 1, "x");
+    lua_getfield(L, 1, "y");
+    lua_getfield(L, 1, "font");
+    lua_getfield(L, 1, "color");
+    
+    const char *text = luaL_checkstring(L, 2);
+    int x = lua_tonumber(L, 3);
+    int y = lua_tonumber(L, 4);
+    const char *font = lua_tostring(L, 5);
+    const char *hex = lua_tostring(L, 6);
     
     if (!font)
         font = "Sans Bold 12";
@@ -111,7 +119,24 @@ int lualock_lua_text_draw(lua_State *L) {
 
 int lualock_lua_text_set(lua_State *L) {
     text_t *text_obj = luaL_checkudata(L, 1, "lualock.text");
-    text_obj->text = luaL_checkstring(L, 2);
+    if (!lua_istable(L, 2))
+        luaL_typerror(L, 2, "table");
+    lua_getfield(L, 2, "text");
+    lua_getfield(L, 2, "x");
+    lua_getfield(L, 2, "y");
+    lua_getfield(L, 2, "font");
+    lua_getfield(L, 2, "color");
+    if (lua_tostring(L, 3))
+        text_obj->text = strdup(lua_tostring(L, 3));
+    if (lua_isnumber(L, 4))
+        text_obj->x = lua_tointeger(L, 4);
+    if (lua_isnumber(L, 5))
+        text_obj->y = lua_tointeger(L, 5);
+    if (lua_tostring(L, 6))
+        text_obj->font = strdup(lua_tostring(L, 6));
+    if (lua_tostring(L, 7))
+        parse_color(lua_tostring(L, 7), &text_obj->r, &text_obj->g, &text_obj->b,
+                    &text_obj->a);
     return 0;
 }
 
