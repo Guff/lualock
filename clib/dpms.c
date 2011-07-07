@@ -12,9 +12,8 @@ int lualock_lua_dpms_set(lua_State *L) {
 	lua_getfield(L, 1, "suspend");
 	lua_getfield(L, 1, "off");
 	DPMSEnable(dpy);
-	int err = DPMSSetTimeouts(dpy, 5, 100, 200);
-	DPMSCapable(dpy);
-	printf("%i %i %i %i\n", lua_tointeger(L, 2), lua_tointeger(L, 3), lua_tointeger(L, 4), err);
+	DPMSSetTimeouts(dpy, luaL_checkint(L, 2), luaL_checkint(L, 3),
+			luaL_checkint(L, 4));
     }
     return 0;
 }

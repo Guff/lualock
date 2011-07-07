@@ -161,11 +161,10 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
 }
 
 void restore_dpms_settings() {
-    if (lualock.dpms_enabled) {
-        int err = DPMSSetTimeouts(lualock.dpy,
-                                  lualock.dpms_standby, lualock.dpms_suspend,
-                                  lualock.dpms_off);
-        printf("%i %i %i %i", lualock.dpms_standby, lualock.dpms_suspend, lualock.dpms_off, err);
+    if (lualock.dpms_enabled && DPMSCapable(lualock.dpy)) {
+        DPMSSetTimeouts(lualock.dpy, lualock.dpms_standby, lualock.dpms_suspend,
+                        lualock.dpms_off);
+        DPMSEnable(lualock.dpy);
     }
 }
 
@@ -191,12 +190,11 @@ int main(int argc, char **argv) {
 
     CARD16 dummy;
     DPMSInfo(dpy, &dummy, &lualock.dpms_enabled);
-    if (lualock.dpms_enabled)
+    if (DPMSCapable(dpy))
         DPMSGetTimeouts(dpy, &lualock.dpms_standby,
                         &lualock.dpms_suspend, &lualock.dpms_off);
     
     atexit(restore_dpms_settings);
-    printf("%i %i %i\n", lualock.dpms_standby, lualock.dpms_suspend, lualock.dpms_off);
     
     gdk_window_show(win);
     
