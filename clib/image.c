@@ -118,7 +118,6 @@ void lualock_lua_image_init(lua_State *L) {
     gdk_init(NULL, NULL);
     const struct luaL_reg lualock_image_lib[] =
     {
-        { "new", lualock_lua_image_new },
         { "render", lualock_lua_image_render },
         { "rotate", lualock_lua_image_rotate },
         { "scale", lualock_lua_image_scale },
@@ -128,6 +127,11 @@ void lualock_lua_image_init(lua_State *L) {
         { NULL, NULL }
     };
     luaL_newmetatable(L, "lualock.image");
-    luaL_register(L, "image", lualock_image_lib);
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    
+    luaL_register(L, NULL, lualock_image_lib);
+    lua_register(L, "image", lualock_lua_image_new);
+    lua_pop(L, 1);
 }
     

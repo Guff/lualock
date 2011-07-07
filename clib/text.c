@@ -118,13 +118,17 @@ int lualock_lua_text_set(lua_State *L) {
 void lualock_lua_text_init(lua_State *L) {
     const struct luaL_reg lualock_text_lib[] =
     {
-        { "new", lualock_lua_text_new },
         { "draw", lualock_lua_text_draw },
         { "set", lualock_lua_text_set },
         { NULL, NULL }
     };
     
     luaL_newmetatable(L, "lualock.text");
-    luaL_register(L, "text", lualock_text_lib);
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    
+    luaL_register(L, NULL, lualock_text_lib);
+    lua_pop(L, 1);
+    lua_register(L, "text", lualock_lua_text_new);
 }
 

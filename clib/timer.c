@@ -43,16 +43,15 @@ static int lualock_lua_timer_new(lua_State *L) {
     
     timer->L = L;
     timer->r = luaL_ref(L, LUA_REGISTRYINDEX);
-    
+    luaL_getmetatable(L, "lualock.timer");
     timer_new(timer, interval, run_times, timer_run_lua_function);
+    lua_setmetatable(L, -2);
+
     return 1;
 }
 
 void lualock_lua_timer_init(lua_State *L) {
-    const struct luaL_reg lualock_timer_lib[] =
-    {
-        { "new", lualock_lua_timer_new },
-        { NULL, NULL }
-    };
-    luaL_register(L, "timer", lualock_timer_lib);
+    luaL_newmetatable(L, "lualock.timer");
+    
+    lua_register(L, "timer", lualock_lua_timer_new);
 }

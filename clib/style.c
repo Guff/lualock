@@ -43,10 +43,5 @@ int lualock_lua_style_set(lua_State *L) {
 }
 
 void lualock_lua_style_init(lua_State *L) {
-    const struct luaL_reg lualock_style_lib[] =
-    {
-        { "set", lualock_lua_style_set },
-        { NULL, NULL }
-    };
-    luaL_register(L, "style", lualock_style_lib);
+    lua_register(L, "style", lualock_lua_style_set);
 }

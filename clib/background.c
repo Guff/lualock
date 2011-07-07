@@ -81,10 +81,5 @@ static int lualock_lua_background_set(lua_State *L) {
 }
 
 void lualock_lua_background_init(lua_State *L) {
-    const struct luaL_reg lualock_background_lib[] =
-    {
-        { "set", lualock_lua_background_set },
-        { NULL, NULL }
-    };
-    luaL_register(L, "background", lualock_background_lib);
+    lua_register(L, "background", lualock_lua_background_set);
 }

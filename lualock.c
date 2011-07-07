@@ -179,7 +179,7 @@ int main(int argc, char **argv) {
     lualock.pw_length = 0;
     lualock.pw_alloc = PW_BUFF_SIZE;
     
-    lualock.need_updates = FALSE;
+    lualock.need_updates = TRUE;
     
     init_display();
     init_window();
