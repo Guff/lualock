@@ -7,6 +7,7 @@
 #include "clib/text.h"
 #include "clib/timer.h"
 #include "clib/style.h"
+#include "clib/dpms.h"
 
 bool lualock_lua_loadrc(lua_State *L, xdgHandle *xdg) {
     luaL_openlibs(lualock.L);
@@ -25,6 +26,9 @@ bool lualock_lua_loadrc(lua_State *L, xdgHandle *xdg) {
     lua_pop(lualock.L, 1);
     
     lualock_lua_style_init(lualock.L);
+    lua_pop(lualock.L, 1);
+    
+    lualock_lua_dpms_init(lualock.L);
     lua_pop(lualock.L, 1);
     
     char *config = xdgConfigFind("lualock/rc.lua", xdg);

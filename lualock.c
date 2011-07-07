@@ -4,14 +4,17 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <cairo-xlib.h>
+#include <X11/Xlib.h>
+#include <X11/extensions/dpms.h>
 #include <pango/pangocairo.h>
 #include <gdk/gdkkeysyms.h>
+#include <gdk/gdkx.h>
 #include <security/pam_appl.h>
 
 #define PW_BUFF_SIZE 32
 #define DEFAULT_FONT "Sans 12"
 
+#include "lualock.h"
 #include "misc.h"
 #include "drawing.h"
 #include "lua_api.h"
@@ -24,7 +27,7 @@ time_t test_timer;
 int frames_drawn;
 
 void init_display() {
-    lualock.dpy = gdk_display_get_default();
+    lualock.dpy = XOpenDisplay(NULL);
     lualock.scr = gdk_screen_get_default();
 }
 
@@ -82,6 +85,7 @@ void reset_password() {
     lualock.pw_length = 0;
 }
 
+
 gboolean on_key_press(GdkEvent *ev) {
     guint keyval = ((GdkEventKey *)ev)->keyval;
     switch(keyval) {
@@ -125,7 +129,7 @@ void event_handler(GdkEvent *ev) {
         // if enter was pressed, check password
             if (!on_key_press(ev))
                 if (authenticate_user())
-                    exit(0);
+                    g_main_loop_quit(lualock.loop);
             break;
         case GDK_EXPOSE:
             lualock.need_updates = TRUE;
@@ -156,9 +160,17 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
     return 0;
 }
 
+void restore_dpms_settings() {
+    if (lualock.dpms_enabled) {
+        int err = DPMSSetTimeouts(lualock.dpy,
+                                  lualock.dpms_standby, lualock.dpms_suspend,
+                                  lualock.dpms_off);
+        printf("%i %i %i %i", lualock.dpms_standby, lualock.dpms_suspend, lualock.dpms_off, err);
+    }
+}
 
 int main(int argc, char **argv) {    
-    GdkDisplay *dpy;
+    Display *dpy;
     GdkWindow *win;
     
     gdk_init(&argc, &argv);
@@ -176,6 +188,15 @@ int main(int argc, char **argv) {
     
     dpy = lualock.dpy;
     win = lualock.win;
+
+    CARD16 dummy;
+    DPMSInfo(dpy, &dummy, &lualock.dpms_enabled);
+    if (lualock.dpms_enabled)
+        DPMSGetTimeouts(dpy, &lualock.dpms_standby,
+                        &lualock.dpms_suspend, &lualock.dpms_off);
+    
+    atexit(restore_dpms_settings);
+    printf("%i %i %i\n", lualock.dpms_standby, lualock.dpms_suspend, lualock.dpms_off);
     
     gdk_window_show(win);
     
@@ -194,9 +215,10 @@ int main(int argc, char **argv) {
                      | GDK_POINTER_MOTION_MASK, NULL, NULL, GDK_CURRENT_TIME);
     
     g_timeout_add(1000.0 / 10, draw, NULL);
-    g_main_run(g_main_new(TRUE));
+    lualock.loop = g_main_new(TRUE);
+    g_main_run(lualock.loop);
     
-    gdk_display_close(dpy);
+    //XCloseDisplay(dpy);
     
     return 0;
 }

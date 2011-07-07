@@ -3,6 +3,8 @@
 
 #include <lua.h>
 #include <gdk/gdk.h>
+#include <X11/Xlib.h>
+#include <X11/Xmd.h>
 #include <pango/pangocairo.h>
 
 typedef struct {
@@ -37,7 +39,7 @@ typedef struct {
 typedef struct {
     lua_State *L;
     
-    GdkDisplay *dpy;
+    Display *dpy;
     GdkScreen *scr;
     GdkWindow *win;
     
@@ -57,7 +59,12 @@ typedef struct {
     layer_t **layers;
     int layers_alloc;
     gboolean need_updates;
-
+    
+    BOOL dpms_enabled;
+    CARD16 dpms_standby, dpms_suspend, dpms_off;
+    
+    GMainLoop *loop;
+    
     style_t style;
 } lualock_t;
 

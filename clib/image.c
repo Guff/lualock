@@ -1,5 +1,3 @@
-#include <lualib.h>
-#include <lauxlib.h>
 #include <librsvg/rsvg.h>
 #include <gdk/gdk.h>
 #include <math.h>

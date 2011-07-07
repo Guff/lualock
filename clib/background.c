@@ -5,7 +5,7 @@
 #include <gdk/gdk.h>
 
 #include "misc.h"
-#include "background.h"
+#include "clib/background.h"
 
 void background_set_color(const char *hex) {
     layer_t *layer = create_layer(gdk_screen_get_width(lualock.scr),

@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 #include "misc.h"
 
