@@ -1,4 +1,4 @@
-**lualock** (also known as **llock** or **luaker**), may *eventually* turn out
+**lualock** (also known as **llock** [pronounced 'yock'] or **luaker**), may *eventually* turn out
 to be a screenlocker that's highly configurable and extensible with lua.
 
 As it stands right now, however, it's a piece of junk. Although, it does
