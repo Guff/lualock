@@ -27,7 +27,6 @@ time_t test_timer;
 int frames_drawn;
 
 void init_display() {
-    lualock.dpy = XOpenDisplay(NULL);
     lualock.scr = gdk_screen_get_default();
 }
 
@@ -160,14 +159,6 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
     return 0;
 }
 
-void restore_dpms_settings() {
-    if (lualock.dpms_enabled && DPMSCapable(lualock.dpy)) {
-        DPMSSetTimeouts(lualock.dpy, lualock.dpms_standby, lualock.dpms_suspend,
-                        lualock.dpms_off);
-        DPMSEnable(lualock.dpy);
-    }
-}
-
 int main(int argc, char **argv) {    
     Display *dpy;
     GdkWindow *win;
@@ -179,28 +170,31 @@ int main(int argc, char **argv) {
     lualock.pw_alloc = PW_BUFF_SIZE;
     
     lualock.need_updates = TRUE;
+    lualock.using_dpms = FALSE;
     
     init_display();
     init_window();
     init_style();
     init_cairo();
     
-    dpy = lualock.dpy;
+    dpy = XOpenDisplay(":0.0");
     win = lualock.win;
+
+    init_lua();
 
     CARD16 dummy;
     DPMSInfo(dpy, &dummy, &lualock.dpms_enabled);
-    if (DPMSCapable(dpy))
+    if (DPMSCapable(dpy) && lualock.using_dpms) {
         DPMSGetTimeouts(dpy, &lualock.dpms_standby,
                         &lualock.dpms_suspend, &lualock.dpms_off);
-    
-    atexit(restore_dpms_settings);
+        printf("%i\n", DPMSSetTimeouts(dpy, lualock.dpms_cfg_standby, lualock.dpms_cfg_suspend,
+                        lualock.dpms_cfg_off));
+    }
     
     gdk_window_show(win);
     
     gdk_event_handler_set((GdkEventFunc)event_handler, NULL, NULL);
 
-    init_lua();
     
     struct pam_conv conv = {pam_conv_cb, NULL};
     int ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
@@ -216,6 +210,7 @@ int main(int argc, char **argv) {
     lualock.loop = g_main_new(TRUE);
     g_main_run(lualock.loop);
     
+    DPMSSetTimeouts(dpy, lualock.dpms_standby, lualock.dpms_suspend, lualock.dpms_off);
     //XCloseDisplay(dpy);
     
     return 0;

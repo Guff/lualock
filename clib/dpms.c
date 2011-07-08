@@ -6,15 +6,13 @@
 #include "clib/dpms.h"
 
 int lualock_lua_dpms_set(lua_State *L) {
-    Display *dpy = XOpenDisplay(NULL);
-    if (DPMSCapable(dpy)) {
-	lua_getfield(L, 1, "standby");
-	lua_getfield(L, 1, "suspend");
-	lua_getfield(L, 1, "off");
-	DPMSEnable(dpy);
-	DPMSSetTimeouts(dpy, luaL_checkint(L, 2), luaL_checkint(L, 3),
-			luaL_checkint(L, 4));
-    }
+    lua_getfield(L, 1, "standby");
+    lua_getfield(L, 1, "suspend");
+    lua_getfield(L, 1, "off");
+    lualock.dpms_cfg_standby = luaL_checkint(L, 2);
+    lualock.dpms_cfg_suspend = luaL_checkint(L, 3);
+    lualock.dpms_cfg_off = luaL_checkint(L, 4);
+    lualock.using_dpms = True;
     return 0;
 }
 

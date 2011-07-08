@@ -39,7 +39,6 @@ typedef struct {
 typedef struct {
     lua_State *L;
     
-    Display *dpy;
     GdkScreen *scr;
     GdkWindow *win;
     
@@ -60,8 +59,9 @@ typedef struct {
     int layers_alloc;
     gboolean need_updates;
     
-    BOOL dpms_enabled;
+    BOOL dpms_enabled, using_dpms;
     CARD16 dpms_standby, dpms_suspend, dpms_off;
+    CARD16 dpms_cfg_standby, dpms_cfg_suspend, dpms_cfg_off;
     
     GMainLoop *loop;
     
