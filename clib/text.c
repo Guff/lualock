@@ -31,40 +31,53 @@ static void get_extents_for_string(const char *text, const char *font,
 }
 
 text_t* text_new(text_t *text_obj, const char *text, int x, int y,
-                 const char *font, double r, double g, double b, double a) {
+                 const char *font, double r, double g, double b, double a,
+                 const char *border_color, double border_width) {
     
     int width, height;
     get_extents_for_string(text, font, &width, &height);
     layer_t *layer = create_layer(width, height);
-    cairo_t *cr = cairo_create(layer->surface);
-    PangoLayout *layout = pango_cairo_create_layout(cr);
+    PangoLayout *layout = NULL;
 
     *text_obj = (text_t) { .text = text, .x = x, .y = y, .font = font, .r = r,
                         .g = g, .b = b, .a = a, .layer = layer,
-                        .layout = layout };
+                        .layout = layout, .border_width = border_width,
+                        .border_color = border_color };
     add_layer(text_obj->layer);
     return text_obj;    
 }
 
 void text_draw(text_t *text_obj) {
+    double border_r, border_g, border_b, border_a;
+    parse_color(text_obj->border_color, &border_r, &border_g, &border_b, &border_a);
+
     // Double buffering
-    int width, height;
+    int width, height;    
     get_extents_for_string(text_obj->text, text_obj->font, &width, &height);
-    cairo_surface_t *surface = create_surface(width, height);
+    cairo_surface_t *surface = create_surface(width + 2 * text_obj->border_width,
+                                              height + 2 * text_obj->border_width);
     cairo_t *cr = cairo_create(surface);
+    cairo_move_to(cr, text_obj->border_width, 0);
+    text_obj-> layout = pango_cairo_create_layout(cr);
     PangoFontDescription *desc = pango_font_description_from_string(text_obj->font);
     pango_layout_set_font_description(text_obj->layout, desc);
     pango_font_description_free(desc);
     
     pango_layout_set_text(text_obj->layout, text_obj->text, -1);
-    
-    cairo_set_source_rgba(cr, text_obj->r, text_obj->g, text_obj->b, text_obj->a);
     pango_cairo_update_layout(cr, text_obj->layout);
-    pango_cairo_show_layout(cr, text_obj->layout);
+    pango_cairo_layout_path(cr, text_obj->layout);
+    
+    cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
+    cairo_set_line_width(cr, text_obj->border_width);
+    cairo_set_source_rgba(cr, border_r, border_g, border_b, border_a);
+    cairo_stroke_preserve(cr);
+    cairo_set_source_rgba(cr, text_obj->r, text_obj->g, text_obj->b, text_obj->a);
+    cairo_fill(cr);
     cairo_destroy(cr);
     
     // Update the layer
-    layer_t *new_layer = create_layer(width, height);
+    layer_t *new_layer = create_layer(width + 2 * text_obj->border_width,
+                                      height + 2 * text_obj->border_width);
     update_layer(text_obj->layer, new_layer);
     text_obj->layer = new_layer;
     text_obj->layer->x = text_obj->x;
@@ -89,10 +102,12 @@ int lualock_lua_text_new(lua_State *L) {
     lua_getfield(L, 1, "y");
     lua_getfield(L, 1, "font");
     lua_getfield(L, 1, "color");
+    lua_getfield(L, 1, "border_color");
+    lua_getfield(L, 1, "border_width");
     
     const char *text = luaL_checkstring(L, 2);
-    int x = lua_tonumber(L, 3);
-    int y = lua_tonumber(L, 4);
+    double x = lua_tonumber(L, 3);
+    double y = lua_tonumber(L, 4);
     const char *font = lua_tostring(L, 5);
     const char *hex = lua_tostring(L, 6);
     
@@ -107,7 +122,8 @@ int lualock_lua_text_new(lua_State *L) {
     text_t *text_obj = lua_newuserdata(L, sizeof(text_t));
     luaL_getmetatable(L, "lualock.text");
     lua_setmetatable(L, -2);
-    text_new(text_obj, text, x, y, font, r, g, b, a);
+    text_new(text_obj, text, x, y, font, r, g, b, a, luaL_optstring(L, 7, "#000000"),
+             lua_tonumber(L, 8));
     return 1;
 }
 
@@ -126,17 +142,17 @@ int lualock_lua_text_set(lua_State *L) {
     lua_getfield(L, 2, "y");
     lua_getfield(L, 2, "font");
     lua_getfield(L, 2, "color");
-    if (lua_tostring(L, 3))
-        text_obj->text = strdup(lua_tostring(L, 3));
-    if (lua_isnumber(L, 4))
-        text_obj->x = lua_tointeger(L, 4);
-    if (lua_isnumber(L, 5))
-        text_obj->y = lua_tointeger(L, 5);
-    if (lua_tostring(L, 6))
-        text_obj->font = strdup(lua_tostring(L, 6));
+    lua_getfield(L, 2, "border_color");
+    lua_getfield(L, 2, "border_width");
+    text_obj->text = strdup(luaL_optstring(L, 3, text_obj->text));
+    text_obj->x = luaL_optnumber(L, 4, text_obj->x);
+    text_obj->y = luaL_optnumber(L, 5, text_obj->y);
+    text_obj->font = strdup(luaL_optstring(L, 6, text_obj->font));
     if (lua_tostring(L, 7))
         parse_color(lua_tostring(L, 7), &text_obj->r, &text_obj->g, &text_obj->b,
                     &text_obj->a);
+    text_obj->border_color = strdup(luaL_optstring(L, 8, text_obj->border_color));
+    text_obj->border_width = luaL_optnumber(L, 9, text_obj->border_width);
     return 0;
 }
 

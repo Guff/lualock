@@ -62,6 +62,10 @@ void remove_layer(layer_t *layer) {
 }
 
 void parse_color(const char *hex, double *r, double *g, double *b, double *a) {
+    if (!hex) {
+        *r = 0, *g = 0, *b = 0, *a = 1;
+        return;
+    }
     unsigned long packed_rgb;
     // hex + 1 skips over the pound sign, which we don't need
     sscanf(hex + 1, "%lx", &packed_rgb);
