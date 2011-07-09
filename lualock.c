@@ -8,7 +8,6 @@
 #include <X11/extensions/dpms.h>
 #include <pango/pangocairo.h>
 #include <gdk/gdkkeysyms.h>
-#include <gdk/gdkx.h>
 #include <security/pam_appl.h>
 
 #define PW_BUFF_SIZE 32
