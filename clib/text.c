@@ -57,7 +57,7 @@ void text_draw(text_t *text_obj) {
     cairo_surface_t *surface = create_surface(width + 2 * text_obj->border_width,
                                               height + 2 * text_obj->border_width);
     cairo_t *cr = cairo_create(surface);
-    cairo_move_to(cr, text_obj->border_width, 0);
+    cairo_translate(cr, text_obj->border_width, text_obj->border_width);
     text_obj-> layout = pango_cairo_create_layout(cr);
     PangoFontDescription *desc = pango_font_description_from_string(text_obj->font);
     pango_layout_set_font_description(text_obj->layout, desc);
@@ -80,8 +80,8 @@ void text_draw(text_t *text_obj) {
                                       height + 2 * text_obj->border_width);
     update_layer(text_obj->layer, new_layer);
     text_obj->layer = new_layer;
-    text_obj->layer->x = text_obj->x;
-    text_obj->layer->y = text_obj->y;
+    text_obj->layer->x = text_obj->x - text_obj->border_width;
+    text_obj->layer->y = text_obj->y - text_obj->border_width;
     
     // Now we draw to the actual surface
     cairo_t *crl = cairo_create(text_obj->layer->surface);
