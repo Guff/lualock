@@ -47,6 +47,8 @@ static int lualock_lua_timer_new(lua_State *L) {
     timer_new(timer, interval, run_times, timer_run_lua_function);
     lua_setmetatable(L, -2);
 
+    lua_pushvalue(L, 1);
+    luaL_ref(L, LUA_REGISTRYINDEX);
     return 1;
 }
 

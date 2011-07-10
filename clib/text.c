@@ -113,12 +113,15 @@ int lualock_lua_text_new(lua_State *L) {
     lua_getfield(L, 1, "border_width");
     
     text_t *text_obj = lua_newuserdata(L, sizeof(text_t));
+    lua_pushvalue(L, -1);
+    luaL_ref(L, LUA_REGISTRYINDEX);
     luaL_getmetatable(L, "lualock.text");
     lua_setmetatable(L, -2);
     text_new(text_obj, luaL_optstring(L, 2, ""), lua_tonumber(L, 3),
              lua_tonumber(L,4), luaL_optstring(L, 5, "Sans Bold 12"),
              luaL_optstring(L, 6, "#000000"), luaL_optstring(L, 7, "#000000"),
              lua_tonumber(L, 8));
+
     return 1;
 }
 
