@@ -39,14 +39,14 @@ text_t* text_new(text_t *text_obj, const char *text, int x, int y,
     
     int width, height;
     get_extents_for_string(text, font, &width, &height);
-    layer_t *layer = create_layer(width, height);
+    ClutterActor *actor = create_actor(width, height);
     PangoLayout *layout = NULL;
 
     *text_obj = (text_t) { .text = text, .x = x, .y = y, .font = font,
                            .font_color = font_color, .layout = layout,
                            .border_width = border_width,
-                           .border_color = border_color, .layer = layer };
-    add_layer(text_obj->layer);
+                           .border_color = border_color, .actor = actor };
+    add_actor(text_obj->actor);
     return text_obj;    
 }
 
@@ -81,17 +81,20 @@ void text_draw(text_t *text_obj) {
     cairo_destroy(cr);
     
     // Update the layer
-    layer_t *new_layer = create_layer(width + 2 * text_obj->border_width,
-                                      height + 2 * text_obj->border_width);
-    cairo_surface_destroy(text_obj->layer->surface);
-    free(text_obj->layer);
-    update_layer(text_obj->layer, new_layer);
-    text_obj->layer = new_layer;
-    text_obj->layer->x = text_obj->x - text_obj->border_width;
-    text_obj->layer->y = text_obj->y - text_obj->border_width;
+    //layer_t *new_layer = create_layer(width + 2 * text_obj->border_width,
+                                      //height + 2 * text_obj->border_width);
+    //cairo_surface_destroy(text_obj->layer->surface);
+    //free(text_obj->layer);
+    //update_layer(text_obj->layer, new_layer);
+    //text_obj->layer = new_layer;
+    //text_obj->layer->x = text_obj->x - text_obj->border_width;
+    //text_obj->layer->y = text_obj->y - text_obj->border_width;
+    clutter_actor_set_position(text_obj->actor,
+                               text_obj->x - text_obj->border_width,
+                               text_obj->y - text_obj->border_width);
     
     // Now we draw to the actual surface
-    cairo_t *crl = cairo_create(text_obj->layer->surface);
+    cairo_t *crl = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(text_obj->actor));
     cairo_set_operator(crl, CAIRO_OPERATOR_SOURCE);
     cairo_set_source_surface(crl, surface, 0, 0);
     cairo_paint(crl);

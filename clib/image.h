@@ -11,7 +11,7 @@
 
 typedef struct {
     GdkPixbuf *pbuf;
-    layer_t *layer;
+    ClutterActor *actor;
 } image_t;
 
 int image_get_width(image_t *image);

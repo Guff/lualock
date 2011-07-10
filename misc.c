@@ -30,6 +30,8 @@ void add_actor(ClutterActor *actor) {
     
     lualock.actors[i] = actor;
     lualock.actors[i + 1] = NULL;
+    
+    clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), actor);
 }
 
 void update_layer(ClutterActor *actor, ClutterActor *new) {

@@ -5,56 +5,43 @@
 #include "clib/image.h"
 
 int image_get_width(image_t *image) {
-    return image->layer->width * image->layer->scale_x;
+    return clutter_actor_get_width(image->actor);
 }
 
 int image_get_height(image_t *image) {
-    return image->layer->height * image->layer->scale_y;
+    return clutter_actor_get_height(image->actor);
 }
 
 void image_render(image_t *image, int x, int y) {
-    cairo_surface_t *surface = create_surface(image->layer->width,
-                                              image->layer->height);
-    cairo_t *cr = cairo_create(surface);
-    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-    cairo_paint(cr);
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(image->actor));
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
     gdk_cairo_set_source_pixbuf(cr, image->pbuf, 0, 0);
     cairo_paint(cr);
     cairo_destroy(cr);
-    
-    cairo_t *crb = cairo_create(image->layer->surface);
-    cairo_set_source_surface(crb, surface, 0, 0);
-    cairo_set_operator(crb, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(crb);
-    cairo_destroy(crb);
-    cairo_surface_destroy(surface);
-    image->layer->x = x;
-    image->layer->y = y;
+    clutter_actor_set_position(image->actor, x, y);
 }
 
 void image_rotate(image_t *image, double angle) {
-    image->layer->angle += 2 * M_PI * angle / 360;
+    clutter_actor_set_z_rotation_from_gravity(image->actor, 2 * M_PI * angle / 360, CLUTTER_GRAVITY_CENTER);
 }
 
 void image_scale(image_t *image, double sx, double sy) {
-    image->layer->scale_x = sx;
-    image->layer->scale_y = sy;
+    clutter_actor_set_scale(image->actor, sx, sy);
 }
 
 void image_resize(image_t *image, int width, int height) {
-    image_scale(image, width / (float) image->layer->width,
-                height / (float) image->layer->height);
+    image_scale(image, width / (float) clutter_actor_get_width(image->actor),
+                height / (float) clutter_actor_get_height(image->actor));
 }
 
 bool image_new(const char *filename, image_t *image) {
     GError **error = NULL;
     image->pbuf = gdk_pixbuf_new_from_file(filename, error);
     
-    image->layer = create_layer(gdk_pixbuf_get_width(image->pbuf),
+    image->actor = create_actor(gdk_pixbuf_get_width(image->pbuf),
                                 gdk_pixbuf_get_height(image->pbuf));
 
-    add_layer(image->layer);
+    add_actor(image->actor);
 
     return true;
 }
