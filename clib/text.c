@@ -89,6 +89,8 @@ void text_draw(text_t *text_obj) {
     //text_obj->layer = new_layer;
     //text_obj->layer->x = text_obj->x - text_obj->border_width;
     //text_obj->layer->y = text_obj->y - text_obj->border_width;
+    //clutter_actor_set_size(text_obj->actor, width + 2 * text_obj->border_width,
+                           //height + 2 * text_obj->border_width);
     clutter_actor_set_position(text_obj->actor,
                                text_obj->x - text_obj->border_width,
                                text_obj->y - text_obj->border_width);

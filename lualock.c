@@ -25,6 +25,8 @@ lualock_t lualock;
 time_t test_timer;
 int frames_drawn;
 
+gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data);
+
 void init_display() {
     lualock.scr = gdk_screen_get_default();
 }
@@ -38,6 +40,7 @@ void init_window() {
     GtkWidget *stage_widget = gtk_clutter_embed_new();
     lualock.stage = gtk_clutter_embed_get_stage(GTK_CLUTTER_EMBED(stage_widget));
     gtk_container_add(GTK_CONTAINER(lualock.win), stage_widget);
+    g_signal_connect(lualock.win, "key-press-event", G_CALLBACK(on_key_press), NULL);
     gtk_widget_show_all(lualock.win);
 }
 
@@ -80,12 +83,13 @@ void reset_password() {
 }
 
 
-gboolean on_key_press(GdkEvent *ev) {
+gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
     guint keyval = ((GdkEventKey *)ev)->keyval;
     switch(keyval) {
         case GDK_KEY_Return:
         case GDK_KEY_KP_Enter:
-            return FALSE;
+            if (authenticate_user())
+                gtk_main_quit();
         case GDK_KEY_BackSpace:
             lualock.pw_length--;
             lualock.password[lualock.pw_length] = '\0';
@@ -116,20 +120,20 @@ gboolean authenticate_user() {
     return (pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
 }
 
-void event_handler(GdkEvent *ev) {
-    switch (ev->type) {
-        case GDK_KEY_PRESS:
-        // if enter was pressed, check password
-            if (!on_key_press(ev))
-                if (authenticate_user())
-                    gtk_main_quit();
-            break;
-        case GDK_EXPOSE:
-            break;
-        default:
-            break;
-    }
-}
+//void event_handler(GdkEvent *ev) {
+    //switch (ev->type) {
+        //case GDK_KEY_PRESS:
+        //// if enter was pressed, check password
+            //if (!on_key_press(ev))
+                //if (authenticate_user())
+                    //gtk_main_quit();
+            //break;
+        //case GDK_EXPOSE:
+            //break;
+        //default:
+            //break;
+    //}
+//}
 
 static int pam_conv_cb(int msgs, const struct pam_message **msg,
                        struct pam_response **resp, void *data) {
@@ -194,7 +198,7 @@ int main(int argc, char **argv) {
     if (ret != PAM_SUCCESS)
         exit(EXIT_FAILURE);
         
-    //gdk_keyboard_grab(win, TRUE, GDK_CURRENT_TIME);
+    gdk_keyboard_grab(win, TRUE, GDK_CURRENT_TIME);
     gdk_pointer_grab(win, TRUE, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK
                      | GDK_POINTER_MOTION_MASK, NULL, NULL, GDK_CURRENT_TIME);
     
