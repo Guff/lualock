@@ -3,12 +3,12 @@ INSTALLDIR := $(DESTDIR)$(PREFIX)
 
 CC	:= gcc
 
-PKGS := cairo-xlib gdk-2.0 gdk-pixbuf-2.0 lua libxdg-basedir pangocairo librsvg-2.0
+PKGS := cairo-xlib gdk-2.0 gdk-pixbuf-2.0 lua libxdg-basedir pangocairo
 INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 
-CFLAGS	:= -g -Wall -Wextra -std=gnu99 -I. $(INCS) $(CFLAGS) -pthread
-LDFLAGS	:= $(LIBS) $(LDFLAGS) -pthread
+CFLAGS	:= -g -Wall -Wextra -std=gnu99 -I. $(INCS) $(CFLAGS)
+LDFLAGS	:= $(LIBS) $(LDFLAGS)
 
 SRCS := $(wildcard *.c clib/*.c)
 OBJS := $(foreach obj,$(SRCS:.c=.o),$(obj))

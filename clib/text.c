@@ -1,6 +1,7 @@
 #include <pango/pangocairo.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "misc.h"
 #include "clib/text.h"
@@ -33,7 +34,7 @@ static void get_extents_for_string(const char *text, const char *font,
 }
 
 text_t* text_new(text_t *text_obj, const char *text, int x, int y,
-                 const char *font, double r, double g, double b, double a,
+                 const char *font, const char *font_color,
                  const char *border_color, double border_width) {
     
     int width, height;
@@ -41,16 +42,18 @@ text_t* text_new(text_t *text_obj, const char *text, int x, int y,
     layer_t *layer = create_layer(width, height);
     PangoLayout *layout = NULL;
 
-    *text_obj = (text_t) { .text = text, .x = x, .y = y, .font = font, .r = r,
-                        .g = g, .b = b, .a = a, .layer = layer,
-                        .layout = layout, .border_width = border_width,
-                        .border_color = border_color };
+    *text_obj = (text_t) { .text = text, .x = x, .y = y, .font = font,
+                           .font_color = font_color, .layout = layout,
+                           .border_width = border_width,
+                           .border_color = border_color, .layer = layer };
     add_layer(text_obj->layer);
     return text_obj;    
 }
 
 void text_draw(text_t *text_obj) {
+    double r, g, b, a;
     double border_r, border_g, border_b, border_a;
+    parse_color(text_obj->font_color, &r, &g, &b, &a);
     parse_color(text_obj->border_color, &border_r, &border_g, &border_b, &border_a);
 
     // Double buffering
@@ -73,7 +76,7 @@ void text_draw(text_t *text_obj) {
     cairo_set_line_width(cr, text_obj->border_width);
     cairo_set_source_rgba(cr, border_r, border_g, border_b, border_a);
     cairo_stroke_preserve(cr);
-    cairo_set_source_rgba(cr, text_obj->r, text_obj->g, text_obj->b, text_obj->a);
+    cairo_set_source_rgba(cr, r, g, b, a);
     cairo_fill(cr);
     cairo_destroy(cr);
     
@@ -81,6 +84,7 @@ void text_draw(text_t *text_obj) {
     layer_t *new_layer = create_layer(width + 2 * text_obj->border_width,
                                       height + 2 * text_obj->border_width);
     cairo_surface_destroy(text_obj->layer->surface);
+    free(text_obj->layer);
     update_layer(text_obj->layer, new_layer);
     text_obj->layer = new_layer;
     text_obj->layer->x = text_obj->x - text_obj->border_width;
@@ -108,24 +112,12 @@ int lualock_lua_text_new(lua_State *L) {
     lua_getfield(L, 1, "border_color");
     lua_getfield(L, 1, "border_width");
     
-    const char *text = luaL_checkstring(L, 2);
-    double x = lua_tonumber(L, 3);
-    double y = lua_tonumber(L, 4);
-    const char *font = lua_tostring(L, 5);
-    const char *hex = lua_tostring(L, 6);
-    
-    if (!font)
-        font = "Sans Bold 12";
-    if (!hex)
-        hex = "#000000";
-    
-    double r, g, b, a;
-    parse_color(hex, &r, &g, &b, &a);
-    
     text_t *text_obj = lua_newuserdata(L, sizeof(text_t));
     luaL_getmetatable(L, "lualock.text");
     lua_setmetatable(L, -2);
-    text_new(text_obj, text, x, y, font, r, g, b, a, luaL_optstring(L, 7, "#000000"),
+    text_new(text_obj, luaL_optstring(L, 2, ""), lua_tonumber(L, 3),
+             lua_tonumber(L,4), luaL_optstring(L, 5, "Sans Bold 12"),
+             luaL_optstring(L, 6, "#000000"), luaL_optstring(L, 7, "#000000"),
              lua_tonumber(L, 8));
     return 1;
 }
@@ -156,8 +148,7 @@ int lualock_lua_text_set(lua_State *L) {
     if (lua_isstring(L, 6))
         text_obj->font = lua_tostring(L, 6);
     if (lua_tostring(L, 7))
-        parse_color(lua_tostring(L, 7), &text_obj->r, &text_obj->g, &text_obj->b,
-                    &text_obj->a);
+        text_obj->font_color = lua_tostring(L, 7);
     if (lua_isstring(L, 8))
         text_obj->border_color = lua_tostring(L, 8);
     if (lua_isnumber(L, 9))

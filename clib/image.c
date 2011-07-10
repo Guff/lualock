@@ -1,4 +1,3 @@
-#include <librsvg/rsvg.h>
 #include <gdk/gdk.h>
 #include <math.h>
 
@@ -54,10 +53,6 @@ void image_resize(image_t *image, int width, int height) {
 bool image_new(const char *filename, image_t *image) {
     GError **error = NULL;
     image->pbuf = gdk_pixbuf_new_from_file(filename, error);
-    // if loading the image didn't work, maybe it's an svg
-    if (!(image->pbuf)) {
-        image->pbuf = rsvg_pixbuf_from_file(filename, error);
-    }
     
     image->layer = create_layer(gdk_pixbuf_get_width(image->pbuf),
                                 gdk_pixbuf_get_height(image->pbuf));

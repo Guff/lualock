@@ -1,6 +1,5 @@
 #include <string.h>
 #include <cairo-xlib.h>
-#include <librsvg/rsvg.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 
@@ -30,10 +29,6 @@ static int lualock_lua_background_set(lua_State *L) {
     }
     GError **error = NULL;
     GdkPixbuf *pbuf = gdk_pixbuf_new_from_file(filename, error);
-    // if loading the image failed, try loading as an svg
-    if (!pbuf)
-        pbuf = rsvg_pixbuf_from_file(filename, error);
-    
     
     const char *style = lua_tostring(L, 2);
     double width, height, win_width, win_height;
