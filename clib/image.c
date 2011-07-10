@@ -54,6 +54,7 @@ static int lualock_lua_image_new(lua_State *L) {
     const char *filename = luaL_checkstring(L, 1);
     bool loaded = image_new(filename, image);
     
+    // keep the userdata referenced
     lua_pushvalue(L, -1);
     luaL_ref(L, LUA_REGISTRYINDEX);
     
