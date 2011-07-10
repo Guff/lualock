@@ -17,7 +17,7 @@ void draw_password_field(cairo_t *cr) {
 }
 
 void draw_password_mask() {
-    cairo_t *cr = cairo_create(lualock.pw_surface);
+    cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(lualock.pw_actor));
     cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
     cairo_paint(cr);
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
@@ -38,41 +38,6 @@ void draw_password_mask() {
     pango_cairo_update_layout(cr, layout);
     pango_cairo_layout_path(cr, layout);
     cairo_fill(cr);
-    cairo_destroy(cr);
     g_object_unref(layout);
-}
-
-gboolean draw(void *data) {
-    if (!lualock.need_updates)
-        return TRUE;
-    cairo_t *cr = cairo_create(lualock.surface_buf);
-    cairo_set_source_rgba(cr, 0, 0, 0, 0);
-    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-    cairo_paint(cr);
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-    int i = 0;
-    while (i < lualock.layers_alloc && lualock.layers[i] != NULL) {
-        cairo_save(cr);
-        cairo_rotate(cr, lualock.layers[i]->angle);
-        cairo_translate(cr, lualock.layers[i]->x, lualock.layers[i]->y);
-        cairo_scale(cr, lualock.layers[i]->scale_x, lualock.layers[i]->scale_y);
-        cairo_set_source_surface(cr, lualock.layers[i]->surface, 0, 0);
-        cairo_paint(cr);
-        cairo_restore(cr);
-        i++;
-    }
-    draw_password_mask();
-    cairo_translate(cr, lualock.style.x, lualock.style.y);
-    cairo_set_source_surface(cr, lualock.pw_surface, 0, 0);
-    cairo_paint(cr);
     cairo_destroy(cr);
-    
-    cairo_t *crw = gdk_cairo_create(lualock.win);
-    cairo_set_source_surface(crw, lualock.surface_buf, 0, 0);
-    cairo_set_operator(crw, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(crw);
-    cairo_destroy(crw);
-    
-    lualock.need_updates = FALSE;
-    return TRUE;
 }

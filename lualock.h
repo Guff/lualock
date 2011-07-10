@@ -2,10 +2,10 @@
 #define LUALOCK_H
 
 #include <lua.h>
-#include <gdk/gdk.h>
+#include <gtk/gtk.h>
 #include <X11/Xlib.h>
 #include <X11/Xmd.h>
-#include <pango/pangocairo.h>
+#include <clutter/clutter.h>
 
 typedef struct {
     const char *font;
@@ -26,22 +26,13 @@ typedef struct {
 } style_t;
 
 typedef struct {
-	cairo_surface_t *surface;
-	int x;
-	int y;
-	int width;
-	int height;
-    double scale_x;
-    double scale_y;
-	double angle;
-} layer_t;
-
-typedef struct {
     lua_State *L;
     
     GdkScreen *scr;
-    GdkWindow *win;
+    GtkWidget *win;
     
+    ClutterActor *stage;
+
     char *password;
     int pw_length;
     int pw_alloc;
@@ -50,20 +41,14 @@ typedef struct {
     
     struct pam_handle *pam_handle;
     
-    cairo_surface_t *surface_buf;
-    cairo_surface_t *surface;
+    ClutterActor *pw_actor;
     
-    cairo_surface_t *pw_surface;
-    
-    layer_t **layers;
-    int layers_alloc;
-    gboolean need_updates;
+    ClutterActor **actors;
+    int actors_alloc;
     
     BOOL dpms_enabled, using_dpms;
     CARD16 dpms_standby, dpms_suspend, dpms_off;
     CARD16 dpms_cfg_standby, dpms_cfg_suspend, dpms_cfg_off;
-    
-    GMainLoop *loop;
     
     style_t style;
 } lualock_t;

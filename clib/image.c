@@ -31,13 +31,10 @@ void image_render(image_t *image, int x, int y) {
     cairo_surface_destroy(surface);
     image->layer->x = x;
     image->layer->y = y;
-    
-    lualock.need_updates = TRUE;
 }
 
 void image_rotate(image_t *image, double angle) {
     image->layer->angle += 2 * M_PI * angle / 360;
-    lualock.need_updates = TRUE;
 }
 
 void image_scale(image_t *image, double sx, double sy) {

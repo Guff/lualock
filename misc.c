@@ -11,53 +11,31 @@ cairo_surface_t* create_surface(int width, int height) {
     return surface;
 }
 
-layer_t* create_layer(int width, int height) {
-	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-		width,
-		height);
-    
-    layer_t *layer = malloc(sizeof(layer_t));
-    layer->surface = surface;
-    layer->width = width;
-    layer->height = height;
-    layer->scale_x = 1;
-    layer->scale_y = 1;
-    layer->x = 0;
-    layer->y = 0;
-    layer->angle = 0;
-    return layer;
+ClutterActor* create_actor(int width, int height) {
+	ClutterActor *actor = clutter_cairo_texture_new(
+        width ? : gdk_screen_get_width(lualock.scr),
+        height ? : gdk_screen_get_height(lualock.scr));
+    return actor;
 }
 
-void add_layer(layer_t *layer) {
+void add_actor(ClutterActor *actor) {
     // find the index of the layer at the end of the array
     int i = 0;
-    for (; i < lualock.layers_alloc && lualock.layers[i] != NULL; i++);
+    for (; i < lualock.actors_alloc && lualock.actors[i] != NULL; i++);
     
-    if (i >= lualock.layers_alloc) {
-        lualock.layers_alloc += 20;
-        lualock.layers = realloc(lualock.layers, lualock.layers_alloc);
+    if (i >= lualock.actors_alloc) {
+        lualock.actors_alloc += 20;
+        lualock.actors = realloc(lualock.actors, lualock.actors_alloc);
     }
     
-    lualock.layers[i] = layer;
-    lualock.layers[i + 1] = NULL;
+    lualock.actors[i] = actor;
+    lualock.actors[i + 1] = NULL;
 }
 
-void update_layer(layer_t *layer, layer_t *new) {
-    for (int i = 0; i < lualock.layers_alloc && lualock.layers[i] != NULL; i++) {
-        if (lualock.layers[i] == layer)
-            lualock.layers[i] = new;
-    }
-}
-
-void remove_layer(layer_t *layer) {
-    int i = 0;
-    while (lualock.layers[i] != layer)
-        i++;
-    
-    int j = 0;
-    while (lualock.layers[i + j] != NULL) {
-        lualock.layers[i + j] = lualock.layers[i + j + 1];
-        j++;
+void update_layer(ClutterActor *actor, ClutterActor *new) {
+    for (int i = 0; i < lualock.actors_alloc && lualock.actors[i] != NULL; i++) {
+        if (lualock.actors[i] == actor)
+            lualock.actors[i] = new;
     }
 }
 

@@ -3,10 +3,10 @@
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdbool.h>
+#include <gtk/gtk.h>
+#include <clutter-gtk/clutter-gtk.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/dpms.h>
-#include <pango/pangocairo.h>
 #include <gdk/gdkkeysyms.h>
 #include <security/pam_appl.h>
 
@@ -30,29 +30,21 @@ void init_display() {
 }
 
 void init_window() {
-    GdkWindowAttr attrs;
-    attrs.override_redirect = TRUE;
-    attrs.width = gdk_screen_get_width(lualock.scr);
-    attrs.height = gdk_screen_get_height(lualock.scr);
-    attrs.window_type = GDK_WINDOW_TOPLEVEL;
-    attrs.wclass = GDK_INPUT_OUTPUT;
-    attrs.x = 0;
-    attrs.y = 0;
-    unsigned long attr_mask = GDK_WA_NOREDIR | GDK_WA_X | GDK_WA_Y;
-    
-    lualock.win = gdk_window_new(gdk_get_default_root_window(), &attrs, attr_mask);
-                                 
-    gdk_window_show(lualock.win);
+    lualock.win = gtk_window_new(GTK_WINDOW_POPUP);
+    gtk_window_fullscreen(GTK_WINDOW(lualock.win));
+    GtkWidget *stage_widget = gtk_clutter_embed_new();
+    lualock.stage = gtk_clutter_embed_get_stage(GTK_CLUTTER_EMBED(stage_widget));
+    gtk_container_add(GTK_CONTAINER(lualock.win), stage_widget);
+    gtk_widget_show_all(lualock.win);
 }
 
 void init_cairo() {
-    lualock.layers_alloc = 20;
-    lualock.layers = malloc(lualock.layers_alloc * sizeof(layer_t));
-    lualock.layers[0] = NULL;
+    lualock.actors_alloc = 20;
+    lualock.actors = malloc(lualock.actors_alloc * sizeof(ClutterActor *));
+    lualock.actors[0] = NULL;
     
-    lualock.surface_buf = create_surface(0, 0);
-    
-    lualock.pw_surface = create_surface(0, 0);
+    lualock.pw_actor = clutter_cairo_texture_new(gdk_screen_get_width(lualock.scr),
+                                                 gdk_screen_get_height(lualock.scr));
 }
 
 void init_style() {
@@ -110,7 +102,6 @@ gboolean on_key_press(GdkEvent *ev) {
             }
     }
     
-    lualock.need_updates = TRUE;
     draw_password_mask();
     
     return TRUE;
@@ -127,10 +118,9 @@ void event_handler(GdkEvent *ev) {
         // if enter was pressed, check password
             if (!on_key_press(ev))
                 if (authenticate_user())
-                    g_main_loop_quit(lualock.loop);
+                    gtk_main_quit();
             break;
         case GDK_EXPOSE:
-            lualock.need_updates = TRUE;
             break;
         default:
             break;
@@ -162,13 +152,12 @@ int main(int argc, char **argv) {
     Display *dpy;
     GdkWindow *win;
     
-    gdk_init(&argc, &argv);
+    gtk_clutter_init(&argc, &argv);
     
     lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
     lualock.pw_length = 0;
     lualock.pw_alloc = PW_BUFF_SIZE;
     
-    lualock.need_updates = TRUE;
     lualock.using_dpms = FALSE;
     
     init_display();
@@ -176,8 +165,8 @@ int main(int argc, char **argv) {
     init_style();
     init_cairo();
     
-    dpy = XOpenDisplay(":0.0");
-    win = lualock.win;
+    dpy = XOpenDisplay(NULL);
+    win = gtk_widget_get_window(lualock.win);
 
     init_lua();
 
@@ -192,7 +181,7 @@ int main(int argc, char **argv) {
     
     gdk_window_show(win);
     
-    gdk_event_handler_set((GdkEventFunc)event_handler, NULL, NULL);
+    //gdk_event_handler_set((GdkEventFunc)event_handler, NULL, NULL);
 
     
     struct pam_conv conv = {pam_conv_cb, NULL};
@@ -206,8 +195,7 @@ int main(int argc, char **argv) {
                      | GDK_POINTER_MOTION_MASK, NULL, NULL, GDK_CURRENT_TIME);
     
     g_timeout_add(1000.0 / 10, draw, NULL);
-    lualock.loop = g_main_new(TRUE);
-    g_main_run(lualock.loop);
+    gtk_main();
     
     DPMSSetTimeouts(dpy, lualock.dpms_standby, lualock.dpms_suspend, lualock.dpms_off);
     //XCloseDisplay(dpy);
