@@ -33,9 +33,9 @@ static void get_extents_for_string(const char *text, const char *font,
     *height = log_rect.height;
 }
 
-text_t* text_new(text_t *text_obj, const char *text, int x, int y,
-                 const char *font, const char *font_color,
-                 const char *border_color, double border_width) {
+text_t* text_new(text_t *text_obj, char *text, int x, int y,
+                 char *font, char *font_color,
+                 char *border_color, double border_width) {
     
     int width, height;
     get_extents_for_string(text, font, &width, &height);
@@ -111,16 +111,22 @@ int lualock_lua_text_new(lua_State *L) {
     lua_getfield(L, 1, "color");
     lua_getfield(L, 1, "border_color");
     lua_getfield(L, 1, "border_width");
+    lua_settop(L, 8);
     
     text_t *text_obj = lua_newuserdata(L, sizeof(text_t));
+    // keep the userdata referenced
     lua_pushvalue(L, -1);
     luaL_ref(L, LUA_REGISTRYINDEX);
     luaL_getmetatable(L, "lualock.text");
     lua_setmetatable(L, -2);
-    text_new(text_obj, luaL_optstring(L, 2, ""), lua_tonumber(L, 3),
-             lua_tonumber(L,4), luaL_optstring(L, 5, "Sans Bold 12"),
-             luaL_optstring(L, 6, "#000000"), luaL_optstring(L, 7, "#000000"),
-             lua_tonumber(L, 8));
+    text_new(text_obj,
+             strdup(luaL_optstring(L, 2, "")), // text
+             lua_tonumber(L, 3), // x
+             lua_tonumber(L, 4), // y
+             strdup(luaL_optstring(L, 5, "Sans Bold 12")), // font
+             strdup(luaL_optstring(L, 6, "#000000")), // font_color
+             strdup(luaL_optstring(L, 7, "#000000")), // border_color
+             lua_tonumber(L, 8)); //border_width
 
     return 1;
 }
@@ -142,18 +148,27 @@ int lualock_lua_text_set(lua_State *L) {
     lua_getfield(L, 2, "color");
     lua_getfield(L, 2, "border_color");
     lua_getfield(L, 2, "border_width");
-    if (lua_isstring(L, 3))
-        text_obj->text = lua_tostring(L, 3);
+    lua_settop(L, 9);
+    if (lua_isstring(L, 3)) {
+        free(text_obj->text);
+        text_obj->text = strdup(lua_tostring(L, 3));
+    }
     if (lua_isnumber(L, 4))
         text_obj->x = lua_tonumber(L, 4);
     if (lua_isnumber(L, 5))
         text_obj->y = lua_tonumber(L, 5);
-    if (lua_isstring(L, 6))
-        text_obj->font = lua_tostring(L, 6);
-    if (lua_tostring(L, 7))
-        text_obj->font_color = lua_tostring(L, 7);
-    if (lua_isstring(L, 8))
-        text_obj->border_color = lua_tostring(L, 8);
+    if (lua_isstring(L, 6)) {
+        free(text_obj->font);
+        text_obj->font = strdup(lua_tostring(L, 6));
+    }
+    if (lua_tostring(L, 7)) {
+        free(text_obj->font_color);
+        text_obj->font_color = strdup(lua_tostring(L, 7));
+    }
+    if (lua_isstring(L, 8)) {
+        free(text_obj->border_color);
+        text_obj->border_color = strdup(lua_tostring(L, 8));
+    }
     if (lua_isnumber(L, 9))
         text_obj->border_width = lua_tonumber(L, 9);
     return 0;

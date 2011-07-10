@@ -6,24 +6,24 @@
 #include <lauxlib.h>
 
 typedef struct {
-    const char *text;
+    char *text;
     
     double x;
     double y;
     
-    const char *font;
-    const char *font_color;
+    char *font;
+    char *font_color;
     
     double border_width;
-    const char *border_color;
+    char *border_color;
     
     layer_t *layer;
     PangoLayout *layout;
 } text_t;
 
-text_t* text_new(text_t *text_obj, const char *text, int x, int y,
-                 const char *font, const char *font_color,
-                 const char *border_color, double border_width);
+text_t* text_new(text_t *text_obj, char *text, int x, int y,
+                 char *font, char *font_color,
+                 char *border_color, double border_width);
 
 void lualock_lua_text_init(lua_State *L);
 

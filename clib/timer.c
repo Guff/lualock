@@ -35,20 +35,22 @@ static void timer_run_lua_function(void *data) {
 }
 
 static int lualock_lua_timer_new(lua_State *L) {
-    l_timer_t *timer = lua_newuserdata(L, sizeof(l_timer_t));
-    
     int interval = luaL_checknumber(L, 2) * 1000;
     int run_times = lua_tonumber(L, 3);
-    lua_pushvalue(L, 1);
+    lua_settop(L, 3);
     
+    l_timer_t *timer = lua_newuserdata(L, sizeof(l_timer_t));
     timer->L = L;
+    lua_pushvalue(L, 1);
     timer->r = luaL_ref(L, LUA_REGISTRYINDEX);
     luaL_getmetatable(L, "lualock.timer");
     timer_new(timer, interval, run_times, timer_run_lua_function);
     lua_setmetatable(L, -2);
-
-    lua_pushvalue(L, 1);
+    
+    // keep the userdata referenced
+    lua_pushvalue(L, -1);
     luaL_ref(L, LUA_REGISTRYINDEX);
+    
     return 1;
 }
 

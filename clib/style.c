@@ -36,6 +36,7 @@ int lualock_lua_style_set(lua_State *L) {
 	lua_getfield(L, 1, "off_y");
 	lua_getfield(L, 1, "width");
 	lua_getfield(L, 1, "height");
+	lua_settop(L, 8);
 	style_set(lua_tostring(L, 2), lua_tonumber(L, 3), lua_tonumber(L, 4),
 			  lua_tonumber(L, 5), lua_tonumber(L, 6), lua_tonumber(L, 7),
 			  lua_tonumber(L, 8), r, g, b, a);
