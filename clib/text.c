@@ -23,8 +23,10 @@ static void get_extents_for_string(const char *text, const char *font,
     
     PangoRectangle log_rect;
     pango_layout_get_pixel_extents(layout, NULL, &log_rect);
+    
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
+    g_object_unref(layout);
     
     *width = log_rect.width;
     *height = log_rect.height;
@@ -78,6 +80,7 @@ void text_draw(text_t *text_obj) {
     // Update the layer
     layer_t *new_layer = create_layer(width + 2 * text_obj->border_width,
                                       height + 2 * text_obj->border_width);
+    cairo_surface_destroy(text_obj->layer->surface);
     update_layer(text_obj->layer, new_layer);
     text_obj->layer = new_layer;
     text_obj->layer->x = text_obj->x - text_obj->border_width;
@@ -144,15 +147,21 @@ int lualock_lua_text_set(lua_State *L) {
     lua_getfield(L, 2, "color");
     lua_getfield(L, 2, "border_color");
     lua_getfield(L, 2, "border_width");
-    text_obj->text = strdup(luaL_optstring(L, 3, text_obj->text));
-    text_obj->x = luaL_optnumber(L, 4, text_obj->x);
-    text_obj->y = luaL_optnumber(L, 5, text_obj->y);
-    text_obj->font = strdup(luaL_optstring(L, 6, text_obj->font));
+    if (lua_isstring(L, 3))
+        text_obj->text = lua_tostring(L, 3);
+    if (lua_isnumber(L, 4))
+        text_obj->x = lua_tonumber(L, 4);
+    if (lua_isnumber(L, 5))
+        text_obj->y = lua_tonumber(L, 5);
+    if (lua_isstring(L, 6))
+        text_obj->font = lua_tostring(L, 6);
     if (lua_tostring(L, 7))
         parse_color(lua_tostring(L, 7), &text_obj->r, &text_obj->g, &text_obj->b,
                     &text_obj->a);
-    text_obj->border_color = strdup(luaL_optstring(L, 8, text_obj->border_color));
-    text_obj->border_width = luaL_optnumber(L, 9, text_obj->border_width);
+    if (lua_isstring(L, 8))
+        text_obj->border_color = lua_tostring(L, 8);
+    if (lua_isnumber(L, 9))
+        text_obj->border_width = lua_tonumber(L, 9);
     return 0;
 }
 

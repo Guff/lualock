@@ -1,5 +1,5 @@
-#include <pthread.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "lualock.h"
 #include "misc.h"
@@ -32,7 +32,9 @@ void draw_password_mask() {
     cairo_set_source_rgba(cr, lualock.style.r, lualock.style.g,
                           lualock.style.b, lualock.style.a);
     cairo_move_to(cr, lualock.style.off_x, lualock.style.off_y);
-    pango_layout_set_text(layout, get_password_mask(), -1);
+    char *password_mask = get_password_mask();
+    pango_layout_set_text(layout, password_mask, -1);
+    free(password_mask);
     pango_cairo_update_layout(cr, layout);
     pango_cairo_layout_path(cr, layout);
     cairo_fill(cr);
@@ -73,17 +75,4 @@ gboolean draw(void *data) {
     
     lualock.need_updates = FALSE;
     return TRUE;
-}
-
-void* draw_frames(void *data) {
-	while(1) {
-		draw(NULL);
-		usleep(1000000 / 10);
-	}
-}
-
-void start_drawing() {
-    //draw_password_mask();
-	pthread_t draw_thread;
-	pthread_create(&draw_thread, NULL, draw_frames, NULL);
 }

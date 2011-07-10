@@ -8,7 +8,7 @@
 #include <pango/pangocairo.h>
 
 typedef struct {
-    char *font;
+    const char *font;
     
     int x;
     int y;

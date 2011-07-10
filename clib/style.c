@@ -7,7 +7,7 @@
 void style_set(const char *font, int x, int y, int off_x, int off_y, int width,
 			   int height, double r, double g, double b, double a) {
 	if (font)
-		lualock.style.font = strdup(font);
+		lualock.style.font = font;
 	lualock.style.x = x;
 	lualock.style.y = y;
 	lualock.style.off_x = off_x;
