@@ -61,17 +61,16 @@ void remove_layer(layer_t *layer) {
     }
 }
 
-void parse_color(const char *hex, double *r, double *g, double *b, double *a) {
-    if (!hex) {
+void parse_color(const char *color, double *r, double *g, double *b, double *a) {
+    if (!color) {
         *r = 0, *g = 0, *b = 0, *a = 1;
         return;
     }
-    unsigned long packed_rgb;
-    // hex + 1 skips over the pound sign, which we don't need
-    sscanf(hex + 1, "%lx", &packed_rgb);
-    *r = (packed_rgb >> 16) / 256.0;
-    *g = (packed_rgb >> 8 & 0xff) / 256.0;
-    *b = (packed_rgb & 0xff) / 256.0;
+    GdkColor color_gdk;
+    gdk_color_parse(color, &color_gdk);
+    *r = color_gdk.red / (float) (1 << 16);
+    *g = color_gdk.green / (float) (1 << 16);
+    *b = color_gdk.blue / (float) (1 << 16);
     *a = 1;
 }
 
