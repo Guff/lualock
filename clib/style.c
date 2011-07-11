@@ -20,6 +20,7 @@ void style_set(const char *font, int x, int y, int off_x, int off_y, int width,
 	lualock.style.a = a;
 	
 	clutter_actor_set_size(lualock.pw_actor, lualock.style.width, lualock.style.height);
+	clutter_cairo_texture_set_surface_size(lualock.pw_actor, lualock.style.width, lualock.style.height);
 	clutter_actor_set_position(lualock.pw_actor, lualock.style.x, lualock.style.y);
 }
 

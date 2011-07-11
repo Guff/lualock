@@ -39,7 +39,8 @@ text_t* text_new(text_t *text_obj, char *text, int x, int y,
     
     int width, height;
     get_extents_for_string(text, font, &width, &height);
-    ClutterActor *actor = create_actor(width, height);
+    ClutterActor *actor = create_actor(width + 2 * border_width,
+                                       height + 2 * border_width);
     PangoLayout *layout = NULL;
 
     *text_obj = (text_t) { .text = text, .x = x, .y = y, .font = font,
@@ -80,17 +81,11 @@ void text_draw(text_t *text_obj) {
     cairo_fill(cr);
     cairo_destroy(cr);
     
-    // Update the layer
-    //layer_t *new_layer = create_layer(width + 2 * text_obj->border_width,
-                                      //height + 2 * text_obj->border_width);
-    //cairo_surface_destroy(text_obj->layer->surface);
-    //free(text_obj->layer);
-    //update_layer(text_obj->layer, new_layer);
-    //text_obj->layer = new_layer;
-    //text_obj->layer->x = text_obj->x - text_obj->border_width;
-    //text_obj->layer->y = text_obj->y - text_obj->border_width;
-    //clutter_actor_set_size(text_obj->actor, width + 2 * text_obj->border_width,
-                           //height + 2 * text_obj->border_width);
+    clutter_actor_set_size(text_obj->actor, width + 2 * text_obj->border_width,
+                           height + 2 * text_obj->border_width);
+    clutter_cairo_texture_set_surface_size(CLUTTER_CAIRO_TEXTURE(text_obj->actor),
+                                           width + 2 * text_obj->border_width,
+                                           height + 2 * text_obj->border_width);
     clutter_actor_set_position(text_obj->actor,
                                text_obj->x - text_obj->border_width,
                                text_obj->y - text_obj->border_width);

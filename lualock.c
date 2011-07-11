@@ -82,6 +82,9 @@ void reset_password() {
     lualock.pw_length = 0;
 }
 
+gboolean authenticate_user() {
+    return (pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
+}
 
 gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
     guint keyval = ((GdkEventKey *)ev)->keyval;
@@ -113,11 +116,6 @@ gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
     draw_password_mask();
     
     return TRUE;
-}
-
-
-gboolean authenticate_user() {
-    return (pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
 }
 
 //void event_handler(GdkEvent *ev) {
@@ -177,7 +175,10 @@ int main(int argc, char **argv) {
     win = gtk_widget_get_window(lualock.win);
 
     init_lua();
-
+    
+    draw_password_mask();
+    clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), lualock.pw_actor);
+    
     CARD16 dummy;
     DPMSInfo(dpy, &dummy, &lualock.dpms_enabled);
     if (DPMSCapable(dpy) && lualock.using_dpms) {
