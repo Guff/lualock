@@ -32,7 +32,7 @@ void draw_password_mask() {
     cairo_set_source_rgba(cr, lualock.style.r, lualock.style.g,
                           lualock.style.b, lualock.style.a);
     cairo_move_to(cr, lualock.style.off_x, lualock.style.off_y);
-    char *password_mask = get_password_mask();
+    gchar *password_mask = get_password_mask();
     pango_layout_set_text(layout, password_mask, -1);
     free(password_mask);
     pango_cairo_update_layout(cr, layout);

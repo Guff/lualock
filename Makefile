@@ -3,7 +3,7 @@ INSTALLDIR := $(DESTDIR)$(PREFIX)
 
 CC	:= gcc
 
-PKGS := clutter-gtk-1.0 lua libxdg-basedir
+PKGS := clutter-gtk-1.0 lua
 INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 

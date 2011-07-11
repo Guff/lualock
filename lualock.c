@@ -69,12 +69,9 @@ void init_style() {
 }
 
 void init_lua() {
-    xdgHandle xdg;
-    xdgInitHandle(&xdg);
-
     lualock.L = luaL_newstate();
     
-    lualock_lua_loadrc(lualock.L, &xdg);    
+    lualock_lua_loadrc(lualock.L);
 }
 
 void reset_password() {

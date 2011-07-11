@@ -4,10 +4,8 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-#include <basedir.h>
-#include <basedir_fs.h>
-#include <stdbool.h>
+#include <glib.h>
 
-bool lualock_lua_loadrc(lua_State *L, xdgHandle *xdg);
+gboolean lualock_lua_loadrc(lua_State *L);
 
 #endif

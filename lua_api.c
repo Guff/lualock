@@ -9,7 +9,7 @@
 #include "clib/style.h"
 #include "clib/dpms.h"
 
-bool lualock_lua_loadrc(lua_State *L, xdgHandle *xdg) {
+bool lualock_lua_loadrc(lua_State *L) {
     luaL_openlibs(lualock.L);
     
     lualock_lua_image_init(lualock.L);
@@ -24,7 +24,8 @@ bool lualock_lua_loadrc(lua_State *L, xdgHandle *xdg) {
     
     lualock_lua_dpms_init(lualock.L);
     
-    char *config = xdgConfigFind("lualock/rc.lua", xdg);
+    gchar *config = g_build_filename(g_get_user_config_dir(), "lualock", "rc.lua",
+                                    NULL);
     if (luaL_loadfile(L, config) || lua_pcall(L, 0, 0, 0))
         return false;
     return true;
