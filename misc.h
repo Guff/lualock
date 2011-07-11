@@ -15,4 +15,6 @@ void parse_color(const char *hex, double *r, double *g, double *b, double *a);
 
 char* get_password_mask();
 
+void get_abs_pos(double rel_x, double rel_y, double *x, double *y);
+
 #endif

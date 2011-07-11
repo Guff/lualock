@@ -22,7 +22,7 @@ typedef struct {
     PangoLayout *layout;
 } text_t;
 
-text_t* text_new(text_t *text_obj, char *text, int x, int y,
+text_t* text_new(text_t *text_obj, char *text, double x, double y,
                  char *font, char *font_color,
                  char *border_color, double border_width);
 

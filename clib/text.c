@@ -33,10 +33,11 @@ static void get_extents_for_string(const char *text, const char *font,
     *height = log_rect.height;
 }
 
-text_t* text_new(text_t *text_obj, char *text, int x, int y,
+text_t* text_new(text_t *text_obj, char *text, double rel_x, double rel_y,
                  char *font, char *font_color,
                  char *border_color, double border_width) {
-    
+    double x, y;
+    get_abs_pos(rel_x, rel_y, &x, &y);
     int width, height;
     get_extents_for_string(text, font, &width, &height);
     ClutterActor *actor = create_actor(width + 2 * border_width,
@@ -57,12 +58,22 @@ void text_draw(text_t *text_obj) {
     parse_color(text_obj->font_color, &r, &g, &b, &a);
     parse_color(text_obj->border_color, &border_r, &border_g, &border_b, &border_a);
 
-    // Double buffering
     int width, height;    
     get_extents_for_string(text_obj->text, text_obj->font, &width, &height);
-    cairo_surface_t *surface = create_surface(width + 2 * text_obj->border_width,
-                                              height + 2 * text_obj->border_width);
-    cairo_t *cr = cairo_create(surface);
+
+    clutter_actor_set_size(text_obj->actor, width + 2 * text_obj->border_width,
+                           height + 2 * text_obj->border_width);
+    clutter_cairo_texture_set_surface_size(CLUTTER_CAIRO_TEXTURE(text_obj->actor),
+                                           width + 2 * text_obj->border_width,
+                                           height + 2 * text_obj->border_width);
+    clutter_actor_set_position(text_obj->actor,
+                               text_obj->x - text_obj->border_width,
+                               text_obj->y - text_obj->border_width);
+    
+    cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(text_obj->actor));
+    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(cr);
+    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
     cairo_translate(cr, text_obj->border_width, text_obj->border_width);
     text_obj-> layout = pango_cairo_create_layout(cr);
     PangoFontDescription *desc = pango_font_description_from_string(text_obj->font);
@@ -80,23 +91,6 @@ void text_draw(text_t *text_obj) {
     cairo_set_source_rgba(cr, r, g, b, a);
     cairo_fill(cr);
     cairo_destroy(cr);
-    
-    clutter_actor_set_size(text_obj->actor, width + 2 * text_obj->border_width,
-                           height + 2 * text_obj->border_width);
-    clutter_cairo_texture_set_surface_size(CLUTTER_CAIRO_TEXTURE(text_obj->actor),
-                                           width + 2 * text_obj->border_width,
-                                           height + 2 * text_obj->border_width);
-    clutter_actor_set_position(text_obj->actor,
-                               text_obj->x - text_obj->border_width,
-                               text_obj->y - text_obj->border_width);
-    
-    // Now we draw to the actual surface
-    cairo_t *crl = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(text_obj->actor));
-    cairo_set_operator(crl, CAIRO_OPERATOR_SOURCE);
-    cairo_set_source_surface(crl, surface, 0, 0);
-    cairo_paint(crl);
-    cairo_destroy(crl);
-    cairo_surface_destroy(surface);
 }
 
 int lualock_lua_text_new(lua_State *L) {

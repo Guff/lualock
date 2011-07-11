@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include <X11/Xlib.h>
+#include <gdk/gdk.h>
 
 #include "misc.h"
 
@@ -60,4 +60,16 @@ char* get_password_mask() {
         password_mask[i] = '*';
     password_mask[strlen(lualock.password)] = '\0';
     return strdup(password_mask);
+}
+
+void get_abs_pos(double rel_x, double rel_y, double *x, double *y) {
+    if (rel_x >= 1.0)
+        *x = rel_x;
+    else
+        *x = rel_x * gdk_screen_get_width(lualock.scr);
+    
+    if (rel_y >= 1.0)
+        *y = rel_y;
+    else
+        *y = rel_y * gdk_screen_get_height(lualock.scr);
 }

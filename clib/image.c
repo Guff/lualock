@@ -12,7 +12,9 @@ int image_get_height(image_t *image) {
     return clutter_actor_get_height(image->actor);
 }
 
-void image_render(image_t *image, int x, int y) {
+void image_render(image_t *image, double rel_x, double rel_y) {
+    double x, y;
+    get_abs_pos(rel_x, rel_y, &x, &y);
     cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(image->actor));
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
     gdk_cairo_set_source_pixbuf(cr, image->pbuf, 0, 0);
@@ -68,7 +70,7 @@ static int lualock_lua_image_new(lua_State *L) {
 
 static int lualock_lua_image_render(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
-    image_render(image, lua_tointeger(L, 2), lua_tointeger(L, 3));
+    image_render(image, lua_tonumber(L, 2), lua_tonumber(L, 3));
     return 0;
 }
 
