@@ -21,9 +21,11 @@ void image_render(image_t *image, int x, int y) {
     clutter_actor_set_position(image->actor, x, y);
 }
 
-void image_rotate(image_t *image, double angle) {
+void image_rotate(image_t *image, double angle, gfloat x, gfloat y) {
     image->rotation += angle;
-    clutter_actor_set_z_rotation_from_gravity(image->actor, image->rotation, CLUTTER_GRAVITY_CENTER);
+    clutter_actor_set_anchor_point(image->actor, x, y);
+    clutter_actor_set_rotation(image->actor, CLUTTER_Z_AXIS, image->rotation,
+                               0, 0, 0);
 }
 
 void image_scale(image_t *image, double sx, double sy) {
@@ -72,7 +74,8 @@ static int lualock_lua_image_render(lua_State *L) {
 
 static int lualock_lua_image_rotate(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
-    image_rotate(image, lua_tonumber(L, 2));
+    lua_settop(L, 4);
+    image_rotate(image, luaL_checknumber(L, 2), lua_tonumber(L, 3), lua_tonumber(L, 4));
     return 0;
 }
 
@@ -108,8 +111,8 @@ void lualock_lua_image_init(lua_State *L) {
         { "rotate", lualock_lua_image_rotate },
         { "scale", lualock_lua_image_scale },
         { "resize", lualock_lua_image_resize },
-        { "get_width", lualock_lua_image_get_width },
-        { "get_height", lualock_lua_image_get_height },
+        { "width", lualock_lua_image_get_width },
+        { "height", lualock_lua_image_get_height },
         { NULL, NULL }
     };
     luaL_newmetatable(L, "lualock.image");
