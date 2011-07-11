@@ -22,7 +22,8 @@ void image_render(image_t *image, int x, int y) {
 }
 
 void image_rotate(image_t *image, double angle) {
-    clutter_actor_set_z_rotation_from_gravity(image->actor, 2 * M_PI * angle / 360, CLUTTER_GRAVITY_CENTER);
+    image->rotation += angle;
+    clutter_actor_set_z_rotation_from_gravity(image->actor, image->rotation, CLUTTER_GRAVITY_CENTER);
 }
 
 void image_scale(image_t *image, double sx, double sy) {
@@ -40,7 +41,9 @@ bool image_new(const char *filename, image_t *image) {
     
     image->actor = create_actor(gdk_pixbuf_get_width(image->pbuf),
                                 gdk_pixbuf_get_height(image->pbuf));
-
+    
+    image->rotation = 0;
+    
     add_actor(image->actor);
 
     return true;

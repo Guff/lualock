@@ -12,6 +12,8 @@
 typedef struct {
     GdkPixbuf *pbuf;
     ClutterActor *actor;
+    
+    gdouble rotation;
 } image_t;
 
 int image_get_width(image_t *image);
