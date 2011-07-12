@@ -43,9 +43,6 @@ typedef struct {
     
     ClutterActor *pw_actor;
     
-    ClutterActor **actors;
-    int actors_alloc;
-    
     BOOL dpms_enabled, using_dpms;
     CARD16 dpms_standby, dpms_suspend, dpms_off;
     CARD16 dpms_cfg_standby, dpms_cfg_suspend, dpms_cfg_off;

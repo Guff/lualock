@@ -36,7 +36,6 @@ void init_window() {
     gtk_window_set_default_size(GTK_WINDOW(lualock.win),
                                 gdk_screen_get_width(lualock.scr),
                                 gdk_screen_get_height(lualock.scr));
-    //gtk_window_fullscreen(GTK_WINDOW(lualock.win));
     GtkWidget *stage_widget = gtk_clutter_embed_new();
     lualock.stage = gtk_clutter_embed_get_stage(GTK_CLUTTER_EMBED(stage_widget));
     gtk_container_add(GTK_CONTAINER(lualock.win), stage_widget);
@@ -45,10 +44,6 @@ void init_window() {
 }
 
 void init_clutter() {
-    lualock.actors_alloc = 20;
-    lualock.actors = malloc(lualock.actors_alloc * sizeof(ClutterActor *));
-    lualock.actors[0] = NULL;
-    
     lualock.pw_actor = clutter_cairo_texture_new(lualock.style.width,
                                                  lualock.style.height);
     clutter_actor_set_position(lualock.pw_actor, lualock.style.x, lualock.style.y);

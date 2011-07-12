@@ -19,26 +19,7 @@ ClutterActor* create_actor(int width, int height) {
 }
 
 void add_actor(ClutterActor *actor) {
-    // find the index of the layer at the end of the array
-    int i = 0;
-    for (; i < lualock.actors_alloc && lualock.actors[i] != NULL; i++);
-    
-    if (i >= lualock.actors_alloc) {
-        lualock.actors_alloc += 20;
-        lualock.actors = realloc(lualock.actors, lualock.actors_alloc);
-    }
-    
-    lualock.actors[i] = actor;
-    lualock.actors[i + 1] = NULL;
-    
     clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), actor);
-}
-
-void update_layer(ClutterActor *actor, ClutterActor *new) {
-    for (int i = 0; i < lualock.actors_alloc && lualock.actors[i] != NULL; i++) {
-        if (lualock.actors[i] == actor)
-            lualock.actors[i] = new;
-    }
 }
 
 void parse_color(const char *color, double *r, double *g, double *b, double *a) {

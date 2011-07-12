@@ -103,7 +103,6 @@ int lualock_lua_text_new(lua_State *L) {
     lua_getfield(L, 1, "color");
     lua_getfield(L, 1, "border_color");
     lua_getfield(L, 1, "border_width");
-    lua_settop(L, 8);
     
     text_t *text_obj = lua_newuserdata(L, sizeof(text_t));
     // keep the userdata referenced
@@ -140,7 +139,7 @@ int lualock_lua_text_set(lua_State *L) {
     lua_getfield(L, 2, "color");
     lua_getfield(L, 2, "border_color");
     lua_getfield(L, 2, "border_width");
-    lua_settop(L, 9);
+
     if (lua_isstring(L, 3)) {
         free(text_obj->text);
         text_obj->text = strdup(lua_tostring(L, 3));

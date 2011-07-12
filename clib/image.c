@@ -75,8 +75,8 @@ static int lualock_lua_image_render(lua_State *L) {
 }
 
 static int lualock_lua_image_rotate(lua_State *L) {
-    image_t *image = luaL_checkudata(L, 1, "lualock.image");
     lua_settop(L, 4);
+    image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_rotate(image, luaL_checknumber(L, 2), lua_tonumber(L, 3), lua_tonumber(L, 4));
     return 0;
 }

@@ -9,7 +9,7 @@
 #include "clib/style.h"
 #include "clib/dpms.h"
 
-bool lualock_lua_loadrc(lua_State *L) {
+gboolean lualock_lua_loadrc(lua_State *L) {
     luaL_openlibs(lualock.L);
     
     lualock_lua_image_init(lualock.L);
