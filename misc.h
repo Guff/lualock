@@ -17,4 +17,7 @@ char* get_password_mask();
 
 void get_abs_pos(double rel_x, double rel_y, double *x, double *y);
 
+void add_timer(guint id);
+void clear_timers();
+
 #endif

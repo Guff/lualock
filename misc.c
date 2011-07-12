@@ -54,3 +54,21 @@ void get_abs_pos(double rel_x, double rel_y, double *x, double *y) {
     else
         *y = rel_y * gdk_screen_get_height(lualock.scr);
 }
+
+void add_timer(guint id) {
+    guint i;
+    for (i = 0; i < lualock.timers_alloc && lualock.timers[i]; i++);
+    if (i >= lualock.timers_alloc - 1) {
+        lualock.timers_alloc += 20;
+        lualock.timers = realloc(lualock.timers, lualock.timers_alloc);
+    }
+    lualock.timers[i] = id;
+    lualock.timers[i + 1] = 0;
+}
+
+void clear_timers() {
+    for (guint i = 0; i < lualock.timers_alloc && lualock.timers[i]; i++)
+        g_source_remove(lualock.timers[i]);
+    
+    lualock.timers[0] = 0;
+}

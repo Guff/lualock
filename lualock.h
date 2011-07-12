@@ -47,6 +47,11 @@ typedef struct {
     CARD16 dpms_standby, dpms_suspend, dpms_off;
     CARD16 dpms_cfg_standby, dpms_cfg_suspend, dpms_cfg_off;
     
+    int timeout;
+    
+    guint *timers;
+    guint timers_alloc;
+    
     style_t style;
 } lualock_t;
 

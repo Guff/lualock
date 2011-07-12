@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "lualock.h"
+#include "misc.h"
 #include "timer.h"
 
 void timer_new(l_timer_t *timer, unsigned int int_us, int cycles,
@@ -15,7 +16,7 @@ void timer_new(l_timer_t *timer, unsigned int int_us, int cycles,
     timer->int_us = int_us;
     timer->cb = cb;
     timer_run(timer);
-    timer->id = g_timeout_add(int_us, timer_run, timer);
+    add_timer(timer->id = g_timeout_add(int_us, timer_run, timer));
 }
     
 gboolean timer_run(void *data) {

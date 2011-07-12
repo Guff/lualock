@@ -7,6 +7,7 @@
 #include <clutter-gtk/clutter-gtk.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/dpms.h>
+#include <X11/extensions/scrnsaver.h>
 #include <gdk/gdkkeysyms.h>
 #include <security/pam_appl.h>
 
@@ -30,10 +31,13 @@ struct {
 static GOptionEntry options[] = {
     { "no-daemon", 'n', 0, G_OPTION_ARG_NONE, &prefs.no_daemon, "Don't run as a"
         " daemon; lock the screen immediately and exit when done", NULL },
-    { NULL }
+    // get gcc to shut up about missing initializers in this instance
+    { NULL, 0, 0, 0, NULL, NULL, NULL }
 };
 
 gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data);
+void show_lock();
+void hide_lock();
 
 void init_display() {
     lualock.scr = gdk_screen_get_default();
@@ -48,13 +52,18 @@ void init_window() {
     lualock.stage = gtk_clutter_embed_get_stage(GTK_CLUTTER_EMBED(stage_widget));
     gtk_container_add(GTK_CONTAINER(lualock.win), stage_widget);
     g_signal_connect(lualock.win, "key-press-event", G_CALLBACK(on_key_press), NULL);
-    gtk_widget_show_all(lualock.win);
 }
 
 void init_clutter() {
     lualock.pw_actor = clutter_cairo_texture_new(lualock.style.width,
                                                  lualock.style.height);
     clutter_actor_set_position(lualock.pw_actor, lualock.style.x, lualock.style.y);
+}
+
+void init_timers() {
+    lualock.timers_alloc = 20;
+    lualock.timers = malloc(lualock.timers_alloc * sizeof(guint));
+    lualock.timers[0] = 0;
 }
 
 void init_style() {
@@ -139,6 +148,30 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
     return 0;
 }
 
+void show_lock() {
+    gtk_widget_show_all(lualock.win);
+    GdkWindow *win = gtk_widget_get_window(lualock.win);
+    gdk_keyboard_grab(win, TRUE, GDK_CURRENT_TIME);
+    gdk_pointer_grab(win, TRUE, GDK_BUTTON_PRESS_MASK
+                     | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK, NULL,
+                     NULL, GDK_CURRENT_TIME);
+    gtk_main();
+    hide_lock();
+}
+
+void hide_lock() {
+    lua_close(lualock.L);
+    clear_timers();
+    gtk_widget_hide(lualock.win);
+    gdk_keyboard_ungrab(GDK_CURRENT_TIME);
+    gdk_pointer_ungrab(GDK_CURRENT_TIME);
+}
+
+int seconds_idle(Display *dpy, XScreenSaverInfo *xss_info) {
+    XScreenSaverQueryInfo(dpy, DefaultRootWindow(dpy), xss_info);
+    return xss_info->idle / 1000;
+}
+
 int main(int argc, char **argv) {   
     GError *error = NULL;
     GOptionContext *opt_context = g_option_context_new("- screenlocker");
@@ -153,7 +186,6 @@ int main(int argc, char **argv) {
     }
     
     Display *dpy;
-    GdkWindow *win;
     
     lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
     lualock.pw_length = 0;
@@ -165,11 +197,12 @@ int main(int argc, char **argv) {
     init_window();
     init_style();
     init_clutter();
+    init_timers();
     
-    dpy = XOpenDisplay(NULL);
-    win = gtk_widget_get_window(lualock.win);
-
-    init_lua();
+    if (!(dpy = XOpenDisplay(NULL))) {
+        printf("Couldn't open X display");
+        return 1;
+    }
     
     draw_password_mask();
     clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), lualock.pw_actor);
@@ -183,22 +216,27 @@ int main(int argc, char **argv) {
                         lualock.dpms_cfg_off));
     }
     
-    gdk_window_show(win);
-    
     struct pam_conv conv = {pam_conv_cb, NULL};
     int ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
     // if PAM doesn't get set up correctly, we can't authenticate. so, bail out
     if (ret != PAM_SUCCESS)
         exit(EXIT_FAILURE);
-        
-    gdk_keyboard_grab(win, TRUE, GDK_CURRENT_TIME);
-    gdk_pointer_grab(win, TRUE, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK
-                     | GDK_POINTER_MOTION_MASK, NULL, NULL, GDK_CURRENT_TIME);
-    printf("%i", prefs.no_daemon);
-    gtk_main();
     
+    XScreenSaverInfo *xss_info = XScreenSaverAllocInfo();
+    if (prefs.no_daemon) {
+        show_lock();
+        return 0;
+    }
+    
+    int idle_time;
+    while (TRUE) {
+        init_lua();
+        while ((idle_time = seconds_idle(dpy, xss_info)) < lualock.timeout) {
+            sleep(lualock.timeout - idle_time - 1);
+        }
+        show_lock();
+    }
     DPMSSetTimeouts(dpy, lualock.dpms_standby, lualock.dpms_suspend, lualock.dpms_off);
-    //XCloseDisplay(dpy);
     
     return 0;
 }
