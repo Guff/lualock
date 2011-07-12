@@ -155,6 +155,9 @@ void show_lock() {
     gdk_pointer_grab(win, TRUE, GDK_BUTTON_PRESS_MASK
                      | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK, NULL,
                      NULL, GDK_CURRENT_TIME);
+    draw_password_mask();
+   	clutter_actor_raise_top(lualock.pw_actor);
+
     gtk_main();
     hide_lock();
 }
@@ -212,8 +215,8 @@ int main(int argc, char **argv) {
     if (DPMSCapable(dpy) && lualock.using_dpms) {
         DPMSGetTimeouts(dpy, &lualock.dpms_standby,
                         &lualock.dpms_suspend, &lualock.dpms_off);
-        printf("%i\n", DPMSSetTimeouts(dpy, lualock.dpms_cfg_standby, lualock.dpms_cfg_suspend,
-                        lualock.dpms_cfg_off));
+        DPMSSetTimeouts(dpy, lualock.dpms_cfg_standby, lualock.dpms_cfg_suspend,
+                        lualock.dpms_cfg_off);
     }
     
     struct pam_conv conv = {pam_conv_cb, NULL};
@@ -224,6 +227,7 @@ int main(int argc, char **argv) {
     
     XScreenSaverInfo *xss_info = XScreenSaverAllocInfo();
     if (prefs.no_daemon) {
+        init_lua();
         show_lock();
         return 0;
     }
