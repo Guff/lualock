@@ -18,12 +18,20 @@
 #include "drawing.h"
 #include "lua_api.h"
 
-extern void lualock_lua_background_init(lua_State *L);
-
 lualock_t lualock;
 
 time_t test_timer;
 int frames_drawn;
+
+struct {
+    gboolean no_daemon;
+} prefs;
+
+static GOptionEntry options[] = {
+    { "no-daemon", 'n', 0, G_OPTION_ARG_NONE, &prefs.no_daemon, "Don't run as a"
+        " daemon; lock the screen immediately and exit when done", NULL },
+    { NULL }
+};
 
 gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data);
 
@@ -110,21 +118,6 @@ gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
     return TRUE;
 }
 
-//void event_handler(GdkEvent *ev) {
-    //switch (ev->type) {
-        //case GDK_KEY_PRESS:
-        //// if enter was pressed, check password
-            //if (!on_key_press(ev))
-                //if (authenticate_user())
-                    //gtk_main_quit();
-            //break;
-        //case GDK_EXPOSE:
-            //break;
-        //default:
-            //break;
-    //}
-//}
-
 static int pam_conv_cb(int msgs, const struct pam_message **msg,
                        struct pam_response **resp, void *data) {
     *resp = (struct pam_response *) calloc(msgs, sizeof(struct pam_message));
@@ -146,11 +139,21 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
     return 0;
 }
 
-int main(int argc, char **argv) {    
+int main(int argc, char **argv) {   
+    GError *error = NULL;
+    GOptionContext *opt_context = g_option_context_new("- screenlocker");
+    g_option_context_add_main_entries(opt_context, options, NULL);
+    g_option_context_add_group(opt_context, gtk_get_option_group(TRUE));
+    g_option_context_add_group(opt_context, cogl_get_option_group());
+    g_option_context_add_group(opt_context, clutter_get_option_group_without_init());
+    g_option_context_add_group(opt_context, gtk_clutter_get_option_group());
+    if (!g_option_context_parse(opt_context, &argc, &argv, &error)) {
+        g_print("option parsing failed: %s\n", error->message);
+        exit(1);
+    }
+    
     Display *dpy;
     GdkWindow *win;
-    
-    gtk_clutter_init(&argc, &argv);
     
     lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
     lualock.pw_length = 0;
@@ -182,9 +185,6 @@ int main(int argc, char **argv) {
     
     gdk_window_show(win);
     
-    //gdk_event_handler_set((GdkEventFunc)event_handler, NULL, NULL);
-
-    
     struct pam_conv conv = {pam_conv_cb, NULL};
     int ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
     // if PAM doesn't get set up correctly, we can't authenticate. so, bail out
@@ -194,7 +194,7 @@ int main(int argc, char **argv) {
     gdk_keyboard_grab(win, TRUE, GDK_CURRENT_TIME);
     gdk_pointer_grab(win, TRUE, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK
                      | GDK_POINTER_MOTION_MASK, NULL, NULL, GDK_CURRENT_TIME);
-    
+    printf("%i", prefs.no_daemon);
     gtk_main();
     
     DPMSSetTimeouts(dpy, lualock.dpms_standby, lualock.dpms_suspend, lualock.dpms_off);
