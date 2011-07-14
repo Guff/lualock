@@ -8,6 +8,7 @@
 #include "clib/timer.h"
 #include "clib/style.h"
 #include "clib/prefs.h"
+#include "clib/dpms.h"
 
 gboolean lualock_lua_loadrc(lua_State *L) {
     luaL_openlibs(lualock.L);
@@ -23,6 +24,8 @@ gboolean lualock_lua_loadrc(lua_State *L) {
     lualock_lua_style_init(lualock.L);
     
     lualock_lua_prefs_init(lualock.L);
+    
+    lualock_lua_dpms_init(lualock.L);
     
     gchar *config = g_build_filename(g_get_user_config_dir(), "lualock", "rc.lua",
                                     NULL);
