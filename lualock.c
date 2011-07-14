@@ -209,13 +209,11 @@ int main(int argc, char **argv) {
     
     CARD16 dummy;
     Display *dpy = gdk_x11_display_get_xdisplay(gdk_display_get_default());
+    XSynchronize(dpy, True);
     DPMSInfo(dpy, &dummy, &lualock.dpms_enabled);
-    if (DPMSCapable(dpy) && lualock.using_dpms) {
+    if (DPMSCapable(dpy)) {
         DPMSGetTimeouts(dpy, &lualock.dpms_standby,
                         &lualock.dpms_suspend, &lualock.dpms_off);
-        //DPMSSetTimeouts(dpy, lualock.dpms_cfg_standby, lualock.dpms_cfg_suspend,
-                        //lualock.dpms_cfg_off);
-        DPMSEnable(dpy);
     }
     
     struct pam_conv conv = {pam_conv_cb, NULL};
@@ -239,6 +237,7 @@ int main(int argc, char **argv) {
         }
         show_lock();
     }
+    
     DPMSSetTimeouts(dpy, lualock.dpms_standby, lualock.dpms_suspend, lualock.dpms_off);
     
     return 0;
