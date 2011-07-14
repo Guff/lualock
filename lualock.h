@@ -43,14 +43,13 @@ typedef struct {
     
     ClutterActor *pw_actor;
     
-    BOOL dpms_enabled, using_dpms;
-    CARD16 dpms_standby, dpms_suspend, dpms_off;
-    CARD16 dpms_cfg_standby, dpms_cfg_suspend, dpms_cfg_off;
-    
     int timeout;
     
     guint *timers;
     guint timers_alloc;
+    
+    GHookList lock_hooks;
+    GHookList unlock_hooks;
     
     style_t style;
 } lualock_t;

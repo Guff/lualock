@@ -7,8 +7,6 @@
 #include <gdk/gdkx.h>
 #include <clutter-gtk/clutter-gtk.h>
 #include <X11/Xlib.h>
-#include <X11/Xproto.h>
-#include <X11/extensions/dpms.h>
 #include <X11/extensions/scrnsaver.h>
 #include <gdk/gdkkeysyms.h>
 #include <security/pam_appl.h>
@@ -88,6 +86,16 @@ void init_lua() {
     lualock_lua_loadrc(lualock.L);
 }
 
+void init_hooks() {
+    g_hook_list_init(&lualock.lock_hooks, sizeof(GHook));
+    g_hook_list_init(&lualock.unlock_hooks, sizeof(GHook));
+}
+
+void clear_hooks() {
+    g_hook_list_clear(&lualock.lock_hooks);
+    g_hook_list_clear(&lualock.unlock_hooks);
+}
+
 void reset_password() {
     lualock.password[0] = '\0';
     lualock.pw_length = 0;
@@ -160,17 +168,21 @@ void show_lock() {
                      NULL, GDK_CURRENT_TIME);
     draw_password_mask();
    	clutter_actor_raise_top(lualock.pw_actor);
-
+    g_hook_list_invoke(&lualock.lock_hooks, FALSE);
+    
     gtk_main();
     hide_lock();
 }
 
 void hide_lock() {
+    g_hook_list_invoke(&lualock.unlock_hooks, FALSE);
     lua_close(lualock.L);
     clear_timers();
     gtk_widget_hide(lualock.win);
     gdk_keyboard_ungrab(GDK_CURRENT_TIME);
     gdk_pointer_ungrab(GDK_CURRENT_TIME);
+    
+    clear_hooks();
 }
 
 int seconds_idle(Display *dpy, XScreenSaverInfo *xss_info) {
@@ -195,8 +207,6 @@ int main(int argc, char **argv) {
     lualock.pw_length = 0;
     lualock.pw_alloc = PW_BUFF_SIZE;
     
-    lualock.using_dpms = FALSE;
-    
     lualock.timeout = 10 * 60;
     
     init_display();
@@ -207,23 +217,16 @@ int main(int argc, char **argv) {
     
     clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), lualock.pw_actor);
     
-    CARD16 dummy;
-    Display *dpy = gdk_x11_display_get_xdisplay(gdk_display_get_default());
-    XSynchronize(dpy, True);
-    DPMSInfo(dpy, &dummy, &lualock.dpms_enabled);
-    if (DPMSCapable(dpy)) {
-        DPMSGetTimeouts(dpy, &lualock.dpms_standby,
-                        &lualock.dpms_suspend, &lualock.dpms_off);
-    }
-    
     struct pam_conv conv = {pam_conv_cb, NULL};
     int ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
     // if PAM doesn't get set up correctly, we can't authenticate. so, bail out
     if (ret != PAM_SUCCESS)
         exit(EXIT_FAILURE);
     
+    Display *dpy = XOpenDisplay(NULL);
     XScreenSaverInfo *xss_info = XScreenSaverAllocInfo();
     if (prefs.no_daemon) {
+        init_hooks();
         init_lua();
         show_lock();
         return 0;
@@ -231,14 +234,13 @@ int main(int argc, char **argv) {
     
     int idle_time;
     while (TRUE) {
+        init_hooks();
         init_lua();
         while ((idle_time = seconds_idle(dpy, xss_info)) < lualock.timeout) {
             sleep(lualock.timeout - idle_time - 1);
         }
         show_lock();
     }
-    
-    DPMSSetTimeouts(dpy, lualock.dpms_standby, lualock.dpms_suspend, lualock.dpms_off);
     
     return 0;
 }
