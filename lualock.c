@@ -4,8 +4,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 #include <clutter-gtk/clutter-gtk.h>
 #include <X11/Xlib.h>
+#include <X11/Xproto.h>
 #include <X11/extensions/dpms.h>
 #include <X11/extensions/scrnsaver.h>
 #include <gdk/gdkkeysyms.h>
@@ -103,7 +105,8 @@ gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
             if (authenticate_user())
                 gtk_main_quit();
         case GDK_KEY_BackSpace:
-            lualock.pw_length--;
+            if (lualock.pw_length > 0)
+                lualock.pw_length--;
             lualock.password[lualock.pw_length] = '\0';
             break;
         case GDK_KEY_Escape:
@@ -188,13 +191,13 @@ int main(int argc, char **argv) {
         exit(1);
     }
     
-    Display *dpy;
-    
     lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
     lualock.pw_length = 0;
     lualock.pw_alloc = PW_BUFF_SIZE;
     
     lualock.using_dpms = FALSE;
+    
+    lualock.timeout = 10 * 60;
     
     init_display();
     init_window();
@@ -202,21 +205,17 @@ int main(int argc, char **argv) {
     init_clutter();
     init_timers();
     
-    if (!(dpy = XOpenDisplay(NULL))) {
-        printf("Couldn't open X display");
-        return 1;
-    }
-    
-    draw_password_mask();
     clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), lualock.pw_actor);
     
     CARD16 dummy;
+    Display *dpy = gdk_x11_display_get_xdisplay(gdk_display_get_default());
     DPMSInfo(dpy, &dummy, &lualock.dpms_enabled);
     if (DPMSCapable(dpy) && lualock.using_dpms) {
         DPMSGetTimeouts(dpy, &lualock.dpms_standby,
                         &lualock.dpms_suspend, &lualock.dpms_off);
-        DPMSSetTimeouts(dpy, lualock.dpms_cfg_standby, lualock.dpms_cfg_suspend,
-                        lualock.dpms_cfg_off);
+        //DPMSSetTimeouts(dpy, lualock.dpms_cfg_standby, lualock.dpms_cfg_suspend,
+                        //lualock.dpms_cfg_off);
+        DPMSEnable(dpy);
     }
     
     struct pam_conv conv = {pam_conv_cb, NULL};
