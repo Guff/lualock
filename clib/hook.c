@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "lualock.h"
+#include "lua_api.h"
 #include "clib/hook.h"
 
 typedef struct {
@@ -11,8 +12,9 @@ typedef struct {
 
 void hook_call_lua_function(gpointer data) {
     hook_data_t *hook_data = data;
+    lua_pushcfunction(hook_data->L, lualock_lua_on_error);
     lua_rawgeti(hook_data->L, LUA_REGISTRYINDEX, hook_data->r);
-    lua_pcall(hook_data->L, 0, 0, 0);
+    lua_pcall(hook_data->L, 0, 0, -2);
 }
 
 int lualock_lua_hook_connect(lua_State *L) {

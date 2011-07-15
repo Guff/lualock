@@ -1,10 +1,29 @@
+require "odious"
+
 style{ color = "#333333", font = "Sans 12", x = 500, y = 400, off_x = 5,
         off_y = 6, width = 150, height = 24 }
 
-prefs{ timeout = 10 * 60 }
+prefs{ timeout = 2 }
+local dpms = { 
+    set = function (standby, suspend, off)
+        spawn(string.format("xset dpms %i %i %i", standby, suspend, off))
+    end,
+    get = function ()
+        local xset_out = odious.util.pread("xset q")
+        local standby, suspend, off =
+            string.match(xset_out, "Standby: (%d+).*Suspend: (%d+).*Off: (%d+)")
+        return tonumber(standby) or 0, tonumber(suspend) or 0, tonumber(off) or 0
+    end 
+}
 
-hook.connect("lock", function () print("hi") end)
-hook.connect("unlock", function () print("bye") end)
+local standby, suspend, off = dpms.get()
+
+hook.connect("lock", function () 
+    dpms.set(1, 2, 3)
+end)
+hook.connect("unlock", function ()
+    dpms.set(standby, suspend, off)
+end)
 
 background("color", "#ff0000")
 background("/usr/share/backgrounds/Aeg_by_Tauno_Erik.jpg", "zoom")

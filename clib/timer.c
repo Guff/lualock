@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "lualock.h"
+#include "lua_api.h"
 #include "misc.h"
 #include "timer.h"
 
@@ -31,8 +32,9 @@ gboolean timer_run(void *data) {
 
 static void timer_run_lua_function(void *data) {
     l_timer_t *timer = data;
+    lua_pushcfunction(timer->L, lualock_lua_on_error);
     lua_rawgeti(timer->L, LUA_REGISTRYINDEX, timer->r);
-    lua_pcall(timer->L, 0, 0, 0);
+    lua_pcall(timer->L, 0, 0, -2);
 }
 
 static int lualock_lua_timer_new(lua_State *L) {
