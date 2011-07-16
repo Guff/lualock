@@ -30,7 +30,7 @@ background("/usr/share/backgrounds/Aeg_by_Tauno_Erik.jpg", "zoom")
 im2 = image("/usr/share/archlinux/logos/archlinux-official-light.svg")
 im2:rotate(60)
 im2:scale(.75, .75)
-im2:render(0.5, 0.5)
+im2:show(0.5, 0.5)
 
 user_text = text{ text = "User: " .. os.getenv("USER"), x = 500, y = 370,
                   font = "Anton 16", color = "#ffffff", border_color = "#000000",

@@ -7,6 +7,7 @@
 #include <glib.h>
 
 int lualock_lua_on_error(lua_State *L);
+void lualock_lua_do_function(lua_State *L);
 
 gboolean lualock_lua_loadrc(lua_State *L);
 

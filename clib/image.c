@@ -4,6 +4,20 @@
 #include "drawing.h"
 #include "clib/image.h"
 
+gboolean image_new(const char *filename, image_t *image) {
+    GError **error = NULL;
+    image->pbuf = gdk_pixbuf_new_from_file(filename, error);
+    
+    image->actor = create_actor(gdk_pixbuf_get_width(image->pbuf),
+                                gdk_pixbuf_get_height(image->pbuf));
+    
+    image->rotation = 0;
+    
+    add_actor(image->actor);
+
+    return TRUE;
+}
+
 int image_get_width(image_t *image) {
     return clutter_actor_get_width(image->actor);
 }
@@ -12,7 +26,7 @@ int image_get_height(image_t *image) {
     return clutter_actor_get_height(image->actor);
 }
 
-void image_render(image_t *image, double rel_x, double rel_y) {
+void image_show(image_t *image, double rel_x, double rel_y) {
     double x, y;
     get_abs_pos(rel_x, rel_y, &x, &y);
     cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(image->actor));
@@ -21,6 +35,7 @@ void image_render(image_t *image, double rel_x, double rel_y) {
     cairo_paint(cr);
     cairo_destroy(cr);
     clutter_actor_set_position(image->actor, x, y);
+    clutter_actor_show(image->actor);
 }
 
 void image_rotate(image_t *image, double angle, gfloat x, gfloat y) {
@@ -39,19 +54,6 @@ void image_resize(image_t *image, int width, int height) {
                 height / (float) clutter_actor_get_height(image->actor));
 }
 
-bool image_new(const char *filename, image_t *image) {
-    GError **error = NULL;
-    image->pbuf = gdk_pixbuf_new_from_file(filename, error);
-    
-    image->actor = create_actor(gdk_pixbuf_get_width(image->pbuf),
-                                gdk_pixbuf_get_height(image->pbuf));
-    
-    image->rotation = 0;
-    
-    add_actor(image->actor);
-
-    return true;
-}
 
 static int lualock_lua_image_new(lua_State *L) {
     image_t *image = lua_newuserdata(L, sizeof(image_t));
@@ -59,7 +61,7 @@ static int lualock_lua_image_new(lua_State *L) {
     lua_setmetatable(L, -2);
     
     const char *filename = luaL_checkstring(L, 1);
-    bool loaded = image_new(filename, image);
+    gboolean loaded = image_new(filename, image);
     
     // keep the userdata referenced
     lua_pushvalue(L, -1);
@@ -68,9 +70,9 @@ static int lualock_lua_image_new(lua_State *L) {
     return loaded;
 }
 
-static int lualock_lua_image_render(lua_State *L) {
+static int lualock_lua_image_show(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
-    image_render(image, lua_tonumber(L, 2), lua_tonumber(L, 3));
+    image_show(image, lua_tonumber(L, 2), lua_tonumber(L, 3));
     return 0;
 }
 
@@ -109,7 +111,7 @@ void lualock_lua_image_init(lua_State *L) {
     gdk_init(NULL, NULL);
     const struct luaL_reg lualock_image_lib[] =
     {
-        { "render", lualock_lua_image_render },
+        { "show", lualock_lua_image_show },
         { "rotate", lualock_lua_image_rotate },
         { "scale", lualock_lua_image_scale },
         { "resize", lualock_lua_image_resize },

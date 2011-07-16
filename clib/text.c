@@ -91,6 +91,8 @@ void text_draw(text_t *text_obj) {
     cairo_set_source_rgba(cr, r, g, b, a);
     cairo_fill(cr);
     cairo_destroy(cr);
+    
+    clutter_actor_show(text_obj->actor);
 }
 
 int lualock_lua_text_new(lua_State *L) {

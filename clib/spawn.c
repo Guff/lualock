@@ -4,7 +4,7 @@
 
 #include "clib/spawn.h"
 
-static void spawn_child_callback(gpointer user_data) {
+static void spawn_child_callback(gpointer data) {
     sigset_t empty;
 
     sigemptyset(&empty);

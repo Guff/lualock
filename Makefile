@@ -7,8 +7,9 @@ PKGS := clutter-gtk-1.0 lua xscrnsaver
 INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 
-CFLAGS   := -g -Wall -Wextra -std=gnu99 -I. $(INCS) $(CFLAGS)
+CFLAGS   := -Wall -Wextra -std=gnu99 -I. $(INCS) $(CFLAGS)
 CPPFLAGS := -DLUALOCK_INSTALL_DIR=\"$(INSTALLDIR)/share/lualock\" $(CPPFLAGS)
+DEBUG    := -g -DDEBUG
 LDFLAGS  := $(LIBS) $(LDFLAGS)
 
 SRCS  := $(wildcard *.c clib/*.c)
@@ -17,6 +18,9 @@ OBJS  := $(foreach obj,$(SRCS:.c=.o),$(obj))
 
 
 all: options lualock
+
+debug: CFLAGS += $(DEBUG)
+debug: all
 
 options:
 	@echo lualock build options:
@@ -28,8 +32,6 @@ options:
 	@echo "build targets:"
 	@echo "SRCS = $(SRCS)"
 	@echo
-
-#$(OBJS): $(HEADS)
 
 .c.o:
 	@echo $(CC) -c $< -o $@

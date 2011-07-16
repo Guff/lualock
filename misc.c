@@ -20,6 +20,7 @@ ClutterActor* create_actor(int width, int height) {
 
 void add_actor(ClutterActor *actor) {
     clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), actor);
+    clutter_actor_hide(actor);
 }
 
 void parse_color(const char *color, double *r, double *g, double *b, double *a) {

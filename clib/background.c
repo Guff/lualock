@@ -16,6 +16,8 @@ void background_set_color(const char *hex) {
     cairo_set_source_rgba(cr, r, g, b, a);
     cairo_paint(cr);
     cairo_destroy(cr);
+    
+    clutter_actor_show(actor);
 }
 
 static int lualock_lua_background_set(lua_State *L) {
@@ -66,6 +68,8 @@ static int lualock_lua_background_set(lua_State *L) {
     cairo_paint(cr);
     cairo_destroy(cr);
     g_object_unref(pbuf);
+    
+    clutter_actor_show(actor);
     
     return 0;
 }

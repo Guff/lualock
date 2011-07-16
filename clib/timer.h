@@ -1,13 +1,13 @@
 #ifndef CLIB_TIMER_H
 #define CLIB_TIMER_H
 
-#include <pthread.h>
-#include <stdbool.h>
+#include <lualib.h>
+#include <glib.h>
 
 typedef struct {
     int id;
     lua_State *L;
-    bool running;
+    gboolean running;
     int cycles;
     int completed_cycles;
     int int_us;

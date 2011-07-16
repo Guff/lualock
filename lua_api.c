@@ -16,12 +16,24 @@ int lualock_lua_on_error(lua_State *L) {
     return 1;
 }
 
+void lualock_lua_do_function(lua_State *L) {
+    if (lua_pcall(L, 0, 0, 0))
+        lualock_lua_on_error(L);
+}
+
 gboolean lualock_lua_loadrc(lua_State *L) {
-    luaL_openlibs(lualock.L);
+    luaL_openlibs(L);
     
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "path");
     
+#ifdef DEBUG
+    lua_pushliteral(L, ";./lib/?.lua");
+    lua_pushliteral(L, ";./lib/?/init.lua");
+    lua_concat(L, 2);
+    lua_concat(L, 2);
+#endif
+
     lua_pushliteral(L, ";" LUALOCK_INSTALL_DIR "/lib/?.lua");
     lua_pushliteral(L, ";" LUALOCK_INSTALL_DIR "/lib/?/init.lua");
     lua_concat(L, 2);
@@ -45,12 +57,12 @@ gboolean lualock_lua_loadrc(lua_State *L) {
     
     lualock_lua_spawn_init(lualock.L);
     
-    lua_pushcfunction(L, lualock_lua_on_error);
-    
     gchar *config = g_build_filename(g_get_user_config_dir(), "lualock", "rc.lua",
                                      NULL);
-    if (luaL_loadfile(L, config) || lua_pcall(L, 0, 0, -2)) {
-        return false;
+    if (luaL_loadfile(L, config)) {
+        return FALSE;
+    } else {
+        lualock_lua_do_function(L);
+        return TRUE;
     }
-    return true;
 }
