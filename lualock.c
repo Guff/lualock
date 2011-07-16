@@ -89,11 +89,13 @@ void init_lua() {
 void init_hooks() {
     g_hook_list_init(&lualock.lock_hooks, sizeof(GHook));
     g_hook_list_init(&lualock.unlock_hooks, sizeof(GHook));
+    g_hook_list_init(&lualock.auth_failed_hooks, sizeof(GHook));
 }
 
 void clear_hooks() {
     g_hook_list_clear(&lualock.lock_hooks);
     g_hook_list_clear(&lualock.unlock_hooks);
+    g_hook_list_clear(&lualock.auth_failed_hooks);
 }
 
 void reset_password() {
@@ -112,6 +114,9 @@ gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
         case GDK_KEY_KP_Enter:
             if (authenticate_user())
                 gtk_main_quit();
+            else
+                g_hook_list_invoke(&lualock.auth_failed_hooks, FALSE);
+            break;
         case GDK_KEY_BackSpace:
             if (lualock.pw_length > 0)
                 lualock.pw_length--;

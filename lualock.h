@@ -48,6 +48,7 @@ typedef struct {
     
     GHookList lock_hooks;
     GHookList unlock_hooks;
+    GHookList auth_failed_hooks;
     
     style_t style;
 } lualock_t;

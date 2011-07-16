@@ -24,6 +24,8 @@ int lualock_lua_hook_connect(lua_State *L) {
         list = &lualock.lock_hooks;
     else if (!strcmp(hook_str, "unlock"))
         list = &lualock.unlock_hooks;
+    else if (!strcmp(hook_str, "auth-failed"))
+        list = &lualock.auth_failed_hooks;
     else
         luaL_argerror(L, 1, "not a valid hook");
     
