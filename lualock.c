@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 #include <unistd.h>
 #include <gtk/gtk.h>
@@ -109,6 +108,9 @@ gboolean authenticate_user() {
 
 gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
     guint keyval = ((GdkEventKey *)ev)->keyval;
+    gchar buf[6];
+    guint32 uc;
+    guint8 uc_len;
     switch(keyval) {
         case GDK_KEY_Return:
         case GDK_KEY_KP_Enter:
@@ -126,15 +128,16 @@ gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
             reset_password();
             break;
         default:
-            if (isprint(gdk_keyval_to_unicode(keyval))) {
+            uc = gdk_keyval_to_unicode(keyval);
+            uc_len = g_unichar_to_utf8(uc, buf);
+            if (g_unichar_isprint(uc)) {
                 // if we're running short on memory for the buffer, grow it
-                if (lualock.pw_alloc <= lualock.pw_length + 1) {
+                if (lualock.pw_alloc <= lualock.pw_length + uc_len) {
                     lualock.password = realloc(lualock.password, lualock.pw_alloc + 32);
                     lualock.pw_alloc += 32;
                 }
-                lualock.password[lualock.pw_length] = gdk_keyval_to_unicode(keyval);
-                lualock.password[lualock.pw_length + 1] = '\0';
-                lualock.pw_length++;
+                strncat(lualock.password, buf, uc_len);
+                lualock.pw_length += uc_len;
             }
     }
     
