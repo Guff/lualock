@@ -38,6 +38,10 @@ void image_show(image_t *image, double rel_x, double rel_y) {
     clutter_actor_show(image->actor);
 }
 
+void image_hide(image_t *image) {
+    clutter_actor_hide(image->actor);
+}
+
 void image_rotate(image_t *image, double angle, gfloat x, gfloat y) {
     image->rotation += angle;
     clutter_actor_set_anchor_point(image->actor, x, y);

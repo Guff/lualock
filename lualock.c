@@ -20,7 +20,6 @@
 
 lualock_t lualock;
 
-const char *hook_names[] = { "lock", "unlock", "auth-failed", NULL };
 
 time_t test_timer;
 int frames_drawn;
@@ -28,6 +27,8 @@ int frames_drawn;
 struct {
     gboolean no_daemon;
 } prefs;
+
+static const char *hook_names[] = { "lock", "unlock", "auth-failed", NULL };
 
 static GOptionEntry options[] = {
     { "no-daemon", 'n', 0, G_OPTION_ARG_NONE, &prefs.no_daemon, "Don't run as a"
@@ -62,9 +63,7 @@ void init_clutter() {
 }
 
 void init_timers() {
-    lualock.timers_alloc = 20;
-    lualock.timers = malloc(lualock.timers_alloc * sizeof(guint));
-    lualock.timers[0] = 0;
+    lualock.timers = g_array_new(TRUE, TRUE, sizeof(guint));
 }
 
 void init_style() {

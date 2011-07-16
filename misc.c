@@ -57,19 +57,12 @@ void get_abs_pos(double rel_x, double rel_y, double *x, double *y) {
 }
 
 void add_timer(guint id) {
-    guint i;
-    for (i = 0; i < lualock.timers_alloc && lualock.timers[i]; i++);
-    if (i >= lualock.timers_alloc - 1) {
-        lualock.timers_alloc += 20;
-        lualock.timers = realloc(lualock.timers, lualock.timers_alloc);
-    }
-    lualock.timers[i] = id;
-    lualock.timers[i + 1] = 0;
+    g_array_append_val(lualock.timers, id);
 }
 
 void clear_timers() {
-    for (guint i = 0; i < lualock.timers_alloc && lualock.timers[i]; i++)
-        g_source_remove(lualock.timers[i]);
+    for (guint i = 0; i < lualock.timers->len; i++)
+        g_source_remove(g_array_index(lualock.timers, guint, i));
     
-    lualock.timers[0] = 0;
+    g_array_remove_range(lualock.timers, 0, lualock.timers->len);
 }

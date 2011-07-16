@@ -43,8 +43,7 @@ typedef struct {
     
     int timeout;
     
-    guint *timers;
-    guint timers_alloc;
+    GArray *timers;
     
     GHashTable *hooks;
     const char **hook_names;
