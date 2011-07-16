@@ -20,6 +20,8 @@
 
 lualock_t lualock;
 
+const char *hook_names[] = { "lock", "unlock", "auth-failed", NULL };
+
 time_t test_timer;
 int frames_drawn;
 
@@ -85,16 +87,24 @@ void init_lua() {
     lualock_lua_loadrc(lualock.L);
 }
 
+void init_hook_table() {
+    lualock.hooks = g_hash_table_new(g_str_hash, g_str_equal);
+    
+    for (int i = 0; hook_names[i]; i++) {
+        GHookList *hook_list = g_malloc(sizeof(GHookList));
+        g_hash_table_insert(lualock.hooks, strdup(hook_names[i]), hook_list);
+    }
+}
+
 void init_hooks() {
-    g_hook_list_init(&lualock.lock_hooks, sizeof(GHook));
-    g_hook_list_init(&lualock.unlock_hooks, sizeof(GHook));
-    g_hook_list_init(&lualock.auth_failed_hooks, sizeof(GHook));
+    for (int i = 0; hook_names[i]; i++)
+        g_hook_list_init(g_hash_table_lookup(lualock.hooks, hook_names[i]),
+                         sizeof(GHook));
 }
 
 void clear_hooks() {
-    g_hook_list_clear(&lualock.lock_hooks);
-    g_hook_list_clear(&lualock.unlock_hooks);
-    g_hook_list_clear(&lualock.auth_failed_hooks);
+    for (int i = 0; hook_names[i]; i++)
+        g_hook_list_clear(g_hash_table_lookup(lualock.hooks, hook_names[i]));
 }
 
 void reset_password() {
@@ -117,7 +127,8 @@ gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
             if (authenticate_user())
                 gtk_main_quit();
             else
-                g_hook_list_invoke(&lualock.auth_failed_hooks, FALSE);
+                g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "auth-failed"),
+                                   FALSE);
             break;
         case GDK_KEY_BackSpace:
             if (lualock.pw_length > 0)
@@ -176,14 +187,14 @@ void show_lock() {
                      NULL, GDK_CURRENT_TIME);
     draw_password_mask();
    	clutter_actor_raise_top(lualock.pw_actor);
-    g_hook_list_invoke(&lualock.lock_hooks, FALSE);
+    g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "lock"), FALSE);
     
     gtk_main();
     hide_lock();
 }
 
 void hide_lock() {
-    g_hook_list_invoke(&lualock.unlock_hooks, FALSE);
+    g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "unlock"), FALSE);
     lua_close(lualock.L);
     clear_timers();
     gtk_widget_hide(lualock.win);
@@ -222,6 +233,7 @@ int main(int argc, char **argv) {
     init_style();
     init_clutter();
     init_timers();
+    init_hook_table();
     
     clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), lualock.pw_actor);
     

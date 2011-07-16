@@ -46,10 +46,8 @@ typedef struct {
     guint *timers;
     guint timers_alloc;
     
-    GHookList lock_hooks;
-    GHookList unlock_hooks;
-    GHookList auth_failed_hooks;
-    
+    GHashTable *hooks;
+    const char **hook_names;
     style_t style;
 } lualock_t;
 

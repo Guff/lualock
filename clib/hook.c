@@ -18,16 +18,9 @@ void hook_call_lua_function(gpointer data) {
 
 int lualock_lua_hook_connect(lua_State *L) {
     lua_settop(L, 2);
-    GHookList *list;
     const char *hook_str = luaL_checkstring(L, 1);
-    if (!strcmp(hook_str, "lock"))
-        list = &lualock.lock_hooks;
-    else if (!strcmp(hook_str, "unlock"))
-        list = &lualock.unlock_hooks;
-    else if (!strcmp(hook_str, "auth-failed"))
-        list = &lualock.auth_failed_hooks;
-    else
-        luaL_argerror(L, 1, "not a valid hook");
+    GHookList *list = g_hash_table_lookup(lualock.hooks, hook_str);
+    luaL_argcheck(L, list, 1, "not a valid hook");
     
     luaL_checktype(L, 2, LUA_TFUNCTION);
     
