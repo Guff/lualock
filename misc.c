@@ -4,14 +4,14 @@
 
 #include "misc.h"
 
-cairo_surface_t* create_surface(int width, int height) {
+cairo_surface_t* create_surface(gint width, gint height) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
         width ? : gdk_screen_get_width(lualock.scr),
         height ? : gdk_screen_get_height(lualock.scr));
     return surface;
 }
 
-ClutterActor* create_actor(int width, int height) {
+ClutterActor* create_actor(gint width, gint height) {
 	ClutterActor *actor = clutter_cairo_texture_new(
         width ? : gdk_screen_get_width(lualock.scr),
         height ? : gdk_screen_get_height(lualock.scr));
@@ -23,7 +23,7 @@ void add_actor(ClutterActor *actor) {
     clutter_actor_hide(actor);
 }
 
-void parse_color(const char *color, double *r, double *g, double *b, double *a) {
+void parse_color(const gchar *color, gdouble *r, gdouble *g, gdouble *b, gdouble *a) {
     if (!color) {
         *r = 0, *g = 0, *b = 0, *a = 1;
         return;
@@ -44,16 +44,15 @@ char* get_password_mask() {
     return strdup(password_mask);
 }
 
-void get_abs_pos(double rel_x, double rel_y, double *x, double *y) {
-    if (rel_x >= 1.0)
-        *x = rel_x;
-    else
-        *x = rel_x * gdk_screen_get_width(lualock.scr);
-    
-    if (rel_y >= 1.0)
-        *y = rel_y;
-    else
-        *y = rel_y * gdk_screen_get_height(lualock.scr);
+void get_abs_pos(gdouble rel_x, gdouble rel_y, gdouble *x, gdouble *y) {
+    *x = rel_x >= 1.0 ? rel_x : rel_x * gdk_screen_get_width(lualock.scr);
+    *y = rel_y >= 1.0 ? rel_y : rel_y * gdk_screen_get_height(lualock.scr);
+}
+
+void get_abs_pos_for_dims(gdouble dim_w, gdouble dim_h, gdouble rel_w, gdouble rel_h,
+                          gdouble *w, gdouble *h) {
+    *w = rel_w >= 1.0 ? rel_w : rel_w * dim_w;
+    *h = rel_h >= 1.0 ? rel_h : rel_h * dim_h;
 }
 
 void add_timer(guint id) {
