@@ -109,6 +109,22 @@ void image_draw_line(image_t *image, gdouble rel_x1, gdouble rel_y1,
     cairo_destroy(cr);
 }
 
+void image_draw_circle(image_t *image, gdouble rel_x, gdouble rel_y,
+                       gdouble radius, gboolean fill, ClutterColor *color) {
+    gdouble x, y;
+    get_abs_pos_for_dims(image_get_width(image), image_get_height(image),
+                         rel_x, rel_y, &x, &y);
+    cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(image->actor));
+    clutter_cairo_set_source_color(cr, color);
+    cairo_arc(cr, x, y, radius, 0, 2 * M_PI);
+    cairo_set_line_width(cr, 1);
+    cairo_stroke_preserve(cr);
+    if (fill)
+        cairo_fill(cr);
+    
+    cairo_destroy(cr);
+}
+
 static int lualock_lua_image_new(lua_State *L) {
     lua_settop(L, 2);
     image_t *image = lua_newuserdata(L, sizeof(image_t));
@@ -203,6 +219,17 @@ static int lualock_lua_image_draw_line(lua_State *L) {
     return 0;
 }
 
+static int lualock_lua_image_draw_circle(lua_State *L) {
+    image_t *image = luaL_checkudata(L, 1, "lualock.image");
+    ClutterColor *color;
+    gdouble r, g, b, a;
+    parse_color(luaL_optstring(L, 6, "#000000"), &r, &g, &b, &a);
+    color = clutter_color_new(r * 255, g * 255, b * 255, a * 255);
+    image_draw_circle(image, lua_tonumber(L, 2), lua_tonumber(L, 3),
+                      lua_tonumber(L, 4), lua_toboolean(L, 5), color);
+    return 0;
+}
+
 void lualock_lua_image_init(lua_State *L) {
     gdk_init(NULL, NULL);
     const struct luaL_reg lualock_image_lib[] =
@@ -217,6 +244,7 @@ void lualock_lua_image_init(lua_State *L) {
         { "height", lualock_lua_image_get_height },
         { "draw_rectangle", lualock_lua_image_draw_rectangle },
         { "draw_line", lualock_lua_image_draw_line },
+        { "draw_circle", lualock_lua_image_draw_circle },
         { NULL, NULL }
     };
     luaL_newmetatable(L, "lualock.image");
