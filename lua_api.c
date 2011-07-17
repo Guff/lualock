@@ -57,12 +57,18 @@ gboolean lualock_lua_loadrc(lua_State *L) {
     
     lualock_lua_spawn_init(lualock.L);
     
-    gchar *config = g_build_filename(g_get_user_config_dir(), "lualock", "rc.lua",
-                                     NULL);
-    if (luaL_loadfile(L, config)) {
-        return FALSE;
-    } else {
-        lualock_lua_do_function(L);
-        return TRUE;
+    GPtrArray *configs = g_ptr_array_new();
+    g_ptr_array_add(configs, g_build_filename(g_get_user_config_dir(), "lualock",
+                                              "rc.lua", NULL));
+    const gchar * const *system_config_dirs = g_get_system_config_dirs();
+    for (guint i = 0; system_config_dirs[i]; i++)
+        g_ptr_array_add(configs, g_build_filename(system_config_dirs[i],
+                                                  "lualock", "rc.lua", NULL));
+    for (guint i = 0; i < configs->len; i++) {
+        if (!luaL_loadfile(L, g_ptr_array_index(configs, i))) {
+            lualock_lua_do_function(L);
+            return TRUE;
+        }
     }
+    return FALSE;
 }

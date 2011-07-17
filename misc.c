@@ -63,5 +63,6 @@ void clear_timers() {
     for (guint i = 0; i < lualock.timers->len; i++)
         g_source_remove(g_array_index(lualock.timers, guint, i));
     
-    g_array_remove_range(lualock.timers, 0, lualock.timers->len);
+    if (lualock.timers->len)
+        g_array_remove_range(lualock.timers, 0, lualock.timers->len);
 }
