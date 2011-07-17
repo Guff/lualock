@@ -3,7 +3,7 @@ INSTALLDIR := $(DESTDIR)$(PREFIX)
 
 CC	:= gcc
 
-PKGS := clutter-gtk-1.0 lua xscrnsaver
+PKGS := clutter-gtk-1.0 lua xscrnsaver dbus-glib-1
 INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 
