@@ -19,47 +19,52 @@ local dpms = {
 local standby, suspend, off = dpms.get()
 
 hook.connect("lock", function () 
-    dpms.set(1, 2, 3)
+    dpms.set(60, 120, 300)
 end)
 hook.connect("unlock", function ()
     dpms.set(standby, suspend, off)
 end)
+hook.connect("auth-failed", function () print("INTRUDER DETECTED") end)
 
-background("color", "#ff0000")
-background("/usr/share/backgrounds/Aeg_by_Tauno_Erik.jpg", "zoom")
+background("color", "#000000")
 im2 = image("/usr/share/archlinux/logos/archlinux-official-light.svg")
-im2:rotate(60)
-im2:scale(.75, .75)
-im2:show(0.5, 0.5)
-im2:draw_rectangle(0, 0, 100, 100, true, "#
+im2:scale(0.75, 0.75)
+im2:set_position(0.1, 0.4)
+im2:draw_rectangle(0, 0, 100, 100, true, "#ff0000")
+im2:draw_line(0, 0, 0.5, 0.5, 5, "#cc0066")
+im2:show()
+
+im3 = image(100, 100)
+im3:set_position(0.5, 0.5)
+im3:draw_rectangle(0, 0, 0.5, 0.75, true)
+im3:show()
+
+clockbg = image(os.getenv("HOME") .. "/Pictures/clockbackground.png")
+clockbg:show()
 
 user_text = text{ text = "User: " .. os.getenv("USER"), x = 500, y = 370,
                   font = "Anton 16", color = "#ffffff", border_color = "#000000",
                   border_width = 3 }
 user_text:draw()
 
-text_clock = text{ text = os.date("%a %b %d, %l:%M:%S %p"), x = 0, y = 0,
-                   font = "Sans 20", color = "#ffffff", border_color = "#000000",
-                   border_width = 4 }
-text_clock:draw()
+clock_hr = text { x = 55, y = 40, font = "Droid Sans Mono 110",
+                  color = "#ffffff", border_color = "#000000", border_width = 4 }
+clock_min = text { x = 305, y = 40, font = "Droid Sans Mono 110",
+                   color = "#ffffff", border_color = "#000000", border_width = 4 }
+clock_noon = text { x = 495, y = 118, font = "Droid Sans Mono 50",
+                    color = "#ffffff", border_color = "#000000", border_width = 3 }
 
 clock_timer = timer(function ()
-    text_clock:set{ text = os.date("%a %b %d, %l:%M:%S %p") }
-    text_clock:draw()
+    clock_hr:set { text = os.date("%I") }
+    clock_min:set { text = os.date("%M") }
+    clock_noon:set { text = os.date("%p") }
+    clock_hr:draw()
+    clock_min:draw()
+    clock_noon:draw()
 end, 1)
 
-text_timer_text = text{ text = "Locked for 0 seconds", x = 100, y = 300, 
-                        font = "Sans 12", color = "#ffffff",
-                        border_color = "#000000", border_width = 6 }
-text_timer_text:draw()
-start_time = os.time()
-text_timer = timer(function ()
-	text_timer_text:set{ text = string.format("Locked for %i seconds", os.time() - start_time) }
-    text_timer_text:draw()
-end, 1)
+--function rotate_image ()
+    --im2:rotate(3, im2:width() / 2, im2:height() / 2)
+--end
 
-function rotate_image ()
-    im2:rotate(3, im2:width() / 2, im2:height() / 2)
-end
-
-t = timer(rotate_image, 0.05);
+--t = timer(rotate_image, 0.05);

@@ -91,19 +91,37 @@ void image_draw_rectangle(image_t *image, gdouble rel_x, gdouble rel_y,
     cairo_destroy(cr);
 }
 
+void image_draw_line(image_t *image, gdouble rel_x1, gdouble rel_y1,
+                     gdouble rel_x2, gdouble rel_y2, gdouble width,
+                     ClutterColor *color) {
+    gdouble x1, y1, x2, y2;
+    get_abs_pos_for_dims(image_get_width(image), image_get_height(image),
+                         rel_x1, rel_y1, &x1, &y1);
+    get_abs_pos_for_dims(image_get_width(image), image_get_height(image),
+                         rel_x2, rel_y2, &x2, &y2);
+    cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(image->actor));
+    clutter_cairo_set_source_color(cr, color);
+    cairo_set_line_width(cr, width);
+    cairo_move_to(cr, x1 + 0.5, y1 + 0.5);
+    cairo_line_to(cr, x2 + 0.5, y2 + 0.5);
+    cairo_stroke(cr);
+    
+    cairo_destroy(cr);
+}
+
 static int lualock_lua_image_new(lua_State *L) {
     lua_settop(L, 2);
     image_t *image = lua_newuserdata(L, sizeof(image_t));
     luaL_getmetatable(L, "lualock.image");
     lua_setmetatable(L, -2);
     
-    if (lua_isstring(L, 1)) {    
+    if (lua_isnumber(L, 1) && lua_isnumber(L, 2)) {
+        image_new_blank(image, lua_tonumber(L, 1), lua_tonumber(L, 2));
+    } else if (lua_isstring(L, 1)) {   
         const char *filename = luaL_checkstring(L, 1);
         gboolean loaded = image_new(image, filename);
         if (!loaded)
             return 0;
-    } else if (lua_isnumber(L, 1) && lua_isnumber(L, 2)) {
-        image_new_blank(image, lua_tonumber(L, 1), lua_tonumber(L, 2));
     }
     // keep the userdata referenced
     lua_pushvalue(L, -1);
@@ -173,6 +191,18 @@ static int lualock_lua_image_draw_rectangle(lua_State *L) {
     return 0;
 }
 
+static int lualock_lua_image_draw_line(lua_State *L) {
+    image_t *image = luaL_checkudata(L, 1, "lualock.image");
+    ClutterColor *color;
+    gdouble r, g, b, a;
+    parse_color(luaL_optstring(L, 7, "#000000"), &r, &g, &b, &a);
+    color = clutter_color_new(r * 255, g * 255, b * 255, a * 255);
+    image_draw_line(image, lua_tonumber(L, 2), lua_tonumber(L, 3),
+                    lua_tonumber(L, 4), lua_tonumber(L, 5), lua_tonumber(L, 6),
+                    color);
+    return 0;
+}
+
 void lualock_lua_image_init(lua_State *L) {
     gdk_init(NULL, NULL);
     const struct luaL_reg lualock_image_lib[] =
@@ -186,6 +216,7 @@ void lualock_lua_image_init(lua_State *L) {
         { "width", lualock_lua_image_get_width },
         { "height", lualock_lua_image_get_height },
         { "draw_rectangle", lualock_lua_image_draw_rectangle },
+        { "draw_line", lualock_lua_image_draw_line },
         { NULL, NULL }
     };
     luaL_newmetatable(L, "lualock.image");
