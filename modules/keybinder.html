@@ -46,10 +46,8 @@
 		<a href="../modules/image.html">image</a>
 	</li>
 
-	<li>
-		<a href="../modules/keybinder.html">keybinder</a>
-	</li>
-
+	<li><strong>keybinder</strong></li>
+	
 	<li>
 		<a href="../modules/odious.html">odious</a>
 	</li>
@@ -58,8 +56,10 @@
 		<a href="../modules/odious.util.html">odious.util</a>
 	</li>
 
-	<li><strong>prefs</strong></li>
-	
+	<li>
+		<a href="../modules/prefs.html">prefs</a>
+	</li>
+
 	<li>
 		<a href="../modules/style.html">style</a>
 	</li>
@@ -91,9 +91,9 @@
 
 <div id="content">
 
-<h1>Module <code>prefs</code></h1>
+<h1>Module <code>keybinder</code></h1>
 
-<p>set lualock's preferences</p>
+<p>function to bind lua functions to key events</p>
 
 <p><b>Author:</b>
 <table class="authors_list">
@@ -113,8 +113,8 @@
 <table class="function_list">
 
 	<tr>
-	<td class="name" nowrap><a href="#prefs">prefs</a>&nbsp;(timeout)</td>
-	<td class="summary">Set style of the password field </td>
+	<td class="name" nowrap><a href="#keybinder">keybinder</a>&nbsp;(accel, func)</td>
+	<td class="summary">Bind a lua function to a keypress event </td>
 	</tr>
 
 </table>
@@ -134,16 +134,20 @@
 
 
 
-<dt><a name="prefs"></a><strong>prefs</strong>&nbsp;(timeout)</dt>
+<dt><a name="keybinder"></a><strong>keybinder</strong>&nbsp;(accel, func)</dt>
 <dd>
-Set style of the password field
+Bind a lua function to a keypress event
 
 
 <h3>Parameters</h3>
 <ul>
 	
 	<li>
-	  timeout: When running as a daemon, the amount of time in seconds before the screen is locked
+	  accel: The key binding to use. Should be of the form "j" or "<Control>j"
+	</li>
+	
+	<li>
+	  func: The function to bind to the keypress
 	</li>
 	
 </ul>
@@ -152,7 +156,7 @@ Set style of the password field
 
 
 <h3>Usage:</h3>
-prefs({ timeout = 600 })
+keybinder("<Control>h", function () print("hullo") end)
 
 
 
