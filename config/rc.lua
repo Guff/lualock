@@ -3,7 +3,9 @@ require "odious"
 style{ color = "#333333", font = "Sans 12", x = 500, y = 400, off_x = 5,
         off_y = 6, width = 150, height = 24 }
 
-prefs{ timeout = 2 }
+prefs{ timeout = 10 * 60 }
+
+-- define functions for setting and restoring DPMS settings
 local dpms = { 
     set = function (standby, suspend, off)
         utils.spawn(string.format("xset dpms %i %i %i", standby, suspend, off))
@@ -16,16 +18,19 @@ local dpms = {
     end 
 }
 
+-- get current DPMS settings
 local standby, suspend, off = dpms.get()
 
 hook.connect("lock", function () 
     dpms.set(60, 120, 300)
 end)
+
+-- restore DPMS settings once we're done
 hook.connect("unlock", function ()
     dpms.set(standby, suspend, off)
 end)
 
-evildot = os.getenv("HOME") .. "/Pictures/evildot.png"
+evildot = utils.get_data_dir() .. "/glowydot.png"
 failed_attempts = 0
 hook.connect("auth-failed", function ()
 	local dot = image(evildot)
@@ -35,12 +40,12 @@ hook.connect("auth-failed", function ()
 end)
 
 background("color", "#000000")
-im = image("/usr/share/archlinux/logos/archlinux-official-light.svg")
+im = image(utils.get_data_dir() .. "/archlinux-official-light.svg")
 im:scale(0.75, 0.75)
 im:set_position(0.1, 0.4)
 im:show()
 
-clockbg = image(os.getenv("HOME") .. "/Pictures/clockbackground.png")
+clockbg = image(utils.get_data_dir() .. "/clockbackground.png")
 clockbg:show()
 
 user_text = text{ text = "User: " .. os.getenv("USER"), x = 500, y = 370,
