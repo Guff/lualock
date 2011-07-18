@@ -1,0 +1,11 @@
+--- preferences API
+-- @author Guff &lt;cassmacguff@gmail.com&gt;
+-- @copyright 2011 Guff
+module("prefs")
+
+--- Set style of the password field
+-- @param timeout When running as a daemon, the amount of time in seconds
+-- before the screen is locked
+-- @class function
+-- @usage prefs({ timeout = 600 })
+-- @name prefs

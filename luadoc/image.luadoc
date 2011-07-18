@@ -1,0 +1,23 @@
+--- image API
+-- @author Guff &lt;cassmacguff@gmail.com&gt;
+-- @copyright 2011 Guff
+module("image")
+
+--- Creates a new image object
+-- @param file Filename of the image to load
+-- @class function
+-- @usage foo = image("foo.png")
+-- @return The new image object
+-- @name image
+
+--- Shows an image
+-- @param self The image to show
+-- @class function
+-- @usage foo:show()
+-- @name show
+
+-- Hides an image
+-- @param self The image to hide
+-- @class function
+-- @usage foo:hide()
+-- @name hide

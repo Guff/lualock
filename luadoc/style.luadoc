@@ -1,0 +1,21 @@
+--- style API
+-- @author Guff &lt;cassmacguff@gmail.com&gt;
+-- @copyright 2011 Guff
+module("style")
+
+--- Set style of the password field
+-- @param color Color of the password text. Should either be a hex string of
+-- the form "#ff0000" or a color name like "red". Default: "#000000"
+-- @param font Font to use for the password text. Should be of the form "Sans
+-- Bold 12". Default: "Sans 12"
+-- @param x x position of the field's top left corner relative to the top left
+-- corner of the screen.
+-- @param y y position of the field's top left corner relative to the top left
+-- corner of the screen.
+-- @param off_x Horizontal offset of the text within the password field.
+-- @param off_y Vertical offset of the text within the password field.
+-- @param width Width of the password field in pixels.
+-- @param height Height of the password field in pixels.
+-- @class function
+-- @usage style({ color = "#baddab", font = "Droid Sans 10", x = 100, y = 200 })
+-- @name style

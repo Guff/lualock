@@ -1,0 +1,13 @@
+--- background API
+-- @author Guff &lt;cassmacguff@gmail.com&gt;
+-- @copyright 2011 Guff
+module("background")
+
+--- Set the background to an image or solid color
+-- @param file Either the filename of an image or the string "color" for a
+-- solid color background
+-- @param style How to display the image; either "stretch", "zoom", or "center".
+-- If file was "color", then this parameter should be a color name or hex code.
+-- @class function
+-- @usage background("foo.png", "stretch") or background("color", "#bababa")
+-- @name background
