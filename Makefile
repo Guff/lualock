@@ -3,7 +3,7 @@ INSTALLDIR := $(DESTDIR)$(PREFIX)
 
 CC	:= gcc
 
-PKGS := clutter-gtk-1.0 lua xscrnsaver dbus-glib-1
+PKGS := clutter-gtk-1.0 lua xscrnsaver
 INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 
@@ -50,6 +50,8 @@ doc: $(HEADS) $(SRCS)
 
 install:
 	install -d $(INSTALLDIR)/share/lualock/
+	cp -r data $(INSTALLDIR)/share/lualock/
+	chmod 644 $(INSTALLDIR)/share/lualock/data/*
 	cp -r lib $(INSTALLDIR)/share/lualock/
 	chmod 755 $(INSTALLDIR)/share/lualock/lib/
 	chmod 755 $(INSTALLDIR)/share/lualock/lib/odious/
