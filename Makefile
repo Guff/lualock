@@ -1,4 +1,4 @@
-PREFIX     ?= /usr/local
+PREFIX     ?= /usr
 INSTALLDIR := $(DESTDIR)$(PREFIX)
 
 CC	:= gcc

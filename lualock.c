@@ -27,6 +27,8 @@
 #include <X11/extensions/scrnsaver.h>
 #include <gdk/gdkkeysyms.h>
 #include <security/pam_appl.h>
+#include <sys/file.h>
+#include <errno.h>
 
 #define PW_BUFF_SIZE 32
 #define DEFAULT_FONT "Sans 12"
@@ -223,7 +225,13 @@ int seconds_idle(Display *dpy, XScreenSaverInfo *xss_info) {
     return xss_info->idle / 1000;
 }
 
-int main(int argc, char **argv) {   
+int main(int argc, char **argv) {
+    int lock_file = open("/var/lock/lualock.lock", O_CREAT | O_RDWR, 0666);
+    int rc = flock(lock_file, LOCK_EX | LOCK_NB);
+    if(rc) {
+        if(EWOULDBLOCK == errno)
+            exit(1);
+    }
     GError *error = NULL;
     GOptionContext *opt_context = g_option_context_new("- screenlocker");
     g_option_context_add_main_entries(opt_context, options, NULL);
