@@ -46,8 +46,10 @@
 		<a href="../modules/image.html">image</a>
 	</li>
 
-	<li><strong>odious</strong></li>
-	
+	<li>
+		<a href="../modules/odious.html">odious</a>
+	</li>
+
 	<li>
 		<a href="../modules/odious.util.html">odious.util</a>
 	</li>
@@ -64,10 +66,8 @@
 		<a href="../modules/text.html">text</a>
 	</li>
 
-	<li>
-		<a href="../modules/timer.html">timer</a>
-	</li>
-
+	<li><strong>timer</strong></li>
+	
 	<li>
 		<a href="../modules/utils.html">utils</a>
 	</li>
@@ -87,13 +87,33 @@
 
 <div id="content">
 
-<h1>Module <code>odious</code></h1>
+<h1>Module <code>timer</code></h1>
 
-<p>Library for lualock</p>
+<p>timer function for running lua code periodically</p>
+
+<p><b>Author:</b>
+<table class="authors_list">
+
+	<tr><td class="name">Guff &lt;cassmacguff@gmail.com&gt;</td></tr>
+
+</table>
+</p>
+
+
+<p>Copyright&copy; 2011 Guff</p>
 
 
 
 
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#timer">timer</a>&nbsp;(func, interval, run_times)</td>
+	<td class="summary">Creates a new timer object and starts it The timer runs the function func every interval seconds.</td>
+	</tr>
+
+</table>
 
 
 
@@ -104,6 +124,51 @@
 <br/>
 
 
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="timer"></a><strong>timer</strong>&nbsp;(func, interval, run_times)</dt>
+<dd>
+Creates a new timer object and starts it The timer runs the function func every interval seconds. It does this up to run_times. After the timer is created, the function is run after the given interval, not immediately.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  func: The lua function to execute
+	</li>
+	
+	<li>
+	  interval: The interval, in seconds
+	</li>
+	
+	<li>
+	  run_times: The maximum number of times to execute func, 0 for no limit
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+timer(function () print("hi") end, 1)
+
+
+
+<h3>Return value:</h3>
+the new timer object
+
+
+
+</dd>
+
+
+</dl>
 
 
 

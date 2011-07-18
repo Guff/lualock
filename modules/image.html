@@ -38,6 +38,10 @@
 		<a href="../modules/background.html">background</a>
 	</li>
 
+	<li>
+		<a href="../modules/hook.html">hook</a>
+	</li>
+
 	<li><strong>image</strong></li>
 	
 	<li>
@@ -54,6 +58,14 @@
 
 	<li>
 		<a href="../modules/style.html">style</a>
+	</li>
+
+	<li>
+		<a href="../modules/text.html">text</a>
+	</li>
+
+	<li>
+		<a href="../modules/timer.html">timer</a>
 	</li>
 
 	<li>
@@ -97,13 +109,68 @@
 <table class="function_list">
 
 	<tr>
+	<td class="name" nowrap><a href="#draw_circle">draw_circle</a>&nbsp;(self, x, y, radius, fill, color)</td>
+	<td class="summary">Draws a circle on the image </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#draw_line">draw_line</a>&nbsp;(self, x1, y1, x2, y2, width, color)</td>
+	<td class="summary">Draws a line on the image </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#draw_rectangle">draw_rectangle</a>&nbsp;(self, x, y, width, height, fill, color)</td>
+	<td class="summary">Draws a rectangle on the image </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#height">height</a>&nbsp;(self)</td>
+	<td class="summary">Gets the height of the image </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#hide">hide</a>&nbsp;(self)</td>
+	<td class="summary">Hides an image </td>
+	</tr>
+
+	<tr>
 	<td class="name" nowrap><a href="#image">image</a>&nbsp;(file)</td>
 	<td class="summary">Creates a new image object </td>
 	</tr>
 
 	<tr>
+	<td class="name" nowrap><a href="#image_new_blank">image_new_blank</a>&nbsp;(width, height)</td>
+	<td class="summary">Creates a new blank image </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#resize">resize</a>&nbsp;(self, width, height)</td>
+	<td class="summary">Resizes the image </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#rotate">rotate</a>&nbsp;(self, angle, x, y)</td>
+	<td class="summary">Rotates the image </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#scale">scale</a>&nbsp;(self, sx, sy)</td>
+	<td class="summary">Scales the image </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#set_position">set_position</a>&nbsp;(self, x, y)</td>
+	<td class="summary">Sets the image position </td>
+	</tr>
+
+	<tr>
 	<td class="name" nowrap><a href="#show">show</a>&nbsp;(self)</td>
 	<td class="summary">Shows an image </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#width">width</a>&nbsp;(self)</td>
+	<td class="summary">Gets the width of the image </td>
 	</tr>
 
 </table>
@@ -120,6 +187,222 @@
 
 <h2><a name="functions"></a>Functions</h2>
 <dl class="function">
+
+
+
+<dt><a name="draw_circle"></a><strong>draw_circle</strong>&nbsp;(self, x, y, radius, fill, color)</dt>
+<dd>
+Draws a circle on the image
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image
+	</li>
+	
+	<li>
+	  x: x coordinate of the circle's center
+	</li>
+	
+	<li>
+	  y: y coordinate of the circle's center
+	</li>
+	
+	<li>
+	  radius: radius of the circle
+	</li>
+	
+	<li>
+	  fill: true to fill the circle with color, false to draw the outline
+	</li>
+	
+	<li>
+	  color: color to draw the circle with
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+foo:draw_circle(0, 0, 50, false, "#ff0000")
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="draw_line"></a><strong>draw_line</strong>&nbsp;(self, x1, y1, x2, y2, width, color)</dt>
+<dd>
+Draws a line on the image
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image
+	</li>
+	
+	<li>
+	  x1: x coordinate of the line's starting point
+	</li>
+	
+	<li>
+	  y1: y coordinate of the line's starting point
+	</li>
+	
+	<li>
+	  x2: x coordinate of the line's ending point
+	</li>
+	
+	<li>
+	  y2: y coordinate of the line's ending point
+	</li>
+	
+	<li>
+	  width: width of the line
+	</li>
+	
+	<li>
+	  color: color of the line
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+foo:draw_line(0, 0, 100, 100, 5, "#000000")
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="draw_rectangle"></a><strong>draw_rectangle</strong>&nbsp;(self, x, y, width, height, fill, color)</dt>
+<dd>
+Draws a rectangle on the image
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image
+	</li>
+	
+	<li>
+	  x: x coordinate of the rectangle's top left corner
+	</li>
+	
+	<li>
+	  y: y coordinate of the rectangle's top left corner
+	</li>
+	
+	<li>
+	  width: width of the rectangle
+	</li>
+	
+	<li>
+	  height: height of the rectangle
+	</li>
+	
+	<li>
+	  fill: true to fill the rectangle with color, false to draw the outline
+	</li>
+	
+	<li>
+	  color: color to draw the rectangle with
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+foo:draw_rectangle(0, 0, 100, 100, true, "#ff0000")
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="height"></a><strong>height</strong>&nbsp;(self)</dt>
+<dd>
+Gets the height of the image
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+h = foo:height()
+
+
+
+<h3>Return value:</h3>
+The image's height
+
+
+
+</dd>
+
+
+
+
+<dt><a name="hide"></a><strong>hide</strong>&nbsp;(self)</dt>
+<dd>
+Hides an image
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image to hide
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+foo:hide()
+
+
+
+
+
+</dd>
+
 
 
 
@@ -155,6 +438,194 @@ The new image object
 
 
 
+<dt><a name="image_new_blank"></a><strong>image_new_blank</strong>&nbsp;(width, height)</dt>
+<dd>
+Creates a new blank image
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  width: Width of the new image
+	</li>
+	
+	<li>
+	  height: Height of the new image
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+foo = image(100, 200)
+
+
+
+<h3>Return value:</h3>
+the new image object
+
+
+
+</dd>
+
+
+
+
+<dt><a name="resize"></a><strong>resize</strong>&nbsp;(self, width, height)</dt>
+<dd>
+Resizes the image
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image to resize
+	</li>
+	
+	<li>
+	  width: The image's new width
+	</li>
+	
+	<li>
+	  height: The image's new height
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+foo:resize(125, 200)
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="rotate"></a><strong>rotate</strong>&nbsp;(self, angle, x, y)</dt>
+<dd>
+Rotates the image
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image to rotate
+	</li>
+	
+	<li>
+	  angle: Angle, in degrees, to rotate the image by
+	</li>
+	
+	<li>
+	  x: x coordinate to use as the image's center of rotation. Default: 0
+	</li>
+	
+	<li>
+	  y: y coordinate to use at the image's center of rotation. Default: 0
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+foo:rotate(60)
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="scale"></a><strong>scale</strong>&nbsp;(self, sx, sy)</dt>
+<dd>
+Scales the image
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image to scale
+	</li>
+	
+	<li>
+	  sx: The ratio to scale the image's width by
+	</li>
+	
+	<li>
+	  sy: The ratio to scale the image's height by
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+foo:scale(0.5, 0.5)
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="set_position"></a><strong>set_position</strong>&nbsp;(self, x, y)</dt>
+<dd>
+Sets the image position
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image to position
+	</li>
+	
+	<li>
+	  x: x position
+	</li>
+	
+	<li>
+	  y: y position
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+foo:set_position(100, 100)
+
+
+
+
+
+</dd>
+
+
+
+
 <dt><a name="show"></a><strong>show</strong>&nbsp;(self)</dt>
 <dd>
 Shows an image
@@ -176,6 +647,38 @@ Shows an image
 foo:show()
 
 
+
+
+
+</dd>
+
+
+
+
+<dt><a name="width"></a><strong>width</strong>&nbsp;(self)</dt>
+<dd>
+Gets the width of the image
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+w = foo:width()
+
+
+
+<h3>Return value:</h3>
+The image's width
 
 
 

@@ -38,16 +38,16 @@
 		<a href="../modules/background.html">background</a>
 	</li>
 
-	<li>
-		<a href="../modules/hook.html">hook</a>
-	</li>
-
+	<li><strong>hook</strong></li>
+	
 	<li>
 		<a href="../modules/image.html">image</a>
 	</li>
 
-	<li><strong>odious</strong></li>
-	
+	<li>
+		<a href="../modules/odious.html">odious</a>
+	</li>
+
 	<li>
 		<a href="../modules/odious.util.html">odious.util</a>
 	</li>
@@ -87,13 +87,33 @@
 
 <div id="content">
 
-<h1>Module <code>odious</code></h1>
+<h1>Module <code>hook</code></h1>
 
-<p>Library for lualock</p>
+<p>API for connecting to lualock's hooks</p>
+
+<p><b>Author:</b>
+<table class="authors_list">
+
+	<tr><td class="name">Guff &lt;cassmacguff@gmail.com&gt;</td></tr>
+
+</table>
+</p>
+
+
+<p>Copyright&copy; 2011 Guff</p>
 
 
 
 
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#connect">connect</a>&nbsp;(hook_name, func)</td>
+	<td class="summary">Connects a lua function to a given hook </td>
+	</tr>
+
+</table>
 
 
 
@@ -104,6 +124,44 @@
 <br/>
 
 
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="connect"></a><strong>connect</strong>&nbsp;(hook_name, func)</dt>
+<dd>
+Connects a lua function to a given hook
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  hook_name: The hook to connect to; one of "lock", "unlock", or "auth-failed"
+	</li>
+	
+	<li>
+	  func: The function to run when the hook is triggered
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+hook.connect("lock", function () print("THE SCREEN IS LOCKED!") end)
+
+
+
+
+
+</dd>
+
+
+</dl>
 
 
 

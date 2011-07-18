@@ -1,0 +1,308 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/background.html">background</a>
+	</li>
+
+	<li>
+		<a href="../modules/hook.html">hook</a>
+	</li>
+
+	<li>
+		<a href="../modules/image.html">image</a>
+	</li>
+
+	<li>
+		<a href="../modules/odious.html">odious</a>
+	</li>
+
+	<li>
+		<a href="../modules/odious.util.html">odious.util</a>
+	</li>
+
+	<li>
+		<a href="../modules/prefs.html">prefs</a>
+	</li>
+
+	<li>
+		<a href="../modules/style.html">style</a>
+	</li>
+
+	<li><strong>text</strong></li>
+	
+	<li>
+		<a href="../modules/timer.html">timer</a>
+	</li>
+
+	<li>
+		<a href="../modules/utils.html">utils</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>text</code></h1>
+
+<p>API for drawing text</p>
+
+<p><b>Author:</b>
+<table class="authors_list">
+
+	<tr><td class="name">Guff &lt;cassmacguff@gmail.com&gt;</td></tr>
+
+</table>
+</p>
+
+
+<p>Copyright&copy; 2011 Guff</p>
+
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#draw">draw</a>&nbsp;(self)</td>
+	<td class="summary">Draws the text object </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#set">set</a>&nbsp;(self, args)</td>
+	<td class="summary">Sets the text object's properties Note that for the changes to be reflected on screen, you must call draw() after this.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#text">text</a>&nbsp;(args)</td>
+	<td class="summary">Creates a new text object Note that draw() must be called to display the text </td>
+	</tr>
+
+</table>
+
+
+
+
+<h2>Tables</h2>
+<table class="table_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#properties">properties</a></td>
+	<td class="summary">Available text object properties </td>
+	</tr>
+
+</table>
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="draw"></a><strong>draw</strong>&nbsp;(self)</dt>
+<dd>
+Draws the text object
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: Text object
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+bar:draw()
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="set"></a><strong>set</strong>&nbsp;(self, args)</dt>
+<dd>
+Sets the text object's properties Note that for the changes to be reflected on screen, you must call draw() after this.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: Text object
+	</li>
+	
+	<li>
+	  args: Properties to use; see properties table
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+bar:set({ text = "Hullo" })
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="text"></a><strong>text</strong>&nbsp;(args)</dt>
+<dd>
+Creates a new text object Note that draw() must be called to display the text
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  args: Table of properties to use for the text object; see properties table
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+bar = text({ text = "User: " .. os.getenv("USER"), x = 500, y = 370 })
+
+
+
+<h3>Return value:</h3>
+The new text object
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+<h2><a name="tables"></a>Tables</h2>
+<dl class="table">
+
+<dt><a name="properties"></a><strong>properties</strong></dt>
+<dd>Available text object properties
+
+
+<em>Fields</em>
+<ul>
+	
+	<li>
+	  text: The text to display
+	</li>
+	
+	<li>
+	  x: x position of the text
+	</li>
+	
+	<li>
+	  y: y position of the text
+	</li>
+	
+	<li>
+	  font: font to use; of the form "Sans Bold 12"
+	</li>
+	
+	<li>
+	  color: color of the text
+	</li>
+	
+	<li>
+	  border_color: color of the text's border
+	</li>
+	
+	<li>
+	  border_width: width of the text's border
+	</li>
+	
+</ul>
+
+
+</dd>
+
+
+</dl>
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->	
+</body>
+</html>
