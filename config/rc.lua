@@ -6,7 +6,7 @@ style{ color = "#333333", font = "Sans 12", x = 500, y = 400, off_x = 5,
 prefs{ timeout = 2 }
 local dpms = { 
     set = function (standby, suspend, off)
-        spawn(string.format("xset dpms %i %i %i", standby, suspend, off))
+        utils.spawn(string.format("xset dpms %i %i %i", standby, suspend, off))
     end,
     get = function ()
         local xset_out = odious.util.pread("xset q")

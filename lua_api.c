@@ -27,7 +27,7 @@
 #include "clib/style.h"
 #include "clib/prefs.h"
 #include "clib/hook.h"
-#include "clib/spawn.h"
+#include "clib/utils.h"
 
 int lualock_lua_on_error(lua_State *L) {
     printf("error: %s\n", luaL_checkstring(L, -1));
@@ -73,7 +73,7 @@ gboolean lualock_lua_loadrc(lua_State *L) {
     
     lualock_lua_hook_init(lualock.L);
     
-    lualock_lua_spawn_init(lualock.L);
+    lualock_lua_utils_init(lualock.L);
     
     GPtrArray *configs = g_ptr_array_new();
     g_ptr_array_add(configs, g_build_filename(g_get_user_config_dir(), "lualock",

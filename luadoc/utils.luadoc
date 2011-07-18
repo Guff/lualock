@@ -1,10 +1,10 @@
---- API for spawning processes asynchronously
+--- Miscellaneous utility functions
 -- @author Guff &lt;cassmacguff@gmail.com&gt;
 -- @copyright 2011 Guff
-module("spawn")
+module("utils")
 
 --- Launch a child process asynchronously
 -- @param command The command to run
 -- @class function
--- @usage spawn("notify-send \"Hullo, warld\"")
+-- @usage utils.spawn("notify-send \"Hullo, warld\"")
 -- @name prefs
