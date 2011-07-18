@@ -2,7 +2,7 @@
 #include <lauxlib.h>
 #include <unistd.h>
 
-#include "clib/spawn.h"
+#include "clib/utils.h"
 
 static void spawn_child_callback(gpointer data) {
     sigset_t empty;
