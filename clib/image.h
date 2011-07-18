@@ -1,5 +1,5 @@
-#ifndef CLIB_IMAGE_H
-#define CLIB_IMAGE_H
+#ifndef LUALOCK_CLIB_IMAGE_H
+#define LUALOCK_CLIB_IMAGE_H
 
 #include <lualib.h>
 #include <lauxlib.h>

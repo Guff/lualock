@@ -1,5 +1,5 @@
-#ifndef CLIB_BACKGROUND_H
-#define CLIB_BACKGROUND_H
+#ifndef LUALOCK_CLIB_BACKGROUND_H
+#define LUALOCK_CLIB_BACKGROUND_H
 
 #include <lua.h>
 #include <lualib.h>

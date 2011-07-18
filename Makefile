@@ -3,7 +3,7 @@ INSTALLDIR := $(DESTDIR)$(PREFIX)
 
 CC	:= gcc
 
-PKGS := clutter-gtk-1.0 lua xscrnsaver
+PKGS := clutter-gtk-1.0 lua xscrnsaver dbus-glib-1
 INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 
@@ -41,6 +41,13 @@ lualock: $(OBJS)
 	@echo $(CC) -o $@ $(OBJS)
 	@$(CC) -o $@ $(OBJS) $(LDFLAGS)
 
+apidoc:
+	mkdir -p apidocs
+	luadoc --nofiles -d apidocs lib/* luadoc/*
+
+doc: $(HEADS) $(SRCS)
+	doxygen -s lualock.doxygen
+
 install:
 	install -d $(INSTALLDIR)/share/lualock/
 	cp -r lib $(INSTALLDIR)/share/lualock/
@@ -55,3 +62,4 @@ install:
 
 clean:
 	rm -rf lualock $(OBJS)
+	rm -rf apidocs

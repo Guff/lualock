@@ -41,11 +41,8 @@ gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data);
 void show_lock();
 void hide_lock();
 
-void init_display() {
-    lualock.scr = gdk_screen_get_default();
-}
-
 void init_window() {
+    lualock.scr = gdk_screen_get_default();
     lualock.win = gtk_window_new(GTK_WINDOW_POPUP);
     gtk_window_set_default_size(GTK_WINDOW(lualock.win),
                                 gdk_screen_get_width(lualock.scr),
@@ -227,7 +224,6 @@ int main(int argc, char **argv) {
     
     lualock.timeout = 10 * 60;
     
-    init_display();
     init_window();
     init_style();
     init_clutter();

@@ -1,5 +1,5 @@
-#ifndef CLIB_SPAWN_H
-#define CLIB_SPAWN_H
+#ifndef LUALOCK_CLIB_SPAWN_H
+#define LUALOCK_CLIB_SPAWN_H
 
 #include <lualib.h>
 

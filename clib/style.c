@@ -28,7 +28,7 @@ void style_set(const char *font, int x, int y, int off_x, int off_y, int width,
 int lualock_lua_style_set(lua_State *L) {
 	double r, g, b, a;
 	lua_getfield(L, 1, "color");
-	parse_color(luaL_checkstring(L, 2), &r, &g, &b, &a);
+	parse_color(luaL_optstring(L, 2, "#000000"), &r, &g, &b, &a);
 	lua_pop(L, 1);
 	lua_getfield(L, 1, "font");
 	lua_getfield(L, 1, "x");
@@ -38,9 +38,14 @@ int lualock_lua_style_set(lua_State *L) {
 	lua_getfield(L, 1, "width");
 	lua_getfield(L, 1, "height");
 	
-	style_set(lua_tostring(L, 2), lua_tonumber(L, 3), lua_tonumber(L, 4),
-			  lua_tonumber(L, 5), lua_tonumber(L, 6), lua_tonumber(L, 7),
-			  lua_tonumber(L, 8), r, g, b, a);
+	style_set(luaL_optstring(L, 2, lualock.style.font),
+			  luaL_optnumber(L, 3, lualock.style.x),
+			  luaL_optnumber(L, 4, lualock.style.y),
+			  luaL_optnumber(L, 5, lualock.style.off_x),
+			  luaL_optnumber(L, 6, lualock.style.off_y),
+			  luaL_optnumber(L, 7, lualock.style.width),
+			  luaL_optnumber(L, 8, lualock.style.height),
+			  r, g, b, a);
 	return 0;
 }
 

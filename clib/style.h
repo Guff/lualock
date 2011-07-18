@@ -1,5 +1,5 @@
-#ifndef CLIB_STYLE_H
-#define CLIB_STYLE_H
+#ifndef LUALOCK_CLIB_STYLE_H
+#define LUALOCK_CLIB_STYLE_H
 
 #include <lua.h>
 #include <lualib.h>

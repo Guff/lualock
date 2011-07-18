@@ -1,5 +1,5 @@
-#ifndef CLIB_TIMER_H
-#define CLIB_TIMER_H
+#ifndef LUALOCK_CLIB_TIMER_H
+#define LUALOCK_CLIB_TIMER_H
 
 #include <lualib.h>
 #include <glib.h>

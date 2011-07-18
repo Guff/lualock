@@ -1,2 +1,4 @@
 *.o
 lualock
+apidocs/
+apidocs/*
