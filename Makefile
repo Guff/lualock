@@ -8,7 +8,7 @@ INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 
 CFLAGS   := -Wall -Wextra -std=gnu99 -I. $(INCS) $(CFLAGS)
-CPPFLAGS := -DLUALOCK_INSTALL_DIR=\"$(INSTALLDIR)/share/lualock\" \
+CPPFLAGS := -DLUALOCK_INSTALL_DIR=\"$(INSTALLDIR)/share/lualock\"  \
 			-DLUALOCK_DATA_DIR=\"$(INSTALLDIR)/share/lualock/data\" $(CPPFLAGS)
 DEBUG    := -g -DDEBUG
 LDFLAGS  := $(LIBS) $(LDFLAGS)
