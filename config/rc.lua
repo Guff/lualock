@@ -30,6 +30,8 @@ hook.connect("unlock", function ()
     dpms.set(standby, suspend, off)
 end)
 
+keybinder("<Alt>j", function () print("hullo") end)
+
 evildot = utils.get_data_dir() .. "/glowydot.png"
 failed_attempts = 0
 hook.connect("auth-failed", function ()
@@ -53,12 +55,15 @@ user_text = text{ text = "User: " .. os.getenv("USER"), x = 500, y = 370,
                   border_width = 3 }
 user_text:draw()
 
-clock_hr = text { x = 55, y = 40, font = "Droid Sans Mono 110",
+clock_hr = text { text = os.date("%I"), x = 55, y = 40, font = "Droid Sans Mono 110",
                   color = "#ffffff", border_color = "#000000", border_width = 4 }
-clock_min = text { x = 305, y = 40, font = "Droid Sans Mono 110",
+clock_min = text { text = os.date("%M"), x = 305, y = 40, font = "Droid Sans Mono 110",
                    color = "#ffffff", border_color = "#000000", border_width = 4 }
-clock_noon = text { x = 495, y = 118, font = "Droid Sans Mono 50",
+clock_noon = text { text = os.date("%p"), x = 495, y = 118, font = "Droid Sans Mono 50",
                     color = "#ffffff", border_color = "#000000", border_width = 3 }
+clock_hr:draw()
+clock_min:draw()
+clock_noon:draw()
 
 clock_timer = timer(function ()
     clock_hr:set { text = os.date("%I") }
@@ -68,3 +73,5 @@ clock_timer = timer(function ()
     clock_min:draw()
     clock_noon:draw()
 end, 1)
+
+clock_timer:start()

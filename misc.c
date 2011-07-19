@@ -77,6 +77,18 @@ void add_timer(guint id) {
     g_array_append_val(lualock.timers, id);
 }
 
+void remove_timer(guint id) {
+    if (!id)
+        return;
+    
+    for (guint i = 0; i < lualock.timers->len; i++) {
+        if (g_array_index(lualock.timers, guint, i) == id) {
+            g_source_remove(id);
+            g_array_remove_index(lualock.timers, i);
+        }
+    }
+}
+
 void clear_timers() {
     for (guint i = 0; i < lualock.timers->len; i++)
         g_source_remove(g_array_index(lualock.timers, guint, i));

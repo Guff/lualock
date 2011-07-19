@@ -37,3 +37,9 @@ module("text")
 -- @class function
 -- @usage bar:draw()
 -- @name draw
+
+--- Hides the text object
+-- @param self Text object
+-- @class function
+-- @usage bar:hide()
+-- @name hide

@@ -38,6 +38,7 @@ void get_abs_pos_for_dims(double dim_w, double dim_h, double rel_w, double rel_h
                           double *w, double *h);
 
 void add_timer(guint id);
+void remove_timer(guint id);
 void clear_timers();
 
 #endif

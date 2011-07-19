@@ -113,7 +113,7 @@ void text_draw(text_t *text_obj) {
     clutter_actor_show(text_obj->actor);
 }
 
-int lualock_lua_text_new(lua_State *L) {
+static int lualock_lua_text_new(lua_State *L) {
     if (!lua_istable(L, 1))
         luaL_typerror(L, 1, "table");
     lua_getfield(L, 1, "text");
@@ -142,13 +142,19 @@ int lualock_lua_text_new(lua_State *L) {
     return 1;
 }
 
-int lualock_lua_text_draw(lua_State *L) {
+static int lualock_lua_text_draw(lua_State *L) {
     text_t *text_obj = luaL_checkudata(L, 1, "lualock.text");
     text_draw(text_obj);
+    clutter_actor_show(text_obj->actor);
+    return 0;
+}
+static int lualock_lua_text_hide(lua_State *L) {
+    text_t *text_obj = luaL_checkudata(L, 1, "lualock.text");
+    clutter_actor_hide(text_obj->actor);
     return 0;
 }
 
-int lualock_lua_text_set(lua_State *L) {
+static int lualock_lua_text_set(lua_State *L) {
     text_t *text_obj = luaL_checkudata(L, 1, "lualock.text");
     if (!lua_istable(L, 2))
         luaL_typerror(L, 2, "table");
@@ -189,6 +195,7 @@ void lualock_lua_text_init(lua_State *L) {
     const struct luaL_reg lualock_text_lib[] =
     {
         { "draw", lualock_lua_text_draw },
+        { "hide", lualock_lua_text_hide },
         { "set", lualock_lua_text_set },
         { NULL, NULL }
     };

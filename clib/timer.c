@@ -32,8 +32,12 @@ void timer_new(l_timer_t *timer, unsigned int int_us, int cycles,
     timer->running = TRUE;
     timer->int_us = int_us;
     timer->cb = cb;
-    add_timer(timer->id = g_timeout_add(int_us, timer_run, timer));
+    timer->id = 0;
 }
+
+void timer_start(l_timer_t *timer) {
+    add_timer(timer->id = g_timeout_add(timer->int_us, timer_run, timer));
+}    
     
 gboolean timer_run(void *data) {
     l_timer_t *timer = (l_timer_t *)data;
@@ -71,8 +75,30 @@ static int lualock_lua_timer_new(lua_State *L) {
     return 1;
 }
 
+static int lualock_lua_timer_start(lua_State *L) {
+    l_timer_t *timer = luaL_checkudata(L, 1, "lualock.timer");
+    timer_start(timer);
+    return 0;
+}
+static int lualock_lua_timer_stop(lua_State *L) {
+    l_timer_t *timer = luaL_checkudata(L, 1, "lualock.timer");
+    remove_timer(timer->id);
+    timer->id = 0;
+    return 0;
+}
+
 void lualock_lua_timer_init(lua_State *L) {
-    luaL_newmetatable(L, "lualock.timer");
+    const struct luaL_reg lualock_timer_lib[] = {
+        { "start", lualock_lua_timer_start },
+        { "stop", lualock_lua_timer_stop },
+        { NULL, NULL }
+    };
     
+    luaL_newmetatable(L, "lualock.timer");
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    
+    luaL_register(L, NULL, lualock_timer_lib);
+    lua_pop(L, 1);
     lua_register(L, "timer", lualock_lua_timer_new);
 }
