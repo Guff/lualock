@@ -1,0 +1,12 @@
+--- API for connecting to lualock's hooks
+-- @author Guff &lt;cassmacguff@gmail.com&gt;
+-- @copyright 2011 Guff
+module("hook")
+
+--- Connects a lua function to a given hook
+-- @param hook_name The hook to connect to; one of "lock", "unlock", or
+-- "auth-failed"
+-- @param func The function to run when the hook is triggered
+-- @class function
+-- @usage hook.connect("lock", function () print("THE SCREEN IS LOCKED!") end)
+-- @name connect

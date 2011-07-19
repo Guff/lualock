@@ -1,0 +1,39 @@
+--- API for drawing text
+-- @author Guff &lt;cassmacguff@gmail.com&gt;
+-- @copyright 2011 Guff
+module("text")
+
+--- Available text object properties
+-- @field text The text to display
+-- @field x x position of the text
+-- @field y y position of the text
+-- @field font font to use; of the form "Sans Bold 12"
+-- @field color color of the text
+-- @field border_color color of the text's border
+-- @field border_width width of the text's border
+-- @class table
+-- @name properties
+
+--- Creates a new text object
+-- Note that draw() must be called to display the text
+-- @param args Table of properties to use for the text object; see properties
+-- table
+-- @return The new text object
+-- @class function
+-- @usage bar = text({ text = "User: " .. os.getenv("USER"), x = 500, y = 370 })
+-- @name text
+
+--- Sets the text object's properties
+-- Note that for the changes to be reflected on screen, you must call draw()
+-- after this.
+-- @param self Text object
+-- @param args Properties to use; see properties table
+-- @class function
+-- @usage bar:set({ text = "Hullo" })
+-- @name set
+
+--- Draws the text object
+-- @param self Text object
+-- @class function
+-- @usage bar:draw()
+-- @name draw

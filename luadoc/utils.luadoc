@@ -18,3 +18,9 @@ module("utils")
 -- @param -
 -- @class function
 -- @name get_data_dir
+
+--- Sleep for a specified amount of time
+-- @param seconds The amount of time to sleep for, in seconds
+-- @class function
+-- @usage utils.sleep(1.5)
+-- @name sleep

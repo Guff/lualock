@@ -1,0 +1,16 @@
+--- timer function for running lua code periodically
+-- @author Guff &lt;cassmacguff@gmail.com&gt;
+-- @copyright 2011 Guff
+module("timer")
+
+--- Creates a new timer object and starts it
+-- The timer runs the function func every interval seconds. It does this
+-- up to run_times. After the timer is created, the function is run after the
+-- given interval, not immediately.
+-- @param func The lua function to execute
+-- @param interval The interval, in seconds
+-- @param run_times The maximum number of times to execute func, 0 for no limit
+-- @return the new timer object
+-- @class function
+-- @usage timer(function () print("hi") end, 1)
+-- @name timer

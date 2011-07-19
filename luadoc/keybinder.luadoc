@@ -1,0 +1,12 @@
+--- function to bind lua functions to key events
+-- @author Guff &lt;cassmacguff@gmail.com&gt;
+-- @copyright 2011 Guff
+module("keybinder")
+
+--- Bind a lua function to a keypress event
+-- @param accel The key binding to use. Should be of the form "j" or
+-- "<Control>j"
+-- @param func The function to bind to the keypress
+-- @class function
+-- @usage keybinder("<Control>h", function () print("hullo") end)
+-- @name keybinder
