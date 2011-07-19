@@ -113,6 +113,16 @@
 <table class="function_list">
 
 	<tr>
+	<td class="name" nowrap><a href="#start">start</a>&nbsp;(self)</td>
+	<td class="summary">Starts a timer Note that the timer will first execute the function after the given interval, not immediately.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#stop">stop</a>&nbsp;(self)</td>
+	<td class="summary">Stops a timer </td>
+	</tr>
+
+	<tr>
 	<td class="name" nowrap><a href="#timer">timer</a>&nbsp;(func, interval, run_times)</td>
 	<td class="summary">Creates a new timer object and starts it The timer runs the function func every interval seconds.</td>
 	</tr>
@@ -134,9 +144,67 @@
 
 
 
+<dt><a name="start"></a><strong>start</strong>&nbsp;(self)</dt>
+<dd>
+Starts a timer Note that the timer will first execute the function after the given interval, not immediately.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The timer object
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+blar:start()
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="stop"></a><strong>stop</strong>&nbsp;(self)</dt>
+<dd>
+Stops a timer
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The timer object
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+blar:stop()
+
+
+
+
+
+</dd>
+
+
+
+
 <dt><a name="timer"></a><strong>timer</strong>&nbsp;(func, interval, run_times)</dt>
 <dd>
-Creates a new timer object and starts it The timer runs the function func every interval seconds. It does this up to run_times. After the timer is created, the function is run after the given interval, not immediately.
+Creates a new timer object and starts it The timer runs the function func every interval seconds. It does this up to run_times. After the timer is created, you must call start() on it before it will run.
 
 
 <h3>Parameters</h3>
@@ -160,7 +228,7 @@ Creates a new timer object and starts it The timer runs the function func every 
 
 
 <h3>Usage:</h3>
-timer(function () print("hi") end, 1)
+blar = timer(function () print("hi") end, 1)
 
 
 
