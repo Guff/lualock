@@ -32,7 +32,6 @@ void timer_new(l_timer_t *timer, unsigned int int_us, int cycles,
     timer->running = TRUE;
     timer->int_us = int_us;
     timer->cb = cb;
-    timer_run(timer);
     add_timer(timer->id = g_timeout_add(int_us, timer_run, timer));
 }
     

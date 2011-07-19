@@ -1,4 +1,4 @@
---- style API
+--- function to set the style of the password field
 -- @author Guff &lt;cassmacguff@gmail.com&gt;
 -- @copyright 2011 Guff
 module("style")

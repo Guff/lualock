@@ -10,14 +10,104 @@ module("image")
 -- @return The new image object
 -- @name image
 
+--- Creates a new blank image
+-- @param width Width of the new image
+-- @param height Height of the new image
+-- @class function
+-- @usage foo = image(100, 200)
+-- @return the new image object
+-- @name image_new_blank
+
 --- Shows an image
 -- @param self The image to show
 -- @class function
 -- @usage foo:show()
 -- @name show
 
--- Hides an image
+--- Hides an image
 -- @param self The image to hide
 -- @class function
 -- @usage foo:hide()
 -- @name hide
+
+--- Sets the image position
+-- @param self The image to position
+-- @param x x position
+-- @param y y position
+-- @class function
+-- @usage foo:set_position(100, 100)
+-- @name set_position
+
+--- Rotates the image
+-- @param self The image to rotate
+-- @param angle Angle, in degrees, to rotate the image by
+-- @param x x coordinate to use as the image's center of rotation. Default: 0
+-- @param y y coordinate to use at the image's center of rotation. Default: 0
+-- @class function
+-- @usage foo:rotate(60)
+-- @name rotate
+
+--- Scales the image
+-- @param self The image to scale
+-- @param sx The ratio to scale the image's width by
+-- @param sy The ratio to scale the image's height by
+-- @class function
+-- @usage foo:scale(0.5, 0.5)
+-- @name scale
+
+--- Resizes the image
+-- @param self The image to resize
+-- @param width The image's new width
+-- @param height The image's new height
+-- @class function
+-- @usage foo:resize(125, 200)
+-- @name resize
+
+--- Gets the width of the image
+-- @param self The image
+-- @return The image's width
+-- @class function
+-- @usage w = foo:width()
+-- @name width
+
+--- Gets the height of the image
+-- @param self The image
+-- @return The image's height
+-- @class function
+-- @usage h = foo:height()
+-- @name height
+
+--- Draws a rectangle on the image
+-- @param self The image
+-- @param x x coordinate of the rectangle's top left corner
+-- @param y y coordinate of the rectangle's top left corner
+-- @param width width of the rectangle
+-- @param height height of the rectangle
+-- @param fill true to fill the rectangle with color, false to draw the outline
+-- @param color color to draw the rectangle with
+-- @class function
+-- @usage foo:draw_rectangle(0, 0, 100, 100, true, "#ff0000")
+-- @name draw_rectangle
+
+--- Draws a line on the image
+-- @param self The image
+-- @param x1 x coordinate of the line's starting point
+-- @param y1 y coordinate of the line's starting point
+-- @param x2 x coordinate of the line's ending point
+-- @param y2 y coordinate of the line's ending point
+-- @param width width of the line
+-- @param color color of the line
+-- @class function
+-- @usage foo:draw_line(0, 0, 100, 100, 5, "#000000")
+-- @name draw_line
+
+--- Draws a circle on the image
+-- @param self The image
+-- @param x x coordinate of the circle's center
+-- @param y y coordinate of the circle's center
+-- @param radius radius of the circle
+-- @param fill true to fill the circle with color, false to draw the outline
+-- @param color color to draw the circle with
+-- @class function
+-- @usage foo:draw_circle(0, 0, 50, false, "#ff0000")
+-- @name draw_circle

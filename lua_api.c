@@ -28,6 +28,7 @@
 #include "clib/prefs.h"
 #include "clib/hook.h"
 #include "clib/utils.h"
+#include "clib/keybinder.h"
 
 int lualock_lua_on_error(lua_State *L) {
     printf("error: %s\n", luaL_checkstring(L, -1));
@@ -59,21 +60,23 @@ gboolean lualock_lua_loadrc(lua_State *L) {
     lua_setfield(L, 1, "path");
     lua_pop(L, 1);
     
-    lualock_lua_image_init(lualock.L);
+    lualock_lua_image_init(L);
     
-    lualock_lua_background_init(lualock.L);
+    lualock_lua_background_init(L);
     
-    lualock_lua_text_init(lualock.L);
+    lualock_lua_text_init(L);
     
-    lualock_lua_timer_init(lualock.L);
+    lualock_lua_timer_init(L);
     
-    lualock_lua_style_init(lualock.L);
+    lualock_lua_style_init(L);
     
-    lualock_lua_prefs_init(lualock.L);
+    lualock_lua_prefs_init(L);
     
-    lualock_lua_hook_init(lualock.L);
+    lualock_lua_hook_init(L);
     
-    lualock_lua_utils_init(lualock.L);
+    lualock_lua_utils_init(L);
+    
+    lualock_lua_keybinder_init(L);
     
     GPtrArray *configs = g_ptr_array_new();
     g_ptr_array_add(configs, g_build_filename(g_get_user_config_dir(), "lualock",
@@ -88,5 +91,7 @@ gboolean lualock_lua_loadrc(lua_State *L) {
             return TRUE;
         }
     }
+    
+    g_ptr_array_free(configs, TRUE);
     return FALSE;
 }

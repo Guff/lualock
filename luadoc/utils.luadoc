@@ -8,3 +8,13 @@ module("utils")
 -- @class function
 -- @usage utils.spawn("notify-send \"Hullo, warld\"")
 -- @name prefs
+
+--- Get the user's local lualock configuration directory
+-- @param -
+-- @class function
+-- @name get_config_dir
+
+--- Get lualock's system-wide data directory
+-- @param -
+-- @class function
+-- @name get_data_dir

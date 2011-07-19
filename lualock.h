@@ -65,6 +65,9 @@ typedef struct {
     
     GHashTable *hooks;
     const char **hook_names;
+    
+    GPtrArray *keybinds;
+    
     style_t style;
 } lualock_t;
 

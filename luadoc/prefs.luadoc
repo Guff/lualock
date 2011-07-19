@@ -1,4 +1,4 @@
---- preferences API
+--- set lualock's preferences
 -- @author Guff &lt;cassmacguff@gmail.com&gt;
 -- @copyright 2011 Guff
 module("prefs")

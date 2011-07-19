@@ -1,4 +1,4 @@
---- background API
+--- set lualock's background
 -- @author Guff &lt;cassmacguff@gmail.com&gt;
 -- @copyright 2011 Guff
 module("background")

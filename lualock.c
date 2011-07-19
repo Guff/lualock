@@ -37,6 +37,7 @@
 #include "misc.h"
 #include "drawing.h"
 #include "lua_api.h"
+#include "clib/keybinder.h"
 
 lualock_t lualock;
 
@@ -118,6 +119,15 @@ void init_hooks() {
                          sizeof(GHook));
 }
 
+void init_keybinds() {
+    lualock.keybinds = g_ptr_array_new();
+}
+
+void clear_keybinds() {
+    if (lualock.keybinds->len)
+        g_ptr_array_remove_range(lualock.keybinds, 0, lualock.keybinds->len);
+}
+
 void clear_hooks() {
     for (int i = 0; hook_names[i]; i++)
         g_hook_list_clear(g_hash_table_lookup(lualock.hooks, hook_names[i]));
@@ -134,6 +144,7 @@ gboolean authenticate_user() {
 
 gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
     guint keyval = ((GdkEventKey *)ev)->keyval;
+    GdkModifierType mod = ((GdkEventKey *)ev)->state;
     gchar buf[6];
     guint32 uc;
     guint8 uc_len;
@@ -170,6 +181,13 @@ gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
     
     draw_password_mask();
     
+    for (guint i = 0; i < lualock.keybinds->len; i++) {
+        keybind_t *bind = g_ptr_array_index(lualock.keybinds, i);
+        if (bind->val == keyval && bind->mod == mod) {
+            lua_rawgeti(lualock.L, LUA_REGISTRYINDEX, bind->r);
+            lualock_lua_do_function(lualock.L);
+        }
+    }
     return TRUE;
 }
 
@@ -213,6 +231,7 @@ void hide_lock() {
     g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "unlock"), FALSE);
     lua_close(lualock.L);
     clear_timers();
+    clear_keybinds();
     gtk_widget_hide(lualock.win);
     gdk_keyboard_ungrab(GDK_CURRENT_TIME);
     gdk_pointer_ungrab(GDK_CURRENT_TIME);
@@ -255,6 +274,7 @@ int main(int argc, char **argv) {
     init_clutter();
     init_timers();
     init_hook_table();
+    init_keybinds();
     
     clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), lualock.pw_actor);
     
