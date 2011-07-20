@@ -113,6 +113,11 @@
 <table class="function_list">
 
 	<tr>
+	<td class="name" nowrap><a href="#clear">clear</a>&nbsp;(self)</td>
+	<td class="summary">Clears the image buffer </td>
+	</tr>
+
+	<tr>
 	<td class="name" nowrap><a href="#draw_circle">draw_circle</a>&nbsp;(self, x, y, radius, fill, color)</td>
 	<td class="summary">Draws a circle on the image </td>
 	</tr>
@@ -169,7 +174,7 @@
 
 	<tr>
 	<td class="name" nowrap><a href="#show">show</a>&nbsp;(self)</td>
-	<td class="summary">Shows an image </td>
+	<td class="summary">Shows an image and flushes image buffer to screen Note: must be called after any drawing is done on the image for it to show up </td>
 	</tr>
 
 	<tr>
@@ -191,6 +196,35 @@
 
 <h2><a name="functions"></a>Functions</h2>
 <dl class="function">
+
+
+
+<dt><a name="clear"></a><strong>clear</strong>&nbsp;(self)</dt>
+<dd>
+Clears the image buffer
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: The image to clear
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+foo:clear()
+
+
+
+
+
+</dd>
+
 
 
 
@@ -632,7 +666,7 @@ foo:set_position(100, 100)
 
 <dt><a name="show"></a><strong>show</strong>&nbsp;(self)</dt>
 <dd>
-Shows an image
+Shows an image and flushes image buffer to screen Note: must be called after any drawing is done on the image for it to show up
 
 
 <h3>Parameters</h3>
