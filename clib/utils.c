@@ -2,6 +2,7 @@
 #include <lauxlib.h>
 #include <unistd.h>
 
+#include "lualock.h"
 #include "clib/utils.h"
 
 static void spawn_child_callback(gpointer data) {
@@ -56,12 +57,24 @@ static int lualock_lua_sleep(lua_State *L) {
 	return 0;
 }
 
+static int lualock_lua_get_screen_width(lua_State *L) {
+	lua_pushinteger(L, gdk_screen_get_width(lualock.scr));
+	return 1;
+}
+
+static int lualock_lua_get_screen_height(lua_State *L) {
+	lua_pushinteger(L, gdk_screen_get_height(lualock.scr));
+	return 1;
+}
+
 void lualock_lua_utils_init(lua_State *L) {
 	const struct luaL_reg lualock_utils_lib[] = {
 		{ "spawn", lualock_lua_spawn },
 		{ "get_data_dir", lualock_lua_get_data_dir },
 		{ "get_config_dir", lualock_lua_get_config_dir },
 		{ "sleep", lualock_lua_sleep },
+		{ "screen_width", lualock_lua_get_screen_width },
+		{ "screen_height", lualock_lua_get_screen_height },
 		{ NULL, NULL }
 	};
 	luaL_register(L, "utils", lualock_utils_lib);

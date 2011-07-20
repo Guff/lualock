@@ -24,3 +24,17 @@ module("utils")
 -- @class function
 -- @usage utils.sleep(1.5)
 -- @name sleep
+
+--- Get the width of the screen
+-- @param -
+-- @return The width of the screen
+-- @class function
+-- @usage w = utils.screen_width()
+-- @name screen_width
+
+--- Get the height of the screen
+-- @param -
+-- @return The height of the screen
+-- @class function
+-- @usage h = utils.screen_height()
+-- @name screen_height

@@ -18,7 +18,8 @@ module("image")
 -- @return the new image object
 -- @name image_new_blank
 
---- Shows an image
+--- Shows an image and flushes image buffer to screen
+-- Note: must be called after any drawing is done on the image for it to show up
 -- @param self The image to show
 -- @class function
 -- @usage foo:show()
@@ -29,6 +30,12 @@ module("image")
 -- @class function
 -- @usage foo:hide()
 -- @name hide
+
+--- Clears the image buffer
+-- @param self The image to clear
+-- @class function
+-- @usage foo:clear()
+-- @name clear
 
 --- Sets the image position
 -- @param self The image to position
