@@ -92,6 +92,7 @@ void image_set_position(image_t *image, gdouble rel_x, gdouble rel_y) {
 void image_show(image_t *image) {
     image_render(image);
     image->layer->show = TRUE;
+    lualock.need_updates = TRUE;
 }
 
 void image_hide(image_t *image) {
@@ -104,20 +105,8 @@ void image_rotate(image_t *image, gdouble angle, gdouble x, gdouble y) {
 }
 
 void image_scale(image_t *image, double sx, double sy) {
-    layer_t *layer = create_layer(image_get_width(image) * sx,
-                                  image_get_height(image) * sy);
-    update_layer(image->layer, layer);
-    image->layer = layer;
-    cairo_surface_t *new_surface = create_surface(image->layer->width,
-                                                  image->layer->height);
-    cairo_t *cr = cairo_create(new_surface);
-    cairo_set_source_surface(cr, image->surface, 0, 0);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(cr);
-    cairo_destroy(cr);
-    cairo_surface_t *old_surface = image->surface;
-    image->surface = new_surface;
-    cairo_surface_destroy(old_surface);
+    image->layer->scale_x = sx;
+    image->layer->scale_y = sy;
 }
 
 void image_resize(image_t *image, gdouble width, gdouble height) {

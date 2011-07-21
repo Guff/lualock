@@ -158,11 +158,7 @@ gboolean on_key_press(GdkEvent *ev) {
     switch(keyval) {
         case GDK_KEY_Return:
         case GDK_KEY_KP_Enter:
-            if (authenticate_user())
-                gtk_main_quit();
-            else
-                g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "auth-failed"),
-                                   FALSE);
+            return FALSE;
             break;
         case GDK_KEY_BackSpace:
             if (lualock.pw_length > 0)
@@ -202,9 +198,15 @@ void event_handler(GdkEvent *ev) {
     switch (ev->type) {
         case GDK_KEY_PRESS:
         // if enter was pressed, check password
-            if (!on_key_press(ev))
+            lualock.need_updates = TRUE;
+            if (!on_key_press(ev)) {
                 if (authenticate_user())
                     g_main_loop_quit(lualock.loop);
+                else
+                    g_hook_list_invoke(
+                        g_hash_table_lookup(lualock.hooks, "auth-failed"),
+                        FALSE);
+            }
             break;
         case GDK_EXPOSE:
             lualock.need_updates = TRUE;
@@ -236,6 +238,7 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
 }
 
 void show_lock() {
+    lualock.need_updates = TRUE;
     gdk_keyboard_grab(lualock.win, TRUE, GDK_CURRENT_TIME);
     gdk_pointer_grab(lualock.win, TRUE, GDK_BUTTON_PRESS_MASK
                      | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK, NULL,
@@ -244,10 +247,8 @@ void show_lock() {
     g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "lock"), FALSE);
     
     lualock.frame_timer_id = g_timeout_add(1000.0 / 10, draw, NULL);
-    lualock.loop = g_main_new(TRUE);
-    g_main_run(lualock.loop);
+    g_main_loop_run(lualock.loop);
     
-    gtk_main();
     hide_lock();
 }
 
@@ -288,7 +289,7 @@ int main(int argc, char **argv) {
     lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
     lualock.pw_length = 0;
     lualock.pw_alloc = PW_BUFF_SIZE;
-    
+        
     lualock.timeout = 10 * 60;
     
     init_window();
@@ -304,6 +305,9 @@ int main(int argc, char **argv) {
     if (ret != PAM_SUCCESS)
         exit(EXIT_FAILURE);
     
+    gdk_event_handler_set((GdkEventFunc)event_handler, NULL, NULL);
+    lualock.loop = g_main_loop_new(NULL, TRUE);
+
     Display *dpy = XOpenDisplay(NULL);
     XScreenSaverInfo *xss_info = XScreenSaverAllocInfo();
     if (prefs.no_daemon) {
@@ -311,9 +315,7 @@ int main(int argc, char **argv) {
         init_lua();
         show_lock();
         return 0;
-    }
-    
-    gdk_event_handler_set((GdkEventFunc)event_handler, NULL, NULL);
+    }    
     
     int idle_time;
     while (TRUE) {

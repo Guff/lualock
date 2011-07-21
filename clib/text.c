@@ -109,6 +109,7 @@ void text_draw(text_t *text_obj) {
     cairo_destroy(cr);
     
     layer->show = TRUE;
+    lualock.need_updates = TRUE;
 }    
 
 static int lualock_lua_text_new(lua_State *L) {
