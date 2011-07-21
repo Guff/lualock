@@ -62,10 +62,8 @@
 		<a href="../modules/odious.widget.html">odious.widget</a>
 	</li>
 
-	<li>
-		<a href="../modules/odious.widget.progressbar.html">odious.widget.progressbar</a>
-	</li>
-
+	<li><strong>odious.widget.progressbar</strong></li>
+	
 	<li>
 		<a href="../modules/prefs.html">prefs</a>
 	</li>
@@ -78,8 +76,10 @@
 		<a href="../modules/text.html">text</a>
 	</li>
 
-	<li><strong>timer</strong></li>
-	
+	<li>
+		<a href="../modules/timer.html">timer</a>
+	</li>
+
 	<li>
 		<a href="../modules/utils.html">utils</a>
 	</li>
@@ -99,20 +99,10 @@
 
 <div id="content">
 
-<h1>Module <code>timer</code></h1>
+<h1>Module <code>odious.widget.progressbar</code></h1>
 
-<p>timer function for running lua code periodically</p>
+<p>A progressbar widget. Adapted from awesome's awful library</p>
 
-<p><b>Author:</b>
-<table class="authors_list">
-
-	<tr><td class="name">Guff &lt;cassmacguff@gmail.com&gt;</td></tr>
-
-</table>
-</p>
-
-
-<p>Copyright&copy; 2011 Guff</p>
 
 
 
@@ -121,18 +111,23 @@
 <table class="function_list">
 
 	<tr>
-	<td class="name" nowrap><a href="#start">start</a>&nbsp;(self)</td>
-	<td class="summary">Starts a timer Note that the timer will first execute the function after the given interval, not immediately.</td>
+	<td class="name" nowrap><a href="#new">new</a>&nbsp;(args)</td>
+	<td class="summary">Create a progressbar widget.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#stop">stop</a>&nbsp;(self)</td>
-	<td class="summary">Stops a timer </td>
+	<td class="name" nowrap><a href="#set_height">set_height</a>&nbsp;(progressbar, height)</td>
+	<td class="summary">Set the progressbar height.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#timer">timer</a>&nbsp;(func, interval, run_times)</td>
-	<td class="summary">Creates a new timer object and starts it The timer runs the function func every interval seconds.</td>
+	<td class="name" nowrap><a href="#set_value">set_value</a>&nbsp;(pbar, value)</td>
+	<td class="summary">Set the progressbar value.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#set_width">set_width</a>&nbsp;(progressbar, width)</td>
+	<td class="summary">Set the progressbar width.</td>
 	</tr>
 
 </table>
@@ -152,96 +147,117 @@
 
 
 
-<dt><a name="start"></a><strong>start</strong>&nbsp;(self)</dt>
+<dt><a name="new"></a><strong>new</strong>&nbsp;(args)</dt>
 <dd>
-Starts a timer Note that the timer will first execute the function after the given interval, not immediately.
+Create a progressbar widget.
 
 
 <h3>Parameters</h3>
 <ul>
 	
 	<li>
-	  self: The timer object
+	  args: Standard widget() arguments. You should add width and height key to set progressbar geometry.
 	</li>
 	
 </ul>
 
 
 
-
-<h3>Usage:</h3>
-blar:start()
-
-
-
-
-
-</dd>
-
-
-
-
-<dt><a name="stop"></a><strong>stop</strong>&nbsp;(self)</dt>
-<dd>
-Stops a timer
-
-
-<h3>Parameters</h3>
-<ul>
-	
-	<li>
-	  self: The timer object
-	</li>
-	
-</ul>
-
-
-
-
-<h3>Usage:</h3>
-blar:stop()
-
-
-
-
-
-</dd>
-
-
-
-
-<dt><a name="timer"></a><strong>timer</strong>&nbsp;(func, interval, run_times)</dt>
-<dd>
-Creates a new timer object and starts it The timer runs the function func every interval seconds. It does this up to run_times. After the timer is created, you must call start() on it before it will run.
-
-
-<h3>Parameters</h3>
-<ul>
-	
-	<li>
-	  func: The lua function to execute
-	</li>
-	
-	<li>
-	  interval: The interval, in seconds
-	</li>
-	
-	<li>
-	  run_times: The maximum number of times to execute func, 0 for no limit
-	</li>
-	
-</ul>
-
-
-
-
-<h3>Usage:</h3>
-blar = timer(function () print("hi") end, 1)
 
 
 
 <h3>Return value:</h3>
-the new timer object
+A progressbar widget.
+
+
+
+</dd>
+
+
+
+
+<dt><a name="set_height"></a><strong>set_height</strong>&nbsp;(progressbar, height)</dt>
+<dd>
+Set the progressbar height.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  progressbar: The progressbar.
+	</li>
+	
+	<li>
+	  height: The height to set.
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="set_value"></a><strong>set_value</strong>&nbsp;(pbar, value)</dt>
+<dd>
+Set the progressbar value.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  pbar: The progress bar.
+	</li>
+	
+	<li>
+	  value: The progress bar value between 0 and 1.
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="set_width"></a><strong>set_width</strong>&nbsp;(progressbar, width)</dt>
+<dd>
+Set the progressbar width.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  progressbar: The progressbar.
+	</li>
+	
+	<li>
+	  width: The width to set.
+	</li>
+	
+</ul>
+
+
+
+
+
 
 
 
