@@ -132,9 +132,10 @@ void image_draw_rectangle(image_t *image, gdouble x, gdouble y,
     clutter_cairo_set_source_color(cr, color);
     cairo_set_line_width(cr, 1);
     cairo_rectangle(cr, x, y, w, h);
-    cairo_stroke_preserve(cr);
     if (fill)
         cairo_fill(cr);
+    else
+        cairo_stroke(cr);
     
     cairo_destroy(cr);
 }
@@ -158,9 +159,10 @@ void image_draw_circle(image_t *image, gdouble x, gdouble y,
     clutter_cairo_set_source_color(cr, color);
     cairo_arc(cr, x, y, radius, 0, 2 * M_PI);
     cairo_set_line_width(cr, 1);
-    cairo_stroke_preserve(cr);
     if (fill)
         cairo_fill(cr);
+    else
+        cairo_stroke(cr);
     
     cairo_destroy(cr);
 }
