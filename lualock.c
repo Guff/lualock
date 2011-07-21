@@ -140,6 +140,14 @@ void clear_hooks() {
         g_hook_list_clear(g_hash_table_lookup(lualock.hooks, hook_names[i]));
 }
 
+void clear_layers() {
+    for (guint i = 0; i < lualock.layers->len; i++)
+        layer_destroy(g_ptr_array_index(lualock.layers, i));
+    
+    if (lualock.layers->len)
+        g_ptr_array_remove_range(lualock.layers, 0, lualock.layers->len);
+}        
+
 void reset_password() {
     lualock.password[0] = '\0';
     lualock.pw_length = 0;
@@ -261,6 +269,7 @@ void hide_lock() {
     gdk_window_hide(lualock.win);
     gdk_keyboard_ungrab(GDK_CURRENT_TIME);
     gdk_pointer_ungrab(GDK_CURRENT_TIME);
+    clear_layers();
     
     clear_hooks();
 }

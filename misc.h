@@ -29,6 +29,7 @@ layer_t* create_layer(gint width, gint height);
 void add_layer(layer_t *layer);
 void remove_layer(layer_t *layer);
 void update_layer(layer_t *old_layer, layer_t *new_layer);
+void layer_destroy(layer_t *layer);
 
 void parse_color(const gchar *hex, gdouble *r, gdouble *g, gdouble *b, gdouble *a);
 

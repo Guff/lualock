@@ -79,7 +79,8 @@ void text_draw(text_t *text_obj) {
     int width, height;    
     get_extents_for_string(text_obj->text, text_obj->font, &width, &height);
     
-    layer_t *layer = create_layer(width, height);
+    layer_t *layer = create_layer(width + text_obj->border_width,
+                                  height + text_obj->border_width);
     layer_t *old_layer = text_obj->layer;
     layer->x = text_obj->x - text_obj->border_width;
     layer->y = text_obj->y - text_obj->border_width;

@@ -52,19 +52,22 @@ void add_layer(layer_t *layer) {
 
 void remove_layer(layer_t *layer) {
     g_ptr_array_remove(lualock.layers, layer);
-    cairo_surface_destroy(layer->surface);
-    free(layer);
+    layer_destroy(layer);
 }
 
 void update_layer(layer_t *old_layer, layer_t *new_layer) {
     for (guint i = 0; i < lualock.layers->len; i++) {
         if (g_ptr_array_index(lualock.layers, i) == old_layer) {
-            cairo_surface_destroy(old_layer->surface);
-            free(old_layer);
+            layer_destroy(old_layer);
             lualock.layers->pdata[i] = new_layer;
             return;
         }
     }
+}
+
+void layer_destroy(layer_t *layer) {
+    cairo_surface_destroy(layer->surface);
+    free(layer);
 }
 
 void parse_color(const gchar *color, gdouble *r, gdouble *g, gdouble *b, gdouble *a) {
