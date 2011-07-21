@@ -27,20 +27,19 @@ gboolean image_new(image_t *image, const char *filename) {
     image->pbuf = gdk_pixbuf_new_from_file(filename, error);
     if (!image->pbuf)
         return FALSE;
-    image->actor = create_actor(gdk_pixbuf_get_width(image->pbuf),
+    image->layer = create_layer(gdk_pixbuf_get_width(image->pbuf),
                                 gdk_pixbuf_get_height(image->pbuf));
     
     image->rotation = 0;
     
-    image->surface = create_surface(clutter_actor_get_width(image->actor),
-                                    clutter_actor_get_height(image->actor));
+    image->surface = create_surface(image->layer->width, image->layer->height);
     cairo_t *cr = cairo_create(image->surface);
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
     gdk_cairo_set_source_pixbuf(cr, image->pbuf, 0, 0);
     cairo_paint(cr);
     cairo_destroy(cr);
     
-    add_actor(image->actor);
+    add_layer(image->layer);
 
     return TRUE;
 }
@@ -48,16 +47,16 @@ gboolean image_new(image_t *image, const char *filename) {
 void image_new_blank(image_t *image, gdouble rel_w, gdouble rel_h) {
     double w, h;
     get_abs_pos(rel_w, rel_h, &w, &h);
-    image->actor = create_actor(w, h);
+    image->layer = create_layer(w, h);
     image->rotation = 0;
     image->surface = create_surface(w, h);
     image->pbuf = NULL;
     
-    add_actor(image->actor);
+    add_layer(image->layer);
 }
 
 void image_render(image_t *image) {
-    cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(image->actor));
+    cairo_t *cr = cairo_create(image->layer->surface);
     cairo_set_source_surface(cr, image->surface, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint(cr);
@@ -76,40 +75,41 @@ void image_clear(image_t *image) {
 }    
 
 gdouble image_get_width(image_t *image) {
-    return clutter_actor_get_width(image->actor);
+    return image->layer->width;
 }
 
 gdouble image_get_height(image_t *image) {
-    return clutter_actor_get_height(image->actor);
+    return image->layer->height;
 }
 
 void image_set_position(image_t *image, gdouble rel_x, gdouble rel_y) {
     gdouble x, y;
     get_abs_pos(rel_x, rel_y, &x, &y);
-    clutter_actor_set_position(image->actor, x, y);
+    image->layer->x = x;
+    image->layer->y = y;
 }
 
 void image_show(image_t *image) {
     image_render(image);
-    clutter_actor_show(image->actor);
+    image->layer->show = TRUE;
 }
 
 void image_hide(image_t *image) {
-    clutter_actor_hide(image->actor);
+    image->layer->show = FALSE;
 }
 
-void image_rotate(image_t *image, gdouble angle, gfloat x, gfloat y) {
+void image_rotate(image_t *image, gdouble angle, gdouble x, gdouble y) {
     image->rotation += angle;
-    clutter_actor_set_anchor_point(image->actor, x, y);
-    clutter_actor_set_rotation(image->actor, CLUTTER_Z_AXIS, image->rotation,
-                               0, 0, 0);
+    image->layer->angle = image->rotation;
 }
 
 void image_scale(image_t *image, double sx, double sy) {
-    clutter_actor_set_scale(image->actor, sx, sy);
-    cairo_surface_t *new_surface = create_surface(
-        clutter_actor_get_width(image->actor),
-        clutter_actor_get_height(image->actor));
+    layer_t *layer = create_layer(image_get_width(image) * sx,
+                                  image_get_height(image) * sy);
+    update_layer(image->layer, layer);
+    image->layer = layer;
+    cairo_surface_t *new_surface = create_surface(image->layer->width,
+                                                  image->layer->height);
     cairo_t *cr = cairo_create(new_surface);
     cairo_set_source_surface(cr, image->surface, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
@@ -121,15 +121,15 @@ void image_scale(image_t *image, double sx, double sy) {
 }
 
 void image_resize(image_t *image, gdouble width, gdouble height) {
-    image_scale(image, width / (gdouble) clutter_actor_get_width(image->actor),
-                height / (gdouble) clutter_actor_get_height(image->actor));
+    image_scale(image, width / (gdouble) image->layer->width,
+                height / (gdouble) image->layer->height);
 }
 
 void image_draw_rectangle(image_t *image, gdouble x, gdouble y,
                           gdouble w, gdouble h, gboolean fill,
-                          ClutterColor *color) {
+                          GdkRGBA *color) {
     cairo_t *cr = cairo_create(image->surface);
-    clutter_cairo_set_source_color(cr, color);
+    gdk_cairo_set_source_rgba(cr, color);
     cairo_set_line_width(cr, 1);
     cairo_rectangle(cr, x, y, w, h);
     if (fill)
@@ -142,9 +142,9 @@ void image_draw_rectangle(image_t *image, gdouble x, gdouble y,
 
 void image_draw_line(image_t *image, gdouble x1, gdouble y1,
                      gdouble x2, gdouble y2, gdouble width,
-                     ClutterColor *color) {
+                     GdkRGBA *color) {
     cairo_t *cr = cairo_create(image->surface);
-    clutter_cairo_set_source_color(cr, color);
+    gdk_cairo_set_source_rgba(cr, color);
     cairo_set_line_width(cr, width);
     cairo_move_to(cr, x1, y1);
     cairo_line_to(cr, x2, y2);
@@ -154,9 +154,9 @@ void image_draw_line(image_t *image, gdouble x1, gdouble y1,
 }
 
 void image_draw_circle(image_t *image, gdouble x, gdouble y,
-                       gdouble radius, gboolean fill, ClutterColor *color) {
+                       gdouble radius, gboolean fill, GdkRGBA *color) {
     cairo_t *cr = cairo_create(image->surface);
-    clutter_cairo_set_source_color(cr, color);
+    gdk_cairo_set_source_rgba(cr, color);
     cairo_arc(cr, x, y, radius, 0, 2 * M_PI);
     cairo_set_line_width(cr, 1);
     if (fill)
@@ -245,36 +245,33 @@ static int lualock_lua_image_clear(lua_State *L) {
 
 static int lualock_lua_image_draw_rectangle(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
-    ClutterColor *color;
     gdouble r, g, b, a;
     parse_color(luaL_optstring(L, 7, "#000000"), &r, &g, &b, &a);
-    color = clutter_color_new(r * 255, g * 255, b * 255, a * 255);
+    GdkRGBA color = { r, g, b, a };
     image_draw_rectangle(image, lua_tonumber(L, 2), lua_tonumber(L, 3),
                          lua_tonumber(L, 4), lua_tonumber(L, 5),
-                         lua_toboolean(L, 6), color);
+                         lua_toboolean(L, 6), &color);
     return 0;
 }
 
 static int lualock_lua_image_draw_line(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
-    ClutterColor *color;
     gdouble r, g, b, a;
     parse_color(luaL_optstring(L, 7, "#000000"), &r, &g, &b, &a);
-    color = clutter_color_new(r * 255, g * 255, b * 255, a * 255);
+    GdkRGBA color = { r, g, b, a };
     image_draw_line(image, lua_tonumber(L, 2), lua_tonumber(L, 3),
                     lua_tonumber(L, 4), lua_tonumber(L, 5), lua_tonumber(L, 6),
-                    color);
+                    &color);
     return 0;
 }
 
 static int lualock_lua_image_draw_circle(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
-    ClutterColor *color;
     gdouble r, g, b, a;
     parse_color(luaL_optstring(L, 6, "#000000"), &r, &g, &b, &a);
-    color = clutter_color_new(r * 255, g * 255, b * 255, a * 255);
+    GdkRGBA color = { r, g, b, a };
     image_draw_circle(image, lua_tonumber(L, 2), lua_tonumber(L, 3),
-                      lua_tonumber(L, 4), lua_toboolean(L, 5), color);
+                      lua_tonumber(L, 4), lua_toboolean(L, 5), &color);
     return 0;
 }
 

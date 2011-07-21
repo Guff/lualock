@@ -37,10 +37,9 @@ void style_set(const char *font, int x, int y, int off_x, int off_y, int width,
 	lualock.style.b = b;
 	lualock.style.a = a;
 	
-	clutter_actor_set_size(lualock.pw_actor, lualock.style.width, lualock.style.height);
-	clutter_cairo_texture_set_surface_size(CLUTTER_CAIRO_TEXTURE(lualock.pw_actor),
-										   lualock.style.width, lualock.style.height);
-	clutter_actor_set_position(lualock.pw_actor, lualock.style.x, lualock.style.y);
+	cairo_surface_t *old_pw_surface = lualock.pw_surface;
+	lualock.pw_surface = create_surface(width, height);
+	cairo_surface_destroy(old_pw_surface);
 }
 
 int lualock_lua_style_set(lua_State *L) {

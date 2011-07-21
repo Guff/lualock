@@ -58,15 +58,15 @@ text_t* text_new(text_t *text_obj, char *text, double rel_x, double rel_y,
     get_abs_pos(rel_x, rel_y, &x, &y);
     int width, height;
     get_extents_for_string(text, font, &width, &height);
-    ClutterActor *actor = create_actor(width + 2 * border_width,
+    layer_t *layer = create_layer(width + 2 * border_width,
                                        height + 2 * border_width);
     PangoLayout *layout = NULL;
 
     *text_obj = (text_t) { .text = text, .x = x, .y = y, .font = font,
                            .font_color = font_color, .layout = layout,
                            .border_width = border_width,
-                           .border_color = border_color, .actor = actor };
-    add_actor(text_obj->actor);
+                           .border_color = border_color, .layer = layer };
+    add_layer(text_obj->layer);
     return text_obj;    
 }
 
@@ -78,17 +78,15 @@ void text_draw(text_t *text_obj) {
 
     int width, height;    
     get_extents_for_string(text_obj->text, text_obj->font, &width, &height);
-
-    clutter_actor_set_size(text_obj->actor, width + 2 * text_obj->border_width,
-                           height + 2 * text_obj->border_width);
-    clutter_cairo_texture_set_surface_size(CLUTTER_CAIRO_TEXTURE(text_obj->actor),
-                                           width + 2 * text_obj->border_width,
-                                           height + 2 * text_obj->border_width);
-    clutter_actor_set_position(text_obj->actor,
-                               text_obj->x - text_obj->border_width,
-                               text_obj->y - text_obj->border_width);
     
-    cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(text_obj->actor));
+    layer_t *layer = create_layer(width, height);
+    layer_t *old_layer = text_obj->layer;
+    layer->x = text_obj->x - text_obj->border_width;
+    layer->y = text_obj->y - text_obj->border_width;
+    text_obj->layer = layer;
+    update_layer(old_layer, layer);
+    
+    cairo_t *cr = cairo_create(layer->surface);
     cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
     cairo_paint(cr);
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
@@ -110,8 +108,8 @@ void text_draw(text_t *text_obj) {
     cairo_fill(cr);
     cairo_destroy(cr);
     
-    clutter_actor_show(text_obj->actor);
-}
+    layer->show = TRUE;
+}    
 
 static int lualock_lua_text_new(lua_State *L) {
     if (!lua_istable(L, 1))
@@ -145,12 +143,11 @@ static int lualock_lua_text_new(lua_State *L) {
 static int lualock_lua_text_draw(lua_State *L) {
     text_t *text_obj = luaL_checkudata(L, 1, "lualock.text");
     text_draw(text_obj);
-    clutter_actor_show(text_obj->actor);
     return 0;
 }
 static int lualock_lua_text_hide(lua_State *L) {
     text_t *text_obj = luaL_checkudata(L, 1, "lualock.text");
-    clutter_actor_hide(text_obj->actor);
+    text_obj->layer->show = FALSE;
     return 0;
 }
 

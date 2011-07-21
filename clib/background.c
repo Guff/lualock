@@ -25,9 +25,9 @@
 #include "clib/background.h"
 
 void background_set_color(const char *hex) {
-    ClutterActor *actor = create_actor(0, 0);
-    add_actor(actor);
-    cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(actor));
+    layer_t *layer = create_layer(0, 0);
+    add_layer(layer);
+    cairo_t *cr = cairo_create(layer->surface);
     
     double r, g, b, a;
     parse_color(hex, &r, &g, &b, &a);
@@ -35,7 +35,7 @@ void background_set_color(const char *hex) {
     cairo_paint(cr);
     cairo_destroy(cr);
     
-    clutter_actor_show(actor);
+    layer->show = TRUE;
 }
 
 static int lualock_lua_background_set(lua_State *L) {
@@ -59,10 +59,10 @@ static int lualock_lua_background_set(lua_State *L) {
     win_width = gdk_screen_get_width(lualock.scr);
     win_height = gdk_screen_get_height(lualock.scr);
 
-    ClutterActor *actor = create_actor(0, 0);
-    add_actor(actor);
+    layer_t *layer = create_layer(0, 0);
+    add_layer(layer);
     
-    cairo_t *cr = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(actor));
+    cairo_t *cr = cairo_create(layer->surface);
 
     if (style) {
         if (!strcmp(style, "stretch")) {
@@ -87,7 +87,7 @@ static int lualock_lua_background_set(lua_State *L) {
     cairo_destroy(cr);
     g_object_unref(pbuf);
     
-    clutter_actor_show(actor);
+    layer->show = TRUE;
     
     return 0;
 }

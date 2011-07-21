@@ -22,7 +22,6 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-#include <clutter/clutter.h>
 
 typedef struct {
     char *text;
@@ -36,7 +35,7 @@ typedef struct {
     double border_width;
     char *border_color;
     
-    ClutterActor *actor;
+    layer_t *layer;
     PangoLayout *layout;
 } text_t;
 

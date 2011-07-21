@@ -20,8 +20,7 @@
 #define LUALOCK_H
 
 #include <lua.h>
-#include <gtk/gtk.h>
-#include <clutter/clutter.h>
+#include <gdk/gdk.h>
 
 typedef struct {
     const char *font;
@@ -42,31 +41,50 @@ typedef struct {
 } style_t;
 
 typedef struct {
+	cairo_surface_t *surface;
+	int x;
+	int y;
+	int width;
+	int height;
+    double scale_x;
+    double scale_y;
+	double angle;
+    
+    gboolean show;
+} layer_t;
+
+typedef struct {
     lua_State *L;
     
     GdkScreen *scr;
-    GtkWidget *win;
+    GdkWindow *win;
     
-    ClutterActor *stage;
-
     char *password;
     int pw_length;
     int pw_alloc;
     
-    char *password_font;
-    
     struct pam_handle *pam_handle;
     
-    ClutterActor *pw_actor;
+    cairo_surface_t *surface_buf;
+    cairo_surface_t *surface;
+    
+    cairo_surface_t *pw_surface;
+    
+    GPtrArray *layers;
+    gboolean need_updates;
     
     int timeout;
     
     GArray *timers;
     
+    guint frame_timer_id;
+    
     GHashTable *hooks;
     const char **hook_names;
     
     GPtrArray *keybinds;
+    
+    GMainLoop *loop;
     
     style_t style;
 } lualock_t;

@@ -19,15 +19,16 @@
 #ifndef MISC_H
 #define MISC_H
 
-#include <clutter/clutter.h>
+#include <gdk/gdk.h>
 
 #include "lualock.h"
 
 cairo_surface_t* create_surface(gint width, gint height);
 
-ClutterActor* create_actor(gint width, gint height);
-void add_actor(ClutterActor *actor);
-void update_actor(ClutterActor *actor, ClutterActor *new);
+layer_t* create_layer(gint width, gint height);
+void add_layer(layer_t *layer);
+void remove_layer(layer_t *layer);
+void update_layer(layer_t *old_layer, layer_t *new_layer);
 
 void parse_color(const gchar *hex, gdouble *r, gdouble *g, gdouble *b, gdouble *a);
 

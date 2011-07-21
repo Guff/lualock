@@ -20,11 +20,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-#include <clutter-gtk/clutter-gtk.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/scrnsaver.h>
+#include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <security/pam_appl.h>
 #include <sys/file.h>
@@ -58,26 +56,27 @@ static GOptionEntry options[] = {
     { NULL, 0, 0, 0, NULL, NULL, NULL }
 };
 
-gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data);
+gboolean on_key_press(GdkEvent *ev);
 void show_lock();
 void hide_lock();
 
 void init_window() {
-    lualock.scr = gdk_screen_get_default();
-    lualock.win = gtk_window_new(GTK_WINDOW_POPUP);
-    gtk_window_set_default_size(GTK_WINDOW(lualock.win),
-                                gdk_screen_get_width(lualock.scr),
-                                gdk_screen_get_height(lualock.scr));
-    GtkWidget *stage_widget = gtk_clutter_embed_new();
-    lualock.stage = gtk_clutter_embed_get_stage(GTK_CLUTTER_EMBED(stage_widget));
-    gtk_container_add(GTK_CONTAINER(lualock.win), stage_widget);
-    g_signal_connect(lualock.win, "key-press-event", G_CALLBACK(on_key_press), NULL);
-}
+    GdkWindowAttr attrs;
 
-void init_clutter() {
-    lualock.pw_actor = clutter_cairo_texture_new(lualock.style.width,
-                                                 lualock.style.height);
-    clutter_actor_set_position(lualock.pw_actor, lualock.style.x, lualock.style.y);
+    lualock.scr = gdk_screen_get_default();
+    
+    attrs.override_redirect = TRUE;
+    attrs.width = gdk_screen_get_width(lualock.scr);
+    attrs.height = gdk_screen_get_height(lualock.scr);
+    attrs.window_type = GDK_WINDOW_TOPLEVEL;
+    attrs.wclass = GDK_INPUT_OUTPUT;
+    attrs.x = 0;
+    attrs.y = 0;
+    unsigned long attr_mask = GDK_WA_NOREDIR | GDK_WA_X | GDK_WA_Y;
+    
+    lualock.win = gdk_window_new(gdk_get_default_root_window(), &attrs, attr_mask);
+                                 
+    gdk_window_show(lualock.win);
 }
 
 void init_timers() {
@@ -96,6 +95,14 @@ void init_style() {
     lualock.style.g = 0;
     lualock.style.b = 0;
     lualock.style.a = 1;
+}
+
+void init_cairo() {
+    lualock.layers = g_ptr_array_new();
+    
+    lualock.surface_buf = create_surface(0, 0);
+    
+    lualock.pw_surface = create_surface(0, 0);
 }
 
 void init_lua() {
@@ -142,7 +149,7 @@ gboolean authenticate_user() {
     return (pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
 }
 
-gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
+gboolean on_key_press(GdkEvent *ev) {
     guint keyval = ((GdkEventKey *)ev)->keyval;
     GdkModifierType mod = ((GdkEventKey *)ev)->state;
     gchar buf[6];
@@ -191,6 +198,22 @@ gboolean on_key_press(GtkWidget *widget, GdkEvent *ev, gpointer data) {
     return TRUE;
 }
 
+void event_handler(GdkEvent *ev) {
+    switch (ev->type) {
+        case GDK_KEY_PRESS:
+        // if enter was pressed, check password
+            if (!on_key_press(ev))
+                if (authenticate_user())
+                    g_main_loop_quit(lualock.loop);
+            break;
+        case GDK_EXPOSE:
+            lualock.need_updates = TRUE;
+            break;
+        default:
+            break;
+    }
+}
+
 static int pam_conv_cb(int msgs, const struct pam_message **msg,
                        struct pam_response **resp, void *data) {
     *resp = (struct pam_response *) calloc(msgs, sizeof(struct pam_message));
@@ -213,15 +236,16 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
 }
 
 void show_lock() {
-    gtk_widget_show_all(lualock.win);
-    GdkWindow *win = gtk_widget_get_window(lualock.win);
-    gdk_keyboard_grab(win, TRUE, GDK_CURRENT_TIME);
-    gdk_pointer_grab(win, TRUE, GDK_BUTTON_PRESS_MASK
+    gdk_keyboard_grab(lualock.win, TRUE, GDK_CURRENT_TIME);
+    gdk_pointer_grab(lualock.win, TRUE, GDK_BUTTON_PRESS_MASK
                      | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK, NULL,
                      NULL, GDK_CURRENT_TIME);
     draw_password_mask();
-   	clutter_actor_raise_top(lualock.pw_actor);
     g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "lock"), FALSE);
+    
+    lualock.frame_timer_id = g_timeout_add(1000.0 / 10, draw, NULL);
+    lualock.loop = g_main_new(TRUE);
+    g_main_run(lualock.loop);
     
     gtk_main();
     hide_lock();
@@ -229,10 +253,11 @@ void show_lock() {
 
 void hide_lock() {
     g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "unlock"), FALSE);
+    g_source_remove(lualock.frame_timer_id);
     lua_close(lualock.L);
     clear_timers();
     clear_keybinds();
-    gtk_widget_hide(lualock.win);
+    gdk_window_hide(lualock.win);
     gdk_keyboard_ungrab(GDK_CURRENT_TIME);
     gdk_pointer_ungrab(GDK_CURRENT_TIME);
     
@@ -255,9 +280,6 @@ int main(int argc, char **argv) {
     GOptionContext *opt_context = g_option_context_new("- screenlocker");
     g_option_context_add_main_entries(opt_context, options, NULL);
     g_option_context_add_group(opt_context, gtk_get_option_group(TRUE));
-    g_option_context_add_group(opt_context, cogl_get_option_group());
-    g_option_context_add_group(opt_context, clutter_get_option_group_without_init());
-    g_option_context_add_group(opt_context, gtk_clutter_get_option_group());
     if (!g_option_context_parse(opt_context, &argc, &argv, &error)) {
         g_print("option parsing failed: %s\n", error->message);
         exit(1);
@@ -271,12 +293,10 @@ int main(int argc, char **argv) {
     
     init_window();
     init_style();
-    init_clutter();
+    init_cairo();
     init_timers();
     init_hook_table();
     init_keybinds();
-    
-    clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), lualock.pw_actor);
     
     struct pam_conv conv = {pam_conv_cb, NULL};
     int ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
@@ -292,6 +312,8 @@ int main(int argc, char **argv) {
         show_lock();
         return 0;
     }
+    
+    gdk_event_handler_set((GdkEventFunc)event_handler, NULL, NULL);
     
     int idle_time;
     while (TRUE) {

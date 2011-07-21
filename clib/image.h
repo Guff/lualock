@@ -26,7 +26,7 @@
 
 typedef struct {
     GdkPixbuf *pbuf;
-    ClutterActor *actor;
+    layer_t *layer;
     cairo_surface_t *surface;
     
     gdouble rotation;

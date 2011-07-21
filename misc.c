@@ -18,7 +18,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <gdk/gdk.h>
 
 #include "misc.h"
 
@@ -29,16 +28,43 @@ cairo_surface_t* create_surface(gint width, gint height) {
     return surface;
 }
 
-ClutterActor* create_actor(gint width, gint height) {
-	ClutterActor *actor = clutter_cairo_texture_new(
-        width ? : gdk_screen_get_width(lualock.scr),
-        height ? : gdk_screen_get_height(lualock.scr));
-    return actor;
+layer_t* create_layer(int width, int height) {
+	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+		width,
+		height);
+    
+    layer_t *layer = malloc(sizeof(layer_t));
+    layer->surface = surface;
+    layer->width = width;
+    layer->height = height;
+    layer->scale_x = 1;
+    layer->scale_y = 1;
+    layer->x = 0;
+    layer->y = 0;
+    layer->angle = 0;
+    layer->show = FALSE;
+    return layer;
 }
 
-void add_actor(ClutterActor *actor) {
-    clutter_container_add_actor(CLUTTER_CONTAINER(lualock.stage), actor);
-    clutter_actor_hide(actor);
+void add_layer(layer_t *layer) {
+    g_ptr_array_add(lualock.layers, layer);
+}
+
+void remove_layer(layer_t *layer) {
+    g_ptr_array_remove(lualock.layers, layer);
+    cairo_surface_destroy(layer->surface);
+    free(layer);
+}
+
+void update_layer(layer_t *old_layer, layer_t *new_layer) {
+    for (guint i = 0; i < lualock.layers->len; i++) {
+        if (g_ptr_array_index(lualock.layers, i) == old_layer) {
+            cairo_surface_destroy(old_layer->surface);
+            free(old_layer);
+            lualock.layers->pdata[i] = new_layer;
+            return;
+        }
+    }
 }
 
 void parse_color(const gchar *color, gdouble *r, gdouble *g, gdouble *b, gdouble *a) {
