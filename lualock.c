@@ -47,7 +47,11 @@ struct {
     gboolean no_daemon;
 } prefs;
 
-static const char *hook_names[] = { "lock", "unlock", "auth-failed", NULL };
+static const char *hook_names[] = { "lock",
+                                    "unlock",
+                                    "auth-failed",
+                                    "key-press",
+                                    NULL };
 
 static GOptionEntry options[] = {
     { "no-daemon", 'n', 0, G_OPTION_ARG_NONE, &prefs.no_daemon, "Don't run as a"
@@ -199,6 +203,8 @@ gboolean on_key_press(GdkEvent *ev) {
             lualock_lua_do_function(lualock.L);
         }
     }
+    
+    g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "key-press"), FALSE);
     return TRUE;
 }
 
@@ -254,7 +260,7 @@ void show_lock() {
     draw_password_mask();
     g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "lock"), FALSE);
     
-    lualock.frame_timer_id = g_timeout_add(1000.0 / 10, draw, NULL);
+    lualock.frame_timer_id = g_timeout_add(1000.0 / 20, draw, NULL);
     g_main_loop_run(lualock.loop);
     
     hide_lock();
