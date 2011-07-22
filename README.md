@@ -1,8 +1,7 @@
-**lualock** (also known as **llock** [pronounced 'yock'] or **luaker**), may *eventually* turn out
-to be a screenlocker that's highly configurable and extensible with lua.
+**lualock** (also known as **llock** [pronounced 'yock'] or **luaker**), is a
+screenlocker that's highly configurable and extensible with lua.
 
-As it stands right now, however, it's a piece of junk. Although, it does
-actually function as a screenlocker now. And it mostly works! The API blows,
-however. I'm working on it.
+As it stands right now, it's still in the testing phase. And it appears that a
+total of two people are interested in it. One of them is me.
 
 A-maaaaaazing.

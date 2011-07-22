@@ -20,8 +20,10 @@ local function update(pbar)
     local width = data[pbar].width or 20
     local height = data[pbar].height or 60
 
-    -- Create new empty image
-    local img = capi.image(width, height)
+    -- Wipe the slate clean
+    local img = pbar.image
+    img:resize(width, height)
+    img:clear()
 
     local value = data[pbar].value
     local max_value = data[pbar].max_value

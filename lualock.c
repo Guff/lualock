@@ -196,6 +196,7 @@ gboolean on_key_press(GdkEvent *ev) {
     
     draw_password_mask();
     
+    // FIXME: I don't like having the lua stuff mixed in with the core stuff
     for (guint i = 0; i < lualock.keybinds->len; i++) {
         keybind_t *bind = g_ptr_array_index(lualock.keybinds, i);
         if (bind->val == keyval && bind->mod == mod) {
@@ -252,6 +253,8 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
 }
 
 void show_lock() {
+    init_hooks();
+    init_lua();
     lualock.need_updates = TRUE;
     gdk_keyboard_grab(lualock.win, TRUE, GDK_CURRENT_TIME);
     gdk_pointer_grab(lualock.win, TRUE, GDK_BUTTON_PRESS_MASK
@@ -305,8 +308,6 @@ int main(int argc, char **argv) {
     lualock.pw_length = 0;
     lualock.pw_alloc = PW_BUFF_SIZE;
         
-    lualock.timeout = 10 * 60;
-    
     init_window();
     init_style();
     init_cairo();
@@ -325,17 +326,22 @@ int main(int argc, char **argv) {
 
     Display *dpy = XOpenDisplay(NULL);
     XScreenSaverInfo *xss_info = XScreenSaverAllocInfo();
+    
     if (prefs.no_daemon) {
-        init_hooks();
-        init_lua();
         show_lock();
         return 0;
     }    
     
+    /* dirty hack: the loop is dependent on values set by rc.lua, but we don't
+     * want lua running the whole time. the easy solution is to execute rc.lua
+     * and immediately close the lua instance, but it's not pretty */
+    init_hooks();
+    init_lua();
+    lua_close(lualock.L);
+    clear_hooks();
+    
     int idle_time;
     while (TRUE) {
-        init_hooks();
-        init_lua();
         while ((idle_time = seconds_idle(dpy, xss_info)) < lualock.timeout) {
             sleep(lualock.timeout - idle_time - 1);
         }
