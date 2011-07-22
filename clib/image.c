@@ -92,7 +92,7 @@ void image_set_position(image_t *image, gdouble rel_x, gdouble rel_y) {
 void image_show(image_t *image) {
     image_render(image);
     image->layer->show = TRUE;
-    lualock.need_updates = TRUE;
+    register_update_for_layer(image->layer);
 }
 
 void image_hide(image_t *image) {

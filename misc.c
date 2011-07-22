@@ -55,7 +55,7 @@ void remove_layer(layer_t *layer) {
     layer_destroy(layer);
 }
 
-void update_layer(layer_t *old_layer, layer_t *new_layer) {
+void replace_layer(layer_t *old_layer, layer_t *new_layer) {
     for (guint i = 0; i < lualock.layers->len; i++) {
         if (g_ptr_array_index(lualock.layers, i) == old_layer) {
             layer_destroy(old_layer);
@@ -124,4 +124,24 @@ void clear_timers() {
     
     if (lualock.timers->len)
         g_array_remove_range(lualock.timers, 0, lualock.timers->len);
+}
+
+void register_update(gdouble x, gdouble y, gdouble w, gdouble h) {
+    cairo_rectangle_int_t rect = { x, y, w, h };
+    cairo_region_union_rectangle(lualock.updates_needed, &rect);
+}
+
+void register_update_for_layer(layer_t *layer) {
+    register_update(layer->x, layer->y, layer->width, layer->height);
+}
+
+void clear_updates() {
+    cairo_region_t *region = cairo_region_create();
+    cairo_region_intersect(lualock.updates_needed, region);
+    cairo_region_destroy(region);
+}
+
+void update_screen() {
+    register_update(0, 0, gdk_screen_get_width(lualock.scr),
+                    gdk_screen_get_height(lualock.scr));
 }

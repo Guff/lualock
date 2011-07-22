@@ -36,7 +36,7 @@ void background_set_color(const char *hex) {
     cairo_destroy(cr);
     
     layer->show = TRUE;
-    lualock.need_updates = TRUE;
+    register_update_for_layer(layer);
 }
 
 static int lualock_lua_background_set(lua_State *L) {

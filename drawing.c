@@ -24,6 +24,8 @@
 #include "drawing.h"
 
 void draw_password_field(cairo_t *cr) {
+    register_update(lualock.style.x, lualock.style.y,
+                    lualock.style.width, lualock.style.height);
     cairo_rectangle(cr, 0, 0, lualock.style.width,
 					lualock.style.height);
 	cairo_clip_preserve(cr);
@@ -61,9 +63,14 @@ void draw_password_mask() {
 }
 
 gboolean draw(void *data) {
-    if (!lualock.need_updates)
+    if (cairo_region_is_empty(lualock.updates_needed))
         return TRUE;
+    cairo_rectangle_int_t extents;
+    cairo_region_get_extents(lualock.updates_needed, &extents);
+    printf("%i %i %i %i\n", extents.x, extents.y, extents.width, extents.height);
     cairo_t *cr = cairo_create(lualock.surface_buf);
+    cairo_rectangle(cr, extents.x, extents.y, extents.width, extents.height);
+    cairo_clip(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
     cairo_paint(cr);
@@ -90,7 +97,7 @@ gboolean draw(void *data) {
     cairo_paint(crw);
     cairo_destroy(crw);
     
-    lualock.need_updates = FALSE;
+    clear_updates();
     return TRUE;
 }
 

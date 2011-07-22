@@ -107,6 +107,8 @@ void init_cairo() {
     lualock.surface_buf = create_surface(0, 0);
     
     lualock.pw_surface = create_surface(0, 0);
+    
+    lualock.updates_needed = cairo_region_create();
 }
 
 void init_lua() {
@@ -213,7 +215,6 @@ void event_handler(GdkEvent *ev) {
     switch (ev->type) {
         case GDK_KEY_PRESS:
         // if enter was pressed, check password
-            lualock.need_updates = TRUE;
             if (!on_key_press(ev)) {
                 if (authenticate_user())
                     g_main_loop_quit(lualock.loop);
@@ -224,7 +225,7 @@ void event_handler(GdkEvent *ev) {
             }
             break;
         case GDK_EXPOSE:
-            lualock.need_updates = TRUE;
+            update_screen();
             break;
         default:
             break;
@@ -255,7 +256,7 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
 void show_lock() {
     init_hooks();
     init_lua();
-    lualock.need_updates = TRUE;
+    update_screen();
     gdk_keyboard_grab(lualock.win, TRUE, GDK_CURRENT_TIME);
     gdk_pointer_grab(lualock.win, TRUE, GDK_BUTTON_PRESS_MASK
                      | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK, NULL,
@@ -274,6 +275,7 @@ void hide_lock() {
     g_source_remove(lualock.frame_timer_id);
     lua_close(lualock.L);
     clear_timers();
+    clear_updates();
     clear_keybinds();
     gdk_window_hide(lualock.win);
     gdk_keyboard_ungrab(GDK_CURRENT_TIME);

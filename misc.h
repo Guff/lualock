@@ -28,7 +28,7 @@ cairo_surface_t* create_surface(gint width, gint height);
 layer_t* create_layer(gint width, gint height);
 void add_layer(layer_t *layer);
 void remove_layer(layer_t *layer);
-void update_layer(layer_t *old_layer, layer_t *new_layer);
+void replace_layer(layer_t *old_layer, layer_t *new_layer);
 void layer_destroy(layer_t *layer);
 
 void parse_color(const gchar *hex, gdouble *r, gdouble *g, gdouble *b, gdouble *a);
@@ -42,5 +42,10 @@ void get_abs_pos_for_dims(double dim_w, double dim_h, double rel_w, double rel_h
 void add_timer(guint id);
 void remove_timer(guint id);
 void clear_timers();
+
+void register_update(gdouble x, gdouble y, gdouble w, gdouble h);
+void register_update_for_layer(layer_t *layer);
+void clear_updates();
+void update_screen();
 
 #endif

@@ -85,7 +85,7 @@ void text_draw(text_t *text_obj) {
     layer->x = text_obj->x - text_obj->border_width;
     layer->y = text_obj->y - text_obj->border_width;
     text_obj->layer = layer;
-    update_layer(old_layer, layer);
+    replace_layer(old_layer, layer);
     
     cairo_t *cr = cairo_create(layer->surface);
     cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
@@ -110,7 +110,7 @@ void text_draw(text_t *text_obj) {
     cairo_destroy(cr);
     
     layer->show = TRUE;
-    lualock.need_updates = TRUE;
+    register_update_for_layer(text_obj->layer);
 }    
 
 static int lualock_lua_text_new(lua_State *L) {

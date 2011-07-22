@@ -21,7 +21,8 @@ local function update(pbar)
     local height = data[pbar].height or 60
 
     -- Wipe the slate clean
-    local img = pbar.image
+    local img
+    img = pbar.image or capi.image(width, height)
     img:resize(width, height)
     img:clear()
 

@@ -71,7 +71,7 @@ typedef struct {
     cairo_surface_t *pw_surface;
     
     GPtrArray *layers;
-    gboolean need_updates;
+    cairo_region_t *updates_needed;
     
     int timeout;
     
