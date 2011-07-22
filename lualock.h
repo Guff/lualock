@@ -91,4 +91,7 @@ typedef struct {
 
 extern lualock_t lualock;
 
+void event_handler(GdkEvent *ev, gpointer data);
+void reset_password();
+
 #endif

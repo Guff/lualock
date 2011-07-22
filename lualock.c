@@ -211,7 +211,7 @@ gboolean on_key_press(GdkEvent *ev) {
     return TRUE;
 }
 
-void event_handler(GdkEvent *ev) {
+void event_handler(GdkEvent *ev, gpointer data) {
     switch (ev->type) {
         case GDK_KEY_PRESS:
         // if enter was pressed, check password
@@ -323,7 +323,7 @@ int main(int argc, char **argv) {
     if (ret != PAM_SUCCESS)
         exit(EXIT_FAILURE);
     
-    gdk_event_handler_set((GdkEventFunc)event_handler, NULL, NULL);
+    gdk_event_handler_set(event_handler, NULL, NULL);
     lualock.loop = g_main_loop_new(NULL, TRUE);
 
     Display *dpy = XOpenDisplay(NULL);

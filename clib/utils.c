@@ -3,7 +3,18 @@
 #include <unistd.h>
 
 #include "lualock.h"
+#include "drawing.h"
 #include "clib/utils.h"
+
+static void do_nothing_event_handler(GdkEvent *ev, gpointer data) {
+}
+
+static gboolean sleep_timeout_cb(gpointer data) {
+	reset_password();
+	gdk_event_handler_set(event_handler, NULL, NULL);
+	draw_password_mask();
+	return FALSE;
+}
 
 static void spawn_child_callback(gpointer data) {
     sigset_t empty;
@@ -53,7 +64,8 @@ static int lualock_lua_get_config_dir(lua_State *L) {
 }
 
 static int lualock_lua_sleep(lua_State *L) {
-	usleep(1000000 * lua_tonumber(L, 1));
+	gdk_event_handler_set(do_nothing_event_handler, NULL, NULL);
+	g_timeout_add(1000 * lua_tonumber(L, 1), sleep_timeout_cb, NULL);
 	return 0;
 }
 
