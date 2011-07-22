@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "misc.h"
 
@@ -132,7 +133,12 @@ void register_update(gdouble x, gdouble y, gdouble w, gdouble h) {
 }
 
 void register_update_for_layer(layer_t *layer) {
-    register_update(layer->x, layer->y, layer->width, layer->height);
+    gdouble x, y, width, height;
+    x = layer->x, y = layer->y;
+    width = layer->width * layer->scale_x;
+    height = layer->height * layer->scale_y;
+    
+    register_update(x, y, width, height);
 }
 
 void clear_updates() {

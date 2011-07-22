@@ -76,10 +76,12 @@ gboolean draw(void *data) {
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
     for (guint i = 0; i < lualock.layers->len; i++) {
         layer_t *layer = g_ptr_array_index(lualock.layers, i);
+        if (!layer->show)
+            continue;
         cairo_save(cr);
-        cairo_rotate(cr, layer->angle);
         cairo_translate(cr, layer->x, layer->y);
         cairo_scale(cr, layer->scale_x, layer->scale_y);
+        cairo_rotate(cr, layer->angle);
         cairo_set_source_surface(cr, layer->surface, 0, 0);
         cairo_paint(cr);
         cairo_restore(cr);
