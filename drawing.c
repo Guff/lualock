@@ -67,7 +67,6 @@ gboolean draw(void *data) {
         return TRUE;
     cairo_rectangle_int_t extents;
     cairo_region_get_extents(lualock.updates_needed, &extents);
-    printf("%i %i %i %i\n", extents.x, extents.y, extents.width, extents.height);
     cairo_t *cr = cairo_create(lualock.surface_buf);
     cairo_rectangle(cr, extents.x, extents.y, extents.width, extents.height);
     cairo_clip(cr);
