@@ -1,9 +1,11 @@
 require "odious"
 
+-- {{{ lualock settings
 style{ color = "#333333", font = "Sans 12", x = 500, y = 400, off_x = 5,
         off_y = 6, width = 150, height = 24 }
 
 prefs{ timeout = 10 * 60 }
+-- }}}
 
 -- define functions for setting and restoring DPMS settings
 local dpms = { 
@@ -17,7 +19,7 @@ local dpms = {
         return tonumber(standby) or 0, tonumber(suspend) or 0, tonumber(off) or 0
     end 
 }
-
+-- {{{ Hooks
 -- get current DPMS settings
 local standby, suspend, off = dpms.get()
 
@@ -30,8 +32,7 @@ hook.connect("unlock", function ()
     dpms.set(standby, suspend, off)
 end)
 
-keybinder("<Alt>j", function () print("hullo") end)
-
+-- show a dot for each failed login attempt
 evildot = utils.get_data_dir() .. "/glowydot.png"
 failed_attempts = 0
 hook.connect("auth-failed", function ()
@@ -40,20 +41,23 @@ hook.connect("auth-failed", function ()
 	dot:show()
 	failed_attempts = failed_attempts + 1
 end)
+-- }}}
 
+-- {{{ 
 background("color", "#000000")
+
 im = image(utils.get_data_dir() .. "/archlinux-official-light.svg")
 im:scale(0.75, 0.75)
 im:set_position(0.1, 0.4)
 im:show()
 
-clockbg = image(utils.get_data_dir() .. "/clockbackground.png")
-clockbg:show()
-
 user_text = text{ text = "User: " .. os.getenv("USER"), x = 500, y = 370,
                   font = "Anton 16", color = "#ffffff", border_color = "#000000",
                   border_width = 3 }
 user_text:draw()
+
+clockbg = image(utils.get_data_dir() .. "/clockbackground.png")
+clockbg:show()
 
 clock_hr = text { text = os.date("%I"), x = 55, y = 40, font = "Droid Sans Mono 110",
                   color = "#ffffff", border_color = "#000000", border_width = 4 }

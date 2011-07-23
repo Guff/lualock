@@ -25,9 +25,7 @@
 #include "clib/background.h"
 
 void background_set_color(const char *hex) {
-    layer_t *layer = create_layer(0, 0);
-    add_layer(layer);
-    cairo_t *cr = cairo_create(layer->surface);
+    cairo_t *cr = cairo_create(lualock.bg_surface);
     
     double r, g, b, a;
     parse_color(hex, &r, &g, &b, &a);
@@ -35,8 +33,7 @@ void background_set_color(const char *hex) {
     cairo_paint(cr);
     cairo_destroy(cr);
     
-    layer->show = TRUE;
-    register_update_for_layer(layer);
+    update_screen();
 }
 
 static int lualock_lua_background_set(lua_State *L) {
@@ -60,10 +57,7 @@ static int lualock_lua_background_set(lua_State *L) {
     win_width = gdk_screen_get_width(lualock.scr);
     win_height = gdk_screen_get_height(lualock.scr);
 
-    layer_t *layer = create_layer(0, 0);
-    add_layer(layer);
-    
-    cairo_t *cr = cairo_create(layer->surface);
+    cairo_t *cr = cairo_create(lualock.bg_surface);
 
     if (style) {
         if (!strcmp(style, "stretch")) {
@@ -88,7 +82,7 @@ static int lualock_lua_background_set(lua_State *L) {
     cairo_destroy(cr);
     g_object_unref(pbuf);
     
-    layer->show = TRUE;
+    update_screen();
     
     return 0;
 }

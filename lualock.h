@@ -70,6 +70,8 @@ typedef struct {
     
     cairo_surface_t *pw_surface;
     
+    cairo_surface_t *bg_surface;
+    
     GPtrArray *layers;
     cairo_region_t *updates_needed;
     

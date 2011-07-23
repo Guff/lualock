@@ -111,6 +111,8 @@ void init_cairo() {
     
     lualock.pw_surface = create_surface(0, 0);
     
+    lualock.bg_surface = create_surface(0, 0);
+    
     lualock.updates_needed = cairo_region_create();
 }
 
@@ -217,9 +219,9 @@ gboolean on_key_press(GdkEvent *ev) {
 void event_handler(GdkEvent *ev, gpointer data) {
     switch (ev->type) {
         case GDK_KEY_PRESS:
-        // if enter was pressed, check password
             if (prefs.test)
                 g_main_loop_quit(lualock.loop);
+        // if enter was pressed, check password
             if (!on_key_press(ev)) {
                 if (authenticate_user())
                     g_main_loop_quit(lualock.loop);
@@ -282,9 +284,9 @@ void hide_lock() {
     clear_timers();
     clear_updates();
     clear_keybinds();
-    gdk_window_hide(lualock.win);
     gdk_keyboard_ungrab(GDK_CURRENT_TIME);
     gdk_pointer_ungrab(GDK_CURRENT_TIME);
+    gdk_window_hide(lualock.win);
     clear_layers();
     
     clear_hooks();
