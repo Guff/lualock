@@ -45,6 +45,7 @@ int frames_drawn;
 
 struct {
     gboolean no_daemon;
+    gboolean test;
 } prefs;
 
 static const char *hook_names[] = { "lock",
@@ -55,7 +56,9 @@ static const char *hook_names[] = { "lock",
 
 static GOptionEntry options[] = {
     { "no-daemon", 'n', 0, G_OPTION_ARG_NONE, &prefs.no_daemon, "Don't run as a"
-        " daemon; lock the screen immediately and exit when done", NULL },
+      " daemon; lock the screen immediately and exit when done", NULL },
+    { "test", 't', 0, G_OPTION_ARG_NONE, &prefs.test, "Don't lock the screen;"
+      " just run once and exit on first keypress", NULL },
     // get gcc to shut up about missing initializers in this instance
     { NULL, 0, 0, 0, NULL, NULL, NULL }
 };
@@ -215,6 +218,8 @@ void event_handler(GdkEvent *ev, gpointer data) {
     switch (ev->type) {
         case GDK_KEY_PRESS:
         // if enter was pressed, check password
+            if (prefs.test)
+                g_main_loop_quit(lualock.loop);
             if (!on_key_press(ev)) {
                 if (authenticate_user())
                     g_main_loop_quit(lualock.loop);
@@ -329,7 +334,7 @@ int main(int argc, char **argv) {
     Display *dpy = XOpenDisplay(NULL);
     XScreenSaverInfo *xss_info = XScreenSaverAllocInfo();
     
-    if (prefs.no_daemon) {
+    if (prefs.no_daemon || prefs.test) {
         show_lock();
         return 0;
     }    
