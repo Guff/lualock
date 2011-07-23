@@ -92,7 +92,7 @@ void text_draw(text_t *text_obj) {
     cairo_paint(cr);
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
     cairo_translate(cr, text_obj->border_width, text_obj->border_width);
-    text_obj-> layout = pango_cairo_create_layout(cr);
+    text_obj->layout = pango_cairo_create_layout(cr);
     PangoFontDescription *desc = pango_font_description_from_string(text_obj->font);
     pango_layout_set_font_description(text_obj->layout, desc);
     pango_font_description_free(desc);
@@ -108,6 +108,8 @@ void text_draw(text_t *text_obj) {
     cairo_set_source_rgba(cr, r, g, b, a);
     cairo_fill(cr);
     cairo_destroy(cr);
+    
+    g_object_unref(text_obj->layout);
     
     layer->show = TRUE;
     register_update_for_layer(text_obj->layer);
