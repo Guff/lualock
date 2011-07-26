@@ -27,8 +27,8 @@ void draw_password_field(cairo_t *cr) {
     register_update(lualock.style.x, lualock.style.y,
                     lualock.style.width, lualock.style.height);
     cairo_rectangle(cr, 0, 0, lualock.style.width,
-					lualock.style.height);
-	cairo_clip_preserve(cr);
+                    lualock.style.height);
+    cairo_clip_preserve(cr);
     cairo_set_source_rgb(cr, 1, 1, 1);
     cairo_fill_preserve(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, .6);
@@ -79,7 +79,7 @@ gboolean draw(void *data) {
     cairo_paint(cr);
 
     for (guint i = 0; i < lualock.layers->len; i++) {
-        layer_t *layer = g_ptr_array_index(lualock.layers, i);
+        layer_t *layer = ptr_array_index(lualock.layers, i);
         if (!layer->show)
             continue;
         cairo_save(cr);

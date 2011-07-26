@@ -87,7 +87,7 @@ void init_window() {
 }
 
 void init_timers() {
-    lualock.timers = g_array_new(TRUE, TRUE, sizeof(guint));
+    lualock.timers = uint_array_new();
 }
 
 void init_style() {
@@ -105,7 +105,7 @@ void init_style() {
 }
 
 void init_cairo() {
-    lualock.layers = g_ptr_array_new();
+    lualock.layers = ptr_array_new();
     
     lualock.surface_buf = create_surface(0, 0);
     
@@ -123,40 +123,38 @@ void init_lua() {
 }
 
 void init_hook_table() {
-    lualock.hooks = g_hash_table_new(g_str_hash, g_str_equal);
+    lualock.hooks = table_new();
     
     for (int i = 0; hook_names[i]; i++) {
-        GHookList *hook_list = g_malloc(sizeof(GHookList));
-        g_hash_table_insert(lualock.hooks, strdup(hook_names[i]), hook_list);
+        GHookList *hook_list = malloc(sizeof(GHookList));
+        table_insert(lualock.hooks, strdup(hook_names[i]), hook_list);
     }
 }
 
 void init_hooks() {
     for (int i = 0; hook_names[i]; i++)
-        g_hook_list_init(g_hash_table_lookup(lualock.hooks, hook_names[i]),
+        g_hook_list_init(table_lookup(lualock.hooks, hook_names[i]),
                          sizeof(GHook));
 }
 
 void init_keybinds() {
-    lualock.keybinds = g_ptr_array_new();
+    lualock.keybinds = ptr_array_new();
 }
 
 void clear_keybinds() {
-    if (lualock.keybinds->len)
-        g_ptr_array_remove_range(lualock.keybinds, 0, lualock.keybinds->len);
+    ptr_array_clear(lualock.keybinds);
 }
 
 void clear_hooks() {
     for (int i = 0; hook_names[i]; i++)
-        g_hook_list_clear(g_hash_table_lookup(lualock.hooks, hook_names[i]));
+        g_hook_list_clear(table_lookup(lualock.hooks, hook_names[i]));
 }
 
 void clear_layers() {
     for (guint i = 0; i < lualock.layers->len; i++)
-        layer_destroy(g_ptr_array_index(lualock.layers, i));
+        layer_destroy(ptr_array_index(lualock.layers, i));
     
-    if (lualock.layers->len)
-        g_ptr_array_remove_range(lualock.layers, 0, lualock.layers->len);
+    ptr_array_clear(lualock.layers);
 }        
 
 void reset_password() {
@@ -205,14 +203,14 @@ gboolean on_key_press(GdkEvent *ev) {
     
     // FIXME: I don't like having the lua stuff mixed in with the core stuff
     for (guint i = 0; i < lualock.keybinds->len; i++) {
-        keybind_t *bind = g_ptr_array_index(lualock.keybinds, i);
+        keybind_t *bind = ptr_array_index(lualock.keybinds, i);
         if (bind->val == keyval && bind->mod == mod) {
             lua_rawgeti(lualock.L, LUA_REGISTRYINDEX, bind->r);
             lualock_lua_do_function(lualock.L);
         }
     }
     
-    g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "key-press"), FALSE);
+    g_hook_list_invoke(table_lookup(lualock.hooks, "key-press"), FALSE);
     return TRUE;
 }
 
@@ -221,13 +219,13 @@ void event_handler(GdkEvent *ev, gpointer data) {
         case GDK_KEY_PRESS:
             if (prefs.test)
                 g_main_loop_quit(lualock.loop);
-        // if enter was pressed, check password
+            // if enter was pressed, check password
             if (!on_key_press(ev)) {
                 if (authenticate_user())
                     g_main_loop_quit(lualock.loop);
                 else
                     g_hook_list_invoke(
-                        g_hash_table_lookup(lualock.hooks, "auth-failed"),
+                        table_lookup(lualock.hooks, "auth-failed"),
                         FALSE);
             }
             break;
@@ -269,7 +267,7 @@ void show_lock() {
                      | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK, NULL,
                      NULL, GDK_CURRENT_TIME);
     draw_password_mask();
-    g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "lock"), FALSE);
+    g_hook_list_invoke(table_lookup(lualock.hooks, "lock"), FALSE);
     
     lualock.frame_timer_id = g_timeout_add(1000.0 / 20, draw, NULL);
     g_main_loop_run(lualock.loop);
@@ -278,7 +276,7 @@ void show_lock() {
 }
 
 void hide_lock() {
-    g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "unlock"), FALSE);
+    g_hook_list_invoke(table_lookup(lualock.hooks, "unlock"), FALSE);
     g_source_remove(lualock.frame_timer_id);
     lua_close(lualock.L);
     clear_timers();

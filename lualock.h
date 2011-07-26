@@ -22,6 +22,8 @@
 #include <lua.h>
 #include <gdk/gdk.h>
 
+#include "datatypes.h"
+
 typedef struct {
     const char *font;
     
@@ -41,14 +43,14 @@ typedef struct {
 } style_t;
 
 typedef struct {
-	cairo_surface_t *surface;
-	int x;
-	int y;
-	int width;
-	int height;
+    cairo_surface_t *surface;
+    int x;
+    int y;
+    int width;
+    int height;
     double scale_x;
     double scale_y;
-	double angle;
+    double angle;
     
     gboolean show;
 } layer_t;
@@ -72,19 +74,18 @@ typedef struct {
     
     cairo_surface_t *bg_surface;
     
-    GPtrArray *layers;
+    ptr_array_t *layers;
     cairo_region_t *updates_needed;
     
     int timeout;
     
-    GArray *timers;
+    uint_array_t *timers;
     
     guint frame_timer_id;
     
-    GHashTable *hooks;
-    const char **hook_names;
+    table_t *hooks;
     
-    GPtrArray *keybinds;
+    ptr_array_t *keybinds;
     
     GMainLoop *loop;
     

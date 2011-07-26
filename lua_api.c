@@ -40,7 +40,7 @@ void lualock_lua_do_function(lua_State *L) {
         lualock_lua_on_error(L);
 }
 
-gboolean lualock_lua_loadrc(lua_State *L) {
+bool lualock_lua_loadrc(lua_State *L) {
     luaL_openlibs(L);
     
     lua_getglobal(L, "package");
@@ -88,10 +88,10 @@ gboolean lualock_lua_loadrc(lua_State *L) {
     for (guint i = 0; i < configs->len; i++) {
         if (!luaL_loadfile(L, g_ptr_array_index(configs, i))) {
             lualock_lua_do_function(L);
-            return TRUE;
+            return true;
         }
     }
     
-    g_ptr_array_free(configs, TRUE);
-    return FALSE;
+    g_ptr_array_free(configs, true);
+    return false;
 }

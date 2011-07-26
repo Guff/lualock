@@ -18,6 +18,7 @@
 
 #include <lauxlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "lualock.h"
 #include "lua_api.h"
@@ -37,13 +38,13 @@ void hook_call_lua_function(gpointer data) {
 int lualock_lua_hook_connect(lua_State *L) {
     lua_settop(L, 2);
     const char *hook_str = luaL_checkstring(L, 1);
-    GHookList *list = g_hash_table_lookup(lualock.hooks, hook_str);
+    GHookList *list = table_lookup(lualock.hooks, hook_str);
     luaL_argcheck(L, list, 1, "not a valid hook");
     
     luaL_checktype(L, 2, LUA_TFUNCTION);
     
     GHook *hook = g_hook_alloc(list);
-    hook_data_t *data = g_malloc(sizeof(hook_data_t));
+    hook_data_t *data = malloc(sizeof(hook_data_t));
     data->L = L;
     data->r = luaL_ref(L, LUA_REGISTRYINDEX);
     hook->data = data;

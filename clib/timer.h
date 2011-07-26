@@ -20,7 +20,6 @@
 #define LUALOCK_CLIB_TIMER_H
 
 #include <lualib.h>
-#include <glib.h>
 
 typedef struct {
     int id;

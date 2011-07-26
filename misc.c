@@ -20,6 +20,7 @@
 #include <string.h>
 #include <math.h>
 
+#include "datatypes.h"
 #include "misc.h"
 
 cairo_surface_t* create_surface(gint width, gint height) {
@@ -30,9 +31,9 @@ cairo_surface_t* create_surface(gint width, gint height) {
 }
 
 layer_t* create_layer(int width, int height) {
-	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-		width,
-		height);
+    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+        width,
+        height);
     
     layer_t *layer = malloc(sizeof(layer_t));
     layer->surface = surface;
@@ -48,19 +49,19 @@ layer_t* create_layer(int width, int height) {
 }
 
 void add_layer(layer_t *layer) {
-    g_ptr_array_add(lualock.layers, layer);
+    ptr_array_add(lualock.layers, layer);
 }
 
 void remove_layer(layer_t *layer) {
-    g_ptr_array_remove(lualock.layers, layer);
+    ptr_array_remove(lualock.layers, layer);
     layer_destroy(layer);
 }
 
 void replace_layer(layer_t *old_layer, layer_t *new_layer) {
     for (guint i = 0; i < lualock.layers->len; i++) {
-        if (g_ptr_array_index(lualock.layers, i) == old_layer) {
+        if (ptr_array_index(lualock.layers, i) == old_layer) {
             layer_destroy(old_layer);
-            lualock.layers->pdata[i] = new_layer;
+            lualock.layers->data[i] = new_layer;
             return;
         }
     }
@@ -104,27 +105,20 @@ void get_abs_pos_for_dims(gdouble dim_w, gdouble dim_h, gdouble rel_w, gdouble r
 }
 
 void add_timer(guint id) {
-    g_array_append_val(lualock.timers, id);
+    uint_array_add(lualock.timers, id);
 }
 
 void remove_timer(guint id) {
     if (!id)
         return;
-    
-    for (guint i = 0; i < lualock.timers->len; i++) {
-        if (g_array_index(lualock.timers, guint, i) == id) {
-            g_source_remove(id);
-            g_array_remove_index(lualock.timers, i);
-        }
-    }
+    uint_array_remove(lualock.timers, id);
 }
 
 void clear_timers() {
     for (guint i = 0; i < lualock.timers->len; i++)
         g_source_remove(g_array_index(lualock.timers, guint, i));
     
-    if (lualock.timers->len)
-        g_array_remove_range(lualock.timers, 0, lualock.timers->len);
+    uint_array_clear(lualock.timers);
 }
 
 void register_update(gdouble x, gdouble y, gdouble w, gdouble h) {
