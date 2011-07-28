@@ -16,6 +16,8 @@
 //      MA 02110-1301, USA.
 //
 
+#include <oocairo.h>
+
 #include "lua_api.h"
 #include "lualock.h"
 #include "drawing.h"
@@ -29,6 +31,7 @@
 #include "clib/hook.h"
 #include "clib/utils.h"
 #include "clib/keybinder.h"
+#include "clib/cairo_surface.h"
 
 int lualock_lua_on_error(lua_State *L) {
     printf("error: %s\n", luaL_checkstring(L, -1));
@@ -77,6 +80,10 @@ gboolean lualock_lua_loadrc(lua_State *L) {
     lualock_lua_utils_init(L);
     
     lualock_lua_keybinder_init(L);
+    
+    lualock_lua_cairo_surface_init(L);
+    
+    luaopen_oocairo(L);
     
     GPtrArray *configs = g_ptr_array_new();
     g_ptr_array_add(configs, g_build_filename(g_get_user_config_dir(), "lualock",

@@ -265,7 +265,6 @@ static int lualock_lua_image_draw_circle(lua_State *L) {
 }
 
 void lualock_lua_image_init(lua_State *L) {
-    gdk_init(NULL, NULL);
     const struct luaL_reg lualock_image_lib[] =
     {
         { "show", lualock_lua_image_show },
