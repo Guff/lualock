@@ -26,6 +26,7 @@ static int lualock_lua_cairo_surface_create(lua_State *L) {
 static int lualock_lua_cairo_surface_show(lua_State *L) {
     lualock_surface_t *lsurface = luaL_checkudata(L, 1, "lualock.cairo_surface");
     lsurface->layer->show = TRUE;
+    register_update_for_layer(lsurface->layer);
     return 0;
 }
 
