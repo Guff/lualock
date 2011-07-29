@@ -30,9 +30,9 @@ cairo_surface_t* create_surface(gint width, gint height) {
 }
 
 layer_t* create_layer(int width, int height) {
-	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-		width,
-		height);
+    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+        width,
+        height);
     
     layer_t *layer = malloc(sizeof(layer_t));
     layer->surface = surface;
@@ -76,12 +76,21 @@ void parse_color(const gchar *color, gdouble *r, gdouble *g, gdouble *b, gdouble
         *r = 0, *g = 0, *b = 0, *a = 1;
         return;
     }
+    
+    gint a_dummy;
+    
+    gchar *color_buf = g_strdup(color);
+    if (color_buf[0] == '#' && strlen(color_buf) == 9)
+        sscanf(color_buf + 7, "%2x", &a_dummy);
+    else
+        a_dummy = 1 << 16;
     GdkColor color_gdk;
-    gdk_color_parse(color, &color_gdk);
-    *r = color_gdk.red / (float) (1 << 16);
-    *g = color_gdk.green / (float) (1 << 16);
-    *b = color_gdk.blue / (float) (1 << 16);
-    *a = 1;
+    gdk_color_parse(color_buf, &color_gdk);
+    *r = color_gdk.red / (float) ((1 << 16) - 1);
+    *g = color_gdk.green / (float) ((1 << 16) - 1);
+    *b = color_gdk.blue / (float) ((1 << 16) - 1);
+    *a = a_dummy / (float) ((1 << 8) - 1);
+    g_free(color_buf);
 }
 
 char* get_password_mask() {

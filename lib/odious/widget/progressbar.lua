@@ -26,6 +26,9 @@ local function update(pbar)
     surface = pbar.surface or capi.cairo_surface(width, height)
     surface:resize(width, height)
     cr = oocairo.context_create(surface:get_surface())
+    cr:set_operator("clear")
+    cr:paint()
+    cr:set_operator("over")
 
     local value = data[pbar].value
     local max_value = data[pbar].max_value
@@ -57,6 +60,7 @@ local function update(pbar)
     r, g, b, a =
         capi.utils.parse_color(data[pbar].background_color or "#000000")
     cr:set_source_rgba(r, g, b, a)
+    cr:set_operator("source")
     if data[pbar].vertical then
         local rel_height = math.floor(over_drawn_height * (1 - value))
         cr:rectangle(border_width, border_width, over_drawn_width, rel_height)
