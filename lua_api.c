@@ -68,8 +68,6 @@ gboolean lualock_lua_loadrc(lua_State *L) {
     
     lualock_lua_background_init(L);
     
-    lualock_lua_text_init(L);
-    
     lualock_lua_timer_init(L);
     
     lualock_lua_style_init(L);
