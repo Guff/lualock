@@ -5,7 +5,7 @@ local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
 local capi = { cairo_surface = cairo_surface, utils = utils }
-local oocairo = require "oocario"
+local oocairo = require "oocairo"
 
 --- A progressbar widget.
 -- Adapted from awesome's awful library
@@ -23,7 +23,7 @@ local function update(pbar)
 
     -- Wipe the slate clean
     local surface
-    surface = pbar.surface or cairo_surface(width, height)
+    surface = pbar.surface or capi.cairo_surface(width, height)
     surface:resize(width, height)
     cr = oocairo.context_create(surface:get_surface())
 
@@ -39,15 +39,19 @@ local function update(pbar)
     if data[pbar].border_color then
         -- Draw border
         cr:rectangle(0.5, 0.5, width - 1, height - 1)
+        cr:set_line_width(2)
         local r, g, b, a = capi.utils.parse_color(data[pbar].border_color);
         cr:set_source_rgba(r, g, b, a)
+        cr:stroke()
         over_drawn_width = width - 2 -- remove 2 for borders
         over_drawn_height = height - 2 -- remove 2 for borders
         border_width = 1
     end
     
-    local r, g, b, a = capi.utils.parse_color(data[pbar.color] or "red") 
+    local r, g, b, a = capi.utils.parse_color(data[pbar].color or "red")
+    cr:set_source_rgba(r, g, b, a)
     cr:rectangle(border_width, border_width, over_drawn_width, over_drawn_height)
+    cr:fill()
 
     -- Cover the part that is not set with a rectangle
     r, g, b, a =
@@ -56,12 +60,14 @@ local function update(pbar)
     if data[pbar].vertical then
         local rel_height = math.floor(over_drawn_height * (1 - value))
         cr:rectangle(border_width, border_width, over_drawn_width, rel_height)
+        cr:fill()
     else
         local rel_x = math.ceil(over_drawn_width * value)
         cr:rectangle(border_width + rel_x,
                      border_width,
                      over_drawn_width - rel_x,
                      over_drawn_height)
+        cr:fill()
     end
 
     -- Update the image

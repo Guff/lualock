@@ -62,6 +62,8 @@ gboolean lualock_lua_loadrc(lua_State *L) {
     lua_concat(L, 2);
     lua_setfield(L, 1, "path");
     lua_pop(L, 1);
+
+    luaopen_oocairo(L);
     
     lualock_lua_image_init(L);
     
@@ -82,9 +84,7 @@ gboolean lualock_lua_loadrc(lua_State *L) {
     lualock_lua_keybinder_init(L);
     
     lualock_lua_cairo_surface_init(L);
-    
-    luaopen_oocairo(L);
-    
+        
     GPtrArray *configs = g_ptr_array_new();
     g_ptr_array_add(configs, g_build_filename(g_get_user_config_dir(), "lualock",
                                               "rc.lua", NULL));
