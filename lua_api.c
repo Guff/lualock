@@ -24,7 +24,6 @@
 
 #include "clib/image.h"
 #include "clib/background.h"
-#include "clib/text.h"
 #include "clib/timer.h"
 #include "clib/style.h"
 #include "clib/prefs.h"
