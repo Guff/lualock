@@ -22,8 +22,7 @@ local function update(pbar)
     local height = data[pbar].height or 60
 
     -- Wipe the slate clean
-    local surface
-    surface = pbar.surface or capi.cairo_surface(width, height)
+    local surface = pbar.surface or capi.cairo_surface(width, height)
     surface:resize(width, height)
     cr = oocairo.context_create(surface:get_surface())
     cr:set_operator("clear")
