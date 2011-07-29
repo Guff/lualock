@@ -18,6 +18,7 @@
 
 #include <gdk/gdk.h>
 #include <math.h>
+#include <oocairo.h>
 
 #include "drawing.h"
 #include "clib/image.h"
@@ -232,36 +233,10 @@ static int lualock_lua_image_clear(lua_State *L) {
     return 0;
 }
 
-static int lualock_lua_image_draw_rectangle(lua_State *L) {
+static int lualock_lua_image_get_surface(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
-    gdouble r, g, b, a;
-    parse_color(luaL_optstring(L, 7, "#000000"), &r, &g, &b, &a);
-    GdkRGBA color = { r, g, b, a };
-    image_draw_rectangle(image, lua_tonumber(L, 2), lua_tonumber(L, 3),
-                         lua_tonumber(L, 4), lua_tonumber(L, 5),
-                         lua_toboolean(L, 6), &color);
-    return 0;
-}
-
-static int lualock_lua_image_draw_line(lua_State *L) {
-    image_t *image = luaL_checkudata(L, 1, "lualock.image");
-    gdouble r, g, b, a;
-    parse_color(luaL_optstring(L, 7, "#000000"), &r, &g, &b, &a);
-    GdkRGBA color = { r, g, b, a };
-    image_draw_line(image, lua_tonumber(L, 2), lua_tonumber(L, 3),
-                    lua_tonumber(L, 4), lua_tonumber(L, 5), lua_tonumber(L, 6),
-                    &color);
-    return 0;
-}
-
-static int lualock_lua_image_draw_circle(lua_State *L) {
-    image_t *image = luaL_checkudata(L, 1, "lualock.image");
-    gdouble r, g, b, a;
-    parse_color(luaL_optstring(L, 6, "#000000"), &r, &g, &b, &a);
-    GdkRGBA color = { r, g, b, a };
-    image_draw_circle(image, lua_tonumber(L, 2), lua_tonumber(L, 3),
-                      lua_tonumber(L, 4), lua_toboolean(L, 5), &color);
-    return 0;
+    oocairo_surface_push(L, image->surface);
+    return 1;
 }
 
 void lualock_lua_image_init(lua_State *L) {
@@ -276,9 +251,7 @@ void lualock_lua_image_init(lua_State *L) {
         { "width", lualock_lua_image_get_width },
         { "height", lualock_lua_image_get_height },
         { "clear", lualock_lua_image_clear },
-        { "draw_rectangle", lualock_lua_image_draw_rectangle },
-        { "draw_line", lualock_lua_image_draw_line },
-        { "draw_circle", lualock_lua_image_draw_circle },
+        { "get_surface", lualock_lua_image_get_surface },
         { NULL, NULL }
     };
     luaL_newmetatable(L, "lualock.image");
