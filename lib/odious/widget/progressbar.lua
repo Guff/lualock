@@ -4,7 +4,8 @@
 local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
-local capi = { image = image }
+local capi = { cairo_surface = cairo_surface, utils = utils }
+local oocairo = require "oocario"
 
 --- A progressbar widget.
 -- Adapted from awesome's awful library
@@ -21,10 +22,10 @@ local function update(pbar)
     local height = data[pbar].height or 60
 
     -- Wipe the slate clean
-    local img
-    img = pbar.image or capi.image(width, height)
-    img:resize(width, height)
-    img:clear()
+    local surface
+    surface = pbar.surface or cairo_surface(width, height)
+    surface:resize(width, height)
+    cr = oocairo.context_create(surface:get_surface())
 
     local value = data[pbar].value
     local max_value = data[pbar].max_value
@@ -37,38 +38,37 @@ local function update(pbar)
     local border_width = 0
     if data[pbar].border_color then
         -- Draw border
-        img:draw_rectangle(0.5, 0.5, width - 1, height - 1, false, data[pbar].border_color)
+        cr:rectangle(0.5, 0.5, width - 1, height - 1)
+        local r, g, b, a = capi.utils.parse_color(data[pbar].border_color);
+        cr:set_source_rgba(r, g, b, a)
         over_drawn_width = width - 2 -- remove 2 for borders
         over_drawn_height = height - 2 -- remove 2 for borders
         border_width = 1
     end
-
-    img:draw_rectangle(border_width, border_width,
-                       over_drawn_width, over_drawn_height,
-                       true, data[pbar].color or "red")
+    
+    local r, g, b, a = capi.utils.parse_color(data[pbar.color] or "red") 
+    cr:rectangle(border_width, border_width, over_drawn_width, over_drawn_height)
 
     -- Cover the part that is not set with a rectangle
+    r, g, b, a =
+        capi.utils.parse_color(data[pbar].background_color or "#000000")
+    cr:set_source_rgba(r, g, b, a)
     if data[pbar].vertical then
         local rel_height = math.floor(over_drawn_height * (1 - value))
-        img:draw_rectangle(border_width,
-                           border_width,
-                           over_drawn_width,
-                           rel_height,
-                           true, data[pbar].background_color or "#000000")
+        cr:rectangle(border_width, border_width, over_drawn_width, rel_height)
     else
         local rel_x = math.ceil(over_drawn_width * value)
-        img:draw_rectangle(border_width + rel_x,
-                           border_width,
-                           over_drawn_width - rel_x,
-                           over_drawn_height,
-                           true, data[pbar].background_color or "#000000")
+        cr:rectangle(border_width + rel_x,
+                     border_width,
+                     over_drawn_width - rel_x,
+                     over_drawn_height)
     end
 
     -- Update the image
-    pbar.image = img
+    pbar.surface = surface
     
-    pbar.image:set_position(data[pbar].x, data[pbar].y)
-    pbar.image:show()
+    pbar.surface:set_position(data[pbar].x, data[pbar].y)
+    pbar.surface:show()
 end
 
 --- Set the progressbar value.

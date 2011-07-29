@@ -11,9 +11,7 @@ static int lualock_lua_cairo_surface_create(lua_State *L) {
     luaL_getmetatable(L, "lualock.cairo_surface");
     lua_setmetatable(L, -2);
     
-    lsurface->layer = create_layer(luaL_checknumber(L, 3), luaL_checknumber(L, 4));
-    lsurface->layer->x = luaL_checknumber(L, 1);
-    lsurface->layer->y = luaL_checknumber(L, 2);
+    lsurface->layer = create_layer(luaL_checknumber(L, 1), luaL_checknumber(L, 2));
     
     add_layer(lsurface->layer);
     
