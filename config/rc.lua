@@ -58,6 +58,75 @@ user_text = odious.widget.text{ text = "User: " .. os.getenv("USER"), x = 500,
 
 local size = 300
 local surface = cairo_surface(size, size)
+local clock_bg = oocairo.surface_create_similar(surface:get_surface(), "color-alpha", size, size)
+
+function setup_context(cr)
+    -- Move (0, 0) into the center and (-1, -1) to the top-left corner)
+    cr:translate(size / 2, size / 2)
+    cr:scale(size / 2, size / 2)
+    return cr
+end
+
+function path_hand(cr, from, to, val, max)
+    local val = val + max / 2
+    cr:save()
+    cr:rotate(2 * math.pi * val / max)
+    cr:move_to(0, from)
+    cr:line_to(0, to)
+    cr:restore()
+end
+
+-- Setup the clock background, create_similar already cleared the surface
+local cr = oocairo.context_create(clock_bg)
+setup_context(cr)
+
+cr:push_group()
+
+-- First the "translucent clock frame"
+cr:push_group()
+local rad = oocairo.pattern_create_radial(0, 0, 0, 0, 0, 1)
+rad:add_color_stop_rgba(0, 1, 1, 1, 1)
+rad:add_color_stop_rgba(0.9, 1, 1, 1, 1)
+rad:add_color_stop_rgba(1, 0, 0, 0, 0)
+cr:set_source(rad)
+cr:paint()
+local s = cr:pop_group()
+
+cr:push_group()
+cr:set_operator("source")
+local pat = oocairo.pattern_create_linear(0, 0, 0.2, 0.9)
+pat:add_color_stop_rgba(0, 0, 0, 0, 0)
+pat:add_color_stop_rgba(1, 1, 1, 1, 1)
+pat:set_extend("reflect")
+cr:set_source(pat)
+cr:paint()
+cr:pop_group_to_source()
+cr:mask(s)
+
+-- Now the blue-ish background
+local pat = oocairo.pattern_create_radial(-0.3, -0.4, 0, -0.2, -0.35, 0.7)
+pat:add_color_stop_rgb(0, 0.9, 0.9, 1)
+pat:add_color_stop_rgb(1, 0.9, 0.9, 1)
+cr:set_source(pat)
+cr:arc(0, 0, 0.8, 0, 2 * math.pi)
+cr:fill()
+
+-- Paint the 15min marks
+local w, h = cr:device_to_user_distance(1, 1)
+if w < 0 then w = -w end
+if h < 0 then h = -h end
+if w < h then w = h end
+cr:set_line_width(w)
+for i = 15, 60, 15 do
+    path_hand(cr, 0.85, 1, i, 60)
+end
+cr:set_source_rgb(1,0,0)
+cr:stroke()
+
+-- Now make the whole background translucent
+cr:pop_group_to_source()
+cr:mask(oocairo.pattern_create_rgba(0, 0, 0, 0.7))
+
 local update_clock = function()
     local time = os.date("*t")
     local cr = oocairo.context_create(surface:get_surface())
@@ -70,89 +139,32 @@ local update_clock = function()
 
     if hour > 12 then hour = hour - 12 end
 
+    -- Paint the background
     cr:save()
-    cr:set_operator("clear")
+    cr:set_source(clock_bg)
+    cr:set_operator("source")
     cr:paint()
     cr:restore()
 
-    cr:push_group()
-
-    -- Move (0, 0) into the center and (-1, -1) to the top-left corner)
-    cr:translate(size / 2, size / 2)
-    cr:scale(size / 2, size / 2)
-
-    local path_hand = function(from, to, val, max)
-        local val = val + max / 2
-        cr:save()
-        cr:rotate(2 * math.pi * val / max)
-        cr:move_to(0, from)
-        cr:line_to(0, to)
-        cr:restore()
-    end
-
-    -- Paint clock background
-    cr:push_group()
-    local rad = oocairo.pattern_create_radial(0, 0, 0, 0, 0, 1)
-    rad:add_color_stop_rgba(0,   1, 1, 1, 1)
-    rad:add_color_stop_rgba(0.9, 1, 1, 1, 1)
-    rad:add_color_stop_rgba(1,   0, 0, 0, 0)
-    cr:set_source(rad)
-    cr:paint()
-    local s = cr:pop_group()
-
-    cr:push_group()
-    cr:set_operator("source")
-    local pat = oocairo.pattern_create_linear(0, 0, 0.2, 0.9)
-    pat:add_color_stop_rgba(0, 0, 0, 0, 0)
-    pat:add_color_stop_rgba(1, 1, 1, 1, 1)
-    pat:set_extend("reflect")
-    cr:set_source(pat)
-    cr:paint()
-    cr:pop_group_to_source()
-    cr:mask(s)
-
-    local pat = oocairo.pattern_create_radial(-0.3, -0.4, 0, -0.2, -0.35, 0.7)
-    pat:add_color_stop_rgb(0, 0.5, 0.7, 1)
-    pat:add_color_stop_rgb(1, 0.3, 0.5, 1)
-    cr:set_source(pat)
-    cr:arc(0, 0, 0.8, 0, 2 * math.pi)
-    --cr:set_source_rgb(0.3, 0.5, 1)
-    cr:fill()
-
-    -- Paint the 15min marks
-    local w, h = cr:device_to_user_distance(1, 1)
-    if w < 0 then w = -w end
-    if h < 0 then h = -h end
-    if w < h then w = h end
-    cr:set_line_width(w)
-    for i = 15, 60, 15 do
-        path_hand (0.85, 1, i, 60)
-    end
-    cr:set_source_rgb(1,0,0)
-    cr:stroke()
+    setup_context(cr)
 
     cr:set_line_cap("round")
     cr:set_source_rgb(0,0,0)
 
     -- Paint the hour hand
     cr:set_line_width(0.05)
-    path_hand (0, 0.4, hour, 12)
+    path_hand(cr, 0, 0.4, hour, 12)
     cr:stroke()
 
     -- Paint the minute hand
     cr:set_line_width(0.02)
-    path_hand (0, 0.65, min, 60)
+    path_hand(cr, 0, 0.65, min, 60)
     cr:stroke()
 
     -- Paint the second hand
     cr:set_line_width(0.01)
-    path_hand (0, 0.7, sec, 60)
-
+    path_hand(cr, 0, 0.7, sec, 60)
     cr:stroke()
-
-    cr:pop_group_to_source()
-    local pat = oocairo.pattern_create_rgba(0, 0, 0, 0.7)
-    cr:mask(pat)
 
     surface:show()
 end
@@ -162,4 +174,3 @@ surf_timer:start()
 surface:show()
 
 update_clock()
-
