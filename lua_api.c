@@ -42,7 +42,15 @@ void lualock_lua_do_function(lua_State *L) {
         lualock_lua_on_error(L);
 }
 
+gboolean collect_garbage(void *data) {
+    lua_State *L = data;
+    lua_gc(L, LUA_GCCOLLECT, 0);
+    return TRUE;
+}
+
 gboolean lualock_lua_loadrc(lua_State *L) {
+    g_timeout_add_seconds(10, collect_garbage, L);
+    
     luaL_openlibs(L);
     
     lua_getglobal(L, "package");
