@@ -46,7 +46,7 @@ gboolean image_new(image_t *image, const char *filename) {
 }
 
 void image_new_blank(image_t *image, gdouble rel_w, gdouble rel_h) {
-    double w, h;
+    gdouble w, h;
     get_abs_pos(rel_w, rel_h, &w, &h);
     image->layer = create_layer(w, h);
     image->rotation = 0;
@@ -105,7 +105,7 @@ void image_rotate(image_t *image, gdouble angle, gdouble x, gdouble y) {
     image->layer->angle = image->rotation;
 }
 
-void image_scale(image_t *image, double sx, double sy) {
+void image_scale(image_t *image, gdouble sx, gdouble sy) {
     image->layer->scale_x = sx;
     image->layer->scale_y = sy;
 }
@@ -157,7 +157,7 @@ void image_draw_circle(image_t *image, gdouble x, gdouble y,
     cairo_destroy(cr);
 }
 
-static int lualock_lua_image_new(lua_State *L) {
+static gint lualock_lua_image_new(lua_State *L) {
     lua_settop(L, 2);
     image_t *image = lua_newuserdata(L, sizeof(image_t));
     luaL_getmetatable(L, "lualock.image");
@@ -166,7 +166,7 @@ static int lualock_lua_image_new(lua_State *L) {
     if (lua_isnumber(L, 1) && lua_isnumber(L, 2)) {
         image_new_blank(image, lua_tonumber(L, 1), lua_tonumber(L, 2));
     } else if (lua_isstring(L, 1)) {   
-        const char *filename = luaL_checkstring(L, 1);
+        const gchar *filename = luaL_checkstring(L, 1);
         gboolean loaded = image_new(image, filename);
         if (!loaded)
             return 0;
@@ -178,62 +178,62 @@ static int lualock_lua_image_new(lua_State *L) {
     return 1;
 }
 
-static int lualock_lua_image_show(lua_State *L) {
+static gint lualock_lua_image_show(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_show(image);
     return 0;
 }
 
-static int lualock_lua_image_hide(lua_State *L) {
+static gint lualock_lua_image_hide(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_hide(image);
     return 0;
 }
 
-static int lualock_lua_image_set_position(lua_State *L) {
+static gint lualock_lua_image_set_position(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_set_position(image, lua_tonumber(L, 2), lua_tonumber(L, 3));
     return 0;
 }
 
-static int lualock_lua_image_rotate(lua_State *L) {
+static gint lualock_lua_image_rotate(lua_State *L) {
     lua_settop(L, 4);
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_rotate(image, luaL_checknumber(L, 2), lua_tonumber(L, 3), lua_tonumber(L, 4));
     return 0;
 }
 
-static int lualock_lua_image_scale(lua_State *L) {
+static gint lualock_lua_image_scale(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_scale(image, lua_tonumber(L, 2), lua_tonumber(L, 3));
     return 0;
 }
 
-static int lualock_lua_image_resize(lua_State *L) {
+static gint lualock_lua_image_resize(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_resize(image, lua_tonumber(L, 2), lua_tonumber(L, 3));
     return 0;
 }
 
-static int lualock_lua_image_get_width(lua_State *L) {
+static gint lualock_lua_image_get_width(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
     lua_pushinteger(L, image_get_width(image));
     return 1;
 }
 
-static int lualock_lua_image_get_height(lua_State *L) {
+static gint lualock_lua_image_get_height(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
     lua_pushinteger(L, image_get_height(image));
     return 1;
 }
 
-static int lualock_lua_image_clear(lua_State *L) {
+static gint lualock_lua_image_clear(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
     image_clear(image);
     return 0;
 }
 
-static int lualock_lua_image_get_surface(lua_State *L) {
+static gint lualock_lua_image_get_surface(lua_State *L) {
     image_t *image = luaL_checkudata(L, 1, "lualock.image");
     oocairo_surface_push(L, image->surface);
     return 1;

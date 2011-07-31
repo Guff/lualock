@@ -22,6 +22,6 @@
 #include <cairo.h>
 
 void draw_password_field(cairo_t *cr);
-void draw_password_mask();
-gboolean draw(void *data);
+void draw_password_mask(void);
+gboolean draw(gpointer data);
 #endif

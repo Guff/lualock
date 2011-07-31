@@ -25,10 +25,10 @@
 #include "misc.h"
 #include "timer.h"
 
-void timer_new(l_timer_t *timer, unsigned int int_us, int cycles,
-               void (*cb)(void*)) {
+void timer_new(l_timer_t *timer, guint int_us, guint cycles,
+               void (*cb)(gpointer)) {
     timer->cycles = cycles;
-    timer->completed_cycles = 0,
+    timer->completed_cycles = 0;
     timer->running = TRUE;
     timer->int_us = int_us;
     timer->cb = cb;
@@ -39,7 +39,7 @@ void timer_start(l_timer_t *timer) {
     add_timer(timer->id = g_timeout_add(timer->int_us, timer_run, timer));
 }    
     
-gboolean timer_run(void *data) {
+gboolean timer_run(gpointer data) {
     l_timer_t *timer = (l_timer_t *)data;
     if (timer->cycles != 0 && timer->completed_cycles >= timer->cycles)
         return FALSE;
@@ -49,15 +49,15 @@ gboolean timer_run(void *data) {
     return TRUE;
 }
 
-static void timer_run_lua_function(void *data) {
+static void timer_run_lua_function(gpointer data) {
     l_timer_t *timer = data;
     lua_rawgeti(timer->L, LUA_REGISTRYINDEX, timer->r);
     lualock_lua_do_function(timer->L);
 }
 
-static int lualock_lua_timer_new(lua_State *L) {
-    int interval = luaL_checknumber(L, 2) * 1000;
-    int run_times = lua_tonumber(L, 3);
+static gint lualock_lua_timer_new(lua_State *L) {
+    guint interval = luaL_checknumber(L, 2) * 1000;
+    guint run_times = lua_tonumber(L, 3);
     lua_settop(L, 3);
     
     l_timer_t *timer = lua_newuserdata(L, sizeof(l_timer_t));
@@ -75,12 +75,12 @@ static int lualock_lua_timer_new(lua_State *L) {
     return 1;
 }
 
-static int lualock_lua_timer_start(lua_State *L) {
+static gint lualock_lua_timer_start(lua_State *L) {
     l_timer_t *timer = luaL_checkudata(L, 1, "lualock.timer");
     timer_start(timer);
     return 0;
 }
-static int lualock_lua_timer_stop(lua_State *L) {
+static gint lualock_lua_timer_stop(lua_State *L) {
     l_timer_t *timer = luaL_checkudata(L, 1, "lualock.timer");
     remove_timer(timer->id);
     timer->id = 0;

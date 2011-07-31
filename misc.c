@@ -29,7 +29,7 @@ cairo_surface_t* create_surface(gint width, gint height) {
     return surface;
 }
 
-layer_t* create_layer(int width, int height) {
+layer_t* create_layer(gint width, gint height) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
         width,
         height);
@@ -93,9 +93,9 @@ void parse_color(const gchar *color, gdouble *r, gdouble *g, gdouble *b, gdouble
     g_free(color_buf);
 }
 
-char* get_password_mask() {
-    char password_mask[strlen(lualock.password) + 1];
-    for (unsigned int i = 0; i < strlen(lualock.password); i++)
+gchar* get_password_mask(void) {
+    gchar password_mask[strlen(lualock.password) + 1];
+    for (guint i = 0; i < strlen(lualock.password); i++)
         password_mask[i] = '*';
     password_mask[strlen(lualock.password)] = '\0';
     return strdup(password_mask);
@@ -128,7 +128,7 @@ void remove_timer(guint id) {
     }
 }
 
-void clear_timers() {
+void clear_timers(void) {
     for (guint i = 0; i < lualock.timers->len; i++)
         g_source_remove(g_array_index(lualock.timers, guint, i));
     
@@ -150,13 +150,13 @@ void register_update_for_layer(layer_t *layer) {
     register_update(x, y, width, height);
 }
 
-void clear_updates() {
+void clear_updates(void) {
     cairo_region_t *region = cairo_region_create();
     cairo_region_intersect(lualock.updates_needed, region);
     cairo_region_destroy(region);
 }
 
-void update_screen() {
+void update_screen(void) {
     register_update(0, 0, gdk_screen_get_width(lualock.scr),
                     gdk_screen_get_height(lualock.scr));
 }

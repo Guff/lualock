@@ -25,18 +25,18 @@
 
 typedef struct {
     lua_State *L;
-    int r;
+    gint r;
 } hook_data_t;
 
-void hook_call_lua_function(gpointer data) {
+static void hook_call_lua_function(gpointer data) {
     hook_data_t *hook_data = data;
     lua_rawgeti(hook_data->L, LUA_REGISTRYINDEX, hook_data->r);
     lualock_lua_do_function(hook_data->L);
 }
 
-int lualock_lua_hook_connect(lua_State *L) {
+static gint lualock_lua_hook_connect(lua_State *L) {
     lua_settop(L, 2);
-    const char *hook_str = luaL_checkstring(L, 1);
+    const gchar *hook_str = luaL_checkstring(L, 1);
     GHookList *list = g_hash_table_lookup(lualock.hooks, hook_str);
     luaL_argcheck(L, list, 1, "not a valid hook");
     

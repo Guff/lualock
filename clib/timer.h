@@ -23,19 +23,19 @@
 #include <glib.h>
 
 typedef struct {
-    int id;
+    gint id;
     lua_State *L;
     gboolean running;
-    int cycles;
-    int completed_cycles;
-    int int_us;
-    int r;
-    void (*cb)(void*);
+    guint cycles;
+    guint completed_cycles;
+    guint int_us;
+    gint r;
+    void (*cb)(gpointer);
 } l_timer_t;
 
-void timer_new(l_timer_t *timer, unsigned int int_us, int cycles,
-               void (*cb)(void*));
-gboolean timer_run(void *data);
+void timer_new(l_timer_t *timer, guint int_us, guint cycles,
+               void (*cb)(gpointer));
+gboolean timer_run(gpointer data);
 
 void lualock_lua_timer_init(lua_State *L);
 

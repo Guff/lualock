@@ -40,16 +40,12 @@
 
 lualock_t lualock;
 
-
-time_t test_timer;
-int frames_drawn;
-
 struct {
     gboolean no_daemon;
     gboolean test;
 } prefs;
 
-static const char *hook_names[] = { "lock",
+static const gchar *hook_names[] = { "lock",
                                     "unlock",
                                     "auth-failed",
                                     "key-press",
@@ -64,11 +60,11 @@ static GOptionEntry options[] = {
     { NULL, 0, 0, 0, NULL, NULL, NULL }
 };
 
-gboolean on_key_press(GdkEvent *ev);
-void show_lock();
-void hide_lock();
+static gboolean on_key_press(GdkEvent *ev);
+void show_lock(void);
+void hide_lock(void);
 
-void init_window() {
+static void init_window(void) {
     GdkWindowAttr attrs;
 
     lualock.scr = gdk_screen_get_default();
@@ -80,18 +76,18 @@ void init_window() {
     attrs.wclass = GDK_INPUT_OUTPUT;
     attrs.x = 0;
     attrs.y = 0;
-    unsigned long attr_mask = GDK_WA_NOREDIR | GDK_WA_X | GDK_WA_Y;
+    gulong attr_mask = GDK_WA_NOREDIR | GDK_WA_X | GDK_WA_Y;
     
     lualock.win = gdk_window_new(gdk_get_default_root_window(), &attrs, attr_mask);
                                  
     gdk_window_show(lualock.win);
 }
 
-void init_timers() {
+static void init_timers(void) {
     lualock.timers = g_array_new(TRUE, TRUE, sizeof(guint));
 }
 
-void init_style() {
+static void init_style(void) {
     lualock.style.font = DEFAULT_FONT;
     lualock.style.x = 400;
     lualock.style.y = 540;
@@ -105,54 +101,55 @@ void init_style() {
     lualock.style.a = 1;
 }
 
-void init_cairo() {
+static void init_cairo(void) {
     lualock.layers = g_ptr_array_new();
     
     lualock.surface_buf = create_surface(0, 0);
     
-    lualock.pw_surface = create_surface(0, 0);
+    lualock.pw_surface = create_surface(lualock.style.width,
+                                        lualock.style.height);
     
     lualock.bg_surface = create_surface(0, 0);
     
     lualock.updates_needed = cairo_region_create();
 }
 
-void init_lua() {
+static void init_lua(void) {
     lualock.L = luaL_newstate();
     
     lualock_lua_loadrc(lualock.L);
 }
 
-void init_hook_table() {
+static void init_hook_table(void) {
     lualock.hooks = g_hash_table_new(g_str_hash, g_str_equal);
     
-    for (int i = 0; hook_names[i]; i++) {
+    for (guint i = 0; hook_names[i]; i++) {
         GHookList *hook_list = g_malloc(sizeof(GHookList));
         g_hash_table_insert(lualock.hooks, strdup(hook_names[i]), hook_list);
     }
 }
 
-void init_hooks() {
-    for (int i = 0; hook_names[i]; i++)
+static void init_hooks(void) {
+    for (guint i = 0; hook_names[i]; i++)
         g_hook_list_init(g_hash_table_lookup(lualock.hooks, hook_names[i]),
                          sizeof(GHook));
 }
 
-void init_keybinds() {
+static void init_keybinds(void) {
     lualock.keybinds = g_ptr_array_new();
 }
 
-void clear_keybinds() {
+static void clear_keybinds(void) {
     if (lualock.keybinds->len)
         g_ptr_array_remove_range(lualock.keybinds, 0, lualock.keybinds->len);
 }
 
-void clear_hooks() {
-    for (int i = 0; hook_names[i]; i++)
+static void clear_hooks(void) {
+    for (guint i = 0; hook_names[i]; i++)
         g_hook_list_clear(g_hash_table_lookup(lualock.hooks, hook_names[i]));
 }
 
-void clear_layers() {
+static void clear_layers(void) {
     for (guint i = 0; i < lualock.layers->len; i++)
         layer_destroy(g_ptr_array_index(lualock.layers, i));
     
@@ -160,16 +157,16 @@ void clear_layers() {
         g_ptr_array_remove_range(lualock.layers, 0, lualock.layers->len);
 }        
 
-void reset_password() {
+void reset_password(void) {
     lualock.password[0] = '\0';
     lualock.pw_length = 0;
 }
 
-gboolean authenticate_user() {
+static gboolean authenticate_user(void) {
     return (pam_authenticate(lualock.pam_handle, 0) == PAM_SUCCESS);
 }
 
-gboolean on_key_press(GdkEvent *ev) {
+static gboolean on_key_press(GdkEvent *ev) {
     guint keyval = ((GdkEventKey *)ev)->keyval;
     GdkModifierType mod = ((GdkEventKey *)ev)->state;
     gchar buf[6];
@@ -240,12 +237,12 @@ void event_handler(GdkEvent *ev, gpointer data) {
     }
 }
 
-static int pam_conv_cb(int msgs, const struct pam_message **msg,
-                       struct pam_response **resp, void *data) {
+static gint pam_conv_cb(gint msgs, const struct pam_message **msg,
+                       struct pam_response **resp, gpointer data) {
     *resp = (struct pam_response *) calloc(msgs, sizeof(struct pam_message));
     if (msgs == 0 || *resp == NULL)
         return 1;
-    for (int i = 0; i < msgs; i++) {
+    for (gint i = 0; i < msgs; i++) {
         if (msg[i]->msg_style != PAM_PROMPT_ECHO_OFF &&
             msg[i]->msg_style != PAM_PROMPT_ECHO_ON)
             continue;
@@ -261,7 +258,7 @@ static int pam_conv_cb(int msgs, const struct pam_message **msg,
     return 0;
 }
 
-void show_lock() {
+void show_lock(void) {
     init_hooks();
     init_lua();
     update_screen();
@@ -278,7 +275,7 @@ void show_lock() {
     hide_lock();
 }
 
-void hide_lock() {
+void hide_lock(void) {
     g_hook_list_invoke(g_hash_table_lookup(lualock.hooks, "unlock"), FALSE);
     g_source_remove(lualock.frame_timer_id);
     lua_close(lualock.L);
@@ -293,14 +290,14 @@ void hide_lock() {
     clear_hooks();
 }
 
-int seconds_idle(Display *dpy, XScreenSaverInfo *xss_info) {
+gint seconds_idle(Display *dpy, XScreenSaverInfo *xss_info) {
     XScreenSaverQueryInfo(dpy, DefaultRootWindow(dpy), xss_info);
     return xss_info->idle / 1000;
 }
 
-int main(int argc, char **argv) {
-    int lock_file = open("/var/lock/lualock.lock", O_CREAT | O_RDWR, 0666);
-    int rc = flock(lock_file, LOCK_EX | LOCK_NB);
+gint main(gint argc, gchar **argv) {
+    gint lock_file = open("/var/lock/lualock.lock", O_CREAT | O_RDWR, 0666);
+    gint rc = flock(lock_file, LOCK_EX | LOCK_NB);
     if(rc) {
         if(EWOULDBLOCK == errno)
             exit(1);
@@ -314,7 +311,7 @@ int main(int argc, char **argv) {
         exit(1);
     }
     
-    lualock.password = calloc(PW_BUFF_SIZE, sizeof(char));
+    lualock.password = calloc(PW_BUFF_SIZE, sizeof(gchar));
     lualock.pw_length = 0;
     lualock.pw_alloc = PW_BUFF_SIZE;
         
@@ -326,7 +323,7 @@ int main(int argc, char **argv) {
     init_keybinds();
     
     struct pam_conv conv = {pam_conv_cb, NULL};
-    int ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
+    gint ret = pam_start("lualock", getenv("USER"), &conv, &lualock.pam_handle);
     // if PAM doesn't get set up correctly, we can't authenticate. so, bail out
     if (ret != PAM_SUCCESS)
         exit(EXIT_FAILURE);
@@ -350,7 +347,7 @@ int main(int argc, char **argv) {
     lua_close(lualock.L);
     clear_hooks();
     
-    int idle_time;
+    gint idle_time;
     while (TRUE) {
         while ((idle_time = seconds_idle(dpy, xss_info)) < lualock.timeout) {
             sleep(lualock.timeout - idle_time - 1);

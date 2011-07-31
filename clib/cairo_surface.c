@@ -5,7 +5,7 @@
 #include "misc.h"
 #include "clib/cairo_surface.h"
 
-static int lualock_lua_cairo_surface_create(lua_State *L) {
+static gint lualock_lua_cairo_surface_create(lua_State *L) {
     lua_settop(L, 4);
     lualock_surface_t *lsurface = lua_newuserdata(L, sizeof(lualock_surface_t));
     luaL_getmetatable(L, "lualock.cairo_surface");
@@ -18,27 +18,27 @@ static int lualock_lua_cairo_surface_create(lua_State *L) {
     return 1;
 }
 
-static int lualock_lua_cairo_surface_show(lua_State *L) {
+static gint lualock_lua_cairo_surface_show(lua_State *L) {
     lualock_surface_t *lsurface = luaL_checkudata(L, 1, "lualock.cairo_surface");
     lsurface->layer->show = TRUE;
     register_update_for_layer(lsurface->layer);
     return 0;
 }
 
-static int lualock_lua_cairo_surface_get_surface(lua_State *L) {
+static gint lualock_lua_cairo_surface_get_surface(lua_State *L) {
     lualock_surface_t *lsurface = luaL_checkudata(L, 1, "lualock.cairo_surface");
     oocairo_surface_push(L, lsurface->layer->surface);
     return 1;
 }
 
-static int lualock_lua_cairo_surface_set_position(lua_State *L) {
+static gint lualock_lua_cairo_surface_set_position(lua_State *L) {
     lualock_surface_t *lsurface = luaL_checkudata(L, 1, "lualock.cairo_surface");
     lsurface->layer->x = luaL_checknumber(L, 2);
     lsurface->layer->y = luaL_checknumber(L, 3);
     return 0;
 }
 
-static int lualock_lua_cairo_surface_resize(lua_State *L) {
+static gint lualock_lua_cairo_surface_resize(lua_State *L) {
     lualock_surface_t *lsurface = luaL_checkudata(L, 1, "lualock.cairo_surface");
     layer_t *layer = create_layer(luaL_checknumber(L, 2), luaL_checknumber(L, 3));
     layer_t *oldlayer = lsurface->layer;

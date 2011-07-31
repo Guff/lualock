@@ -33,19 +33,19 @@ void layer_destroy(layer_t *layer);
 
 void parse_color(const gchar *hex, gdouble *r, gdouble *g, gdouble *b, gdouble *a);
 
-char* get_password_mask();
+gchar* get_password_mask(void);
 
-void get_abs_pos(double rel_x, double rel_y, double *x, double *y);
-void get_abs_pos_for_dims(double dim_w, double dim_h, double rel_w, double rel_h,
-                          double *w, double *h);
+void get_abs_pos(gdouble rel_x, gdouble rel_y, gdouble *x, gdouble *y);
+void get_abs_pos_for_dims(gdouble dim_w, gdouble dim_h, gdouble rel_w,
+                          gdouble rel_h, gdouble *w, gdouble *h);
 
 void add_timer(guint id);
 void remove_timer(guint id);
-void clear_timers();
+void clear_timers(void);
 
 void register_update(gdouble x, gdouble y, gdouble w, gdouble h);
 void register_update_for_layer(layer_t *layer);
-void clear_updates();
-void update_screen();
+void clear_updates(void);
+void update_screen(void);
 
 #endif

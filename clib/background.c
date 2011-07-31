@@ -24,10 +24,10 @@
 #include "misc.h"
 #include "clib/background.h"
 
-void background_set_color(const char *hex) {
+void background_set_color(const gchar *hex) {
     cairo_t *cr = cairo_create(lualock.bg_surface);
     
-    double r, g, b, a;
+    gdouble r, g, b, a;
     parse_color(hex, &r, &g, &b, &a);
     cairo_set_source_rgba(cr, r, g, b, a);
     cairo_paint(cr);
@@ -36,8 +36,8 @@ void background_set_color(const char *hex) {
     update_screen();
 }
 
-static int lualock_lua_background_set(lua_State *L) {
-    const char *filename = luaL_checkstring(L, 1);
+static gint lualock_lua_background_set(lua_State *L) {
+    const gchar *filename = luaL_checkstring(L, 1);
     if (!strcmp(filename, "color")) {
         background_set_color(luaL_checkstring(L, 2));
         return 0;
@@ -45,12 +45,12 @@ static int lualock_lua_background_set(lua_State *L) {
     GError **error = NULL;
     GdkPixbuf *pbuf = gdk_pixbuf_new_from_file(filename, error);
     
-    const char *style = lua_tostring(L, 2);
-    double width, height, win_width, win_height;
-    int off_x = 0;
-    int off_y = 0;
-    double scale_x = 1;
-    double scale_y = 1;
+    const gchar *style = lua_tostring(L, 2);
+    gdouble width, height, win_width, win_height;
+    gint off_x = 0;
+    gint off_y = 0;
+    gdouble scale_x = 1;
+    gdouble scale_y = 1;
     
     width = gdk_pixbuf_get_width(pbuf);
     height = gdk_pixbuf_get_height(pbuf);

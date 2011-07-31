@@ -23,32 +23,32 @@
 #include <gdk/gdk.h>
 
 typedef struct {
-    const char *font;
+    const gchar *font;
     
-    int x;
-    int y;
+    gint x;
+    gint y;
     
-    int off_x;
-    int off_y;
+    gint off_x;
+    gint off_y;
     
-    int width;
-    int height;
+    gint width;
+    gint height;
     
-    double r;
-    double g;
-    double b;
-    double a;
+    gdouble r;
+    gdouble g;
+    gdouble b;
+    gdouble a;
 } style_t;
 
 typedef struct {
-	cairo_surface_t *surface;
-	int x;
-	int y;
-	int width;
-	int height;
-    double scale_x;
-    double scale_y;
-	double angle;
+    cairo_surface_t *surface;
+    gint x;
+    gint y;
+    gint width;
+    gint height;
+    gdouble scale_x;
+    gdouble scale_y;
+    gdouble angle;
     
     gboolean show;
 } layer_t;
@@ -59,9 +59,9 @@ typedef struct {
     GdkScreen *scr;
     GdkWindow *win;
     
-    char *password;
-    int pw_length;
-    int pw_alloc;
+    gchar *password;
+    gint pw_length;
+    gint pw_alloc;
     
     struct pam_handle *pam_handle;
     
@@ -75,14 +75,14 @@ typedef struct {
     GPtrArray *layers;
     cairo_region_t *updates_needed;
     
-    int timeout;
+    gint timeout;
     
     GArray *timers;
     
     guint frame_timer_id;
     
     GHashTable *hooks;
-    const char **hook_names;
+    const gchar **hook_names;
     
     GPtrArray *keybinds;
     
@@ -94,6 +94,6 @@ typedef struct {
 extern lualock_t lualock;
 
 void event_handler(GdkEvent *ev, gpointer data);
-void reset_password();
+void reset_password(void);
 
 #endif

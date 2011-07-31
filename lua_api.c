@@ -32,7 +32,7 @@
 #include "clib/keybinder.h"
 #include "clib/cairo_surface.h"
 
-int lualock_lua_on_error(lua_State *L) {
+gint lualock_lua_on_error(lua_State *L) {
     printf("error: %s\n", luaL_checkstring(L, -1));
     return 1;
 }
@@ -42,7 +42,7 @@ void lualock_lua_do_function(lua_State *L) {
         lualock_lua_on_error(L);
 }
 
-gboolean collect_garbage(void *data) {
+gboolean collect_garbage(gpointer data) {
     lua_State *L = data;
     lua_gc(L, LUA_GCCOLLECT, 0);
     return TRUE;

@@ -42,7 +42,7 @@ static GPid spawn_command(const gchar *command_line, GError **error) {
     return pid;
 }
 
-static int lualock_lua_spawn(lua_State *L) {
+static gint lualock_lua_spawn(lua_State *L) {
     lua_settop(L, 1);
     GError *error = NULL;
     GPid pid = spawn_command(luaL_checkstring(L, 1), &error);
@@ -54,33 +54,33 @@ static int lualock_lua_spawn(lua_State *L) {
     return 1;
 }
 
-static int lualock_lua_get_data_dir(lua_State *L) {
+static gint lualock_lua_get_data_dir(lua_State *L) {
     lua_pushliteral(L, LUALOCK_DATA_DIR);
     return 1;
 }
 
-static int lualock_lua_get_config_dir(lua_State *L) {
+static gint lualock_lua_get_config_dir(lua_State *L) {
     lua_pushstring(L, g_build_filename(g_get_user_config_dir(), "lualock", NULL));
     return 1;
 }
 
-static int lualock_lua_sleep(lua_State *L) {
+static gint lualock_lua_sleep(lua_State *L) {
     gdk_event_handler_set(do_nothing_event_handler, NULL, NULL);
     g_timeout_add(1000 * lua_tonumber(L, 1), sleep_timeout_cb, NULL);
     return 0;
 }
 
-static int lualock_lua_get_screen_width(lua_State *L) {
+static gint lualock_lua_get_screen_width(lua_State *L) {
     lua_pushinteger(L, gdk_screen_get_width(lualock.scr));
     return 1;
 }
 
-static int lualock_lua_get_screen_height(lua_State *L) {
+static gint lualock_lua_get_screen_height(lua_State *L) {
     lua_pushinteger(L, gdk_screen_get_height(lualock.scr));
     return 1;
 }
 
-static int lualock_lua_parse_color(lua_State *L) {
+static gint lualock_lua_parse_color(lua_State *L) {
     gdouble r, g, b, a;
     parse_color(luaL_checkstring(L, 1), &r, &g, &b, &a);
     lua_pushnumber(L, r);

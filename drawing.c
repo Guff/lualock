@@ -27,8 +27,8 @@ void draw_password_field(cairo_t *cr) {
     register_update(lualock.style.x, lualock.style.y,
                     lualock.style.width, lualock.style.height);
     cairo_rectangle(cr, 0, 0, lualock.style.width,
-					lualock.style.height);
-	cairo_clip_preserve(cr);
+                    lualock.style.height);
+    cairo_clip_preserve(cr);
     cairo_set_source_rgb(cr, 1, 1, 1);
     cairo_fill_preserve(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, .6);
@@ -36,7 +36,7 @@ void draw_password_field(cairo_t *cr) {
     cairo_stroke(cr);
 }
 
-void draw_password_mask() {
+void draw_password_mask(void) {
     cairo_t *cr = cairo_create(lualock.pw_surface);
     cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
     cairo_paint(cr);
@@ -62,7 +62,7 @@ void draw_password_mask() {
     cairo_destroy(cr);
 }
 
-gboolean draw(void *data) {
+gboolean draw(gpointer data) {
     if (cairo_region_is_empty(lualock.updates_needed))
         return TRUE;
     cairo_rectangle_int_t extents;

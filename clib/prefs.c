@@ -19,7 +19,7 @@
 #include "misc.h"
 #include "clib/prefs.h"
 
-int lualock_lua_prefs_set(lua_State *L) {
+static gint lualock_lua_prefs_set(lua_State *L) {
     lua_getfield(L, 1, "timeout");
     lualock.timeout = luaL_checkint(L, 2);
     
