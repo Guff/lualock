@@ -262,7 +262,12 @@ void show_lock(void) {
     init_hooks();
     init_lua();
     update_screen();
-    gdk_keyboard_grab(lualock.win, TRUE, GDK_CURRENT_TIME);
+    for (int i = 0; i < 1000; i++) {
+        if (gdk_keyboard_grab(lualock.win, TRUE, GDK_CURRENT_TIME) == GDK_GRAB_SUCCESS)
+            break;
+        usleep(1000);
+    }
+        
     gdk_pointer_grab(lualock.win, TRUE, GDK_BUTTON_PRESS_MASK
                      | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK, NULL,
                      NULL, GDK_CURRENT_TIME);
