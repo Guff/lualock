@@ -3,7 +3,7 @@ INSTALLDIR := $(DESTDIR)$(PREFIX)
 
 CC	:= gcc
 
-PKGS := gtk+-3.0 lua oocairo xscrnsaver
+PKGS := gtk+-3.0 lua oocairo xscrnsaver x11
 INCS := $(shell pkg-config --cflags $(PKGS))
 LIBS := $(shell pkg-config --libs $(PKGS)) -lpam
 
@@ -16,7 +16,6 @@ LDFLAGS  := $(LIBS) $(LDFLAGS)
 SRCS  := $(wildcard *.c clib/*.c)
 HEADS := $(wildcard *.h clib/*.h)
 OBJS  := $(foreach obj,$(SRCS:.c=.o),$(obj))
-
 
 all: options lualock
 

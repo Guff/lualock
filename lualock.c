@@ -30,7 +30,6 @@
 #include <errno.h>
 
 #define PW_BUFF_SIZE 32
-#define DEFAULT_FONT "Sans 12"
 
 #include "lualock.h"
 #include "misc.h"
@@ -88,7 +87,7 @@ static void init_timers(void) {
 }
 
 static void init_style(void) {
-    lualock.style.font = DEFAULT_FONT;
+    lualock.style.font_desc = pango_font_description_from_string(DEFAULT_FONT);
     lualock.style.x = 400;
     lualock.style.y = 540;
     lualock.style.off_x = 5;

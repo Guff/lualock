@@ -25,8 +25,11 @@
 void style_set(const gchar *font, gint x, gint y, gint off_x, gint off_y,
                gint width, gint height, gdouble r, gdouble g, gdouble b,
                gdouble a) {
-    if (font)
-        lualock.style.font = font;
+    if (font) {
+        pango_font_description_free(lualock.style.font_desc);
+        lualock.style.font_desc = pango_font_description_from_string(font);
+    }
+    
     lualock.style.x = x;
     lualock.style.y = y;
     lualock.style.off_x = off_x;
@@ -56,7 +59,7 @@ int lualock_lua_style_set(lua_State *L) {
     lua_getfield(L, 1, "width");
     lua_getfield(L, 1, "height");
     
-    style_set(luaL_optstring(L, 2, lualock.style.font),
+    style_set(luaL_optstring(L, 2, DEFAULT_FONT),
               luaL_optnumber(L, 3, lualock.style.x),
               luaL_optnumber(L, 4, lualock.style.y),
               luaL_optnumber(L, 5, lualock.style.off_x),

@@ -22,8 +22,10 @@
 #include <lua.h>
 #include <gdk/gdk.h>
 
+#define DEFAULT_FONT "Sans 12"
+
 typedef struct {
-    const gchar *font;
+    PangoFontDescription *font_desc;
     
     gint x;
     gint y;

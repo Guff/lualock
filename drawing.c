@@ -45,10 +45,7 @@ void draw_password_mask(void) {
     
     PangoLayout *layout = pango_cairo_create_layout(cr);
     
-    PangoFontDescription *desc =
-        pango_font_description_from_string(lualock.style.font);
-    pango_layout_set_font_description(layout, desc);
-    pango_font_description_free(desc);
+    pango_layout_set_font_description(layout, lualock.style.font_desc);
     cairo_set_source_rgba(cr, lualock.style.r, lualock.style.g,
                           lualock.style.b, lualock.style.a);
     cairo_move_to(cr, lualock.style.off_x, lualock.style.off_y);
