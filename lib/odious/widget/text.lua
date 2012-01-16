@@ -12,25 +12,34 @@ local properties = { "text", "font", "color", "border_color", "border_width",
                      "x", "y" }
                      
 local function get_extents(text)
-    dummy_surf = oocairo.image_surface_create("rgb24", 1, 1)
-    cr = oocairo.context_create(dummy_surf)
-    layout = oopango.cairo.layout_create(cr)
-    desc = oopango.font_description_from_string(data[text].font)
+    local dummy_surf = oocairo.image_surface_create("rgb24", 1, 1)
+    local cr = oocairo.context_create(dummy_surf)
+    local layout = oopango.cairo.layout_create(cr)
+    local desc = oopango.font_description_from_string(data[text].font)
     layout:set_font_description(desc)
     layout:set_text(data[text].text)
+    
     local rect = layout:get_pixel_extents()
-    local width, height = rect.width, rect.height
-    width = width + 2 * data[text].border_width
-    height = height + 2 * data[text].border_width
-    return width, height
+    rect.width = rect.width + 2 * data[text].border_width
+    rect.height = rect.height + 2 * data[text].border_width
+    return rect
 end
 
 local function update(text)
-    local width, height = get_extents(text)
-
-    -- Wipe the slate clean
-    local surface = text.surface or capi.cairo_surface(width, height)
-    surface:resize(width, height)
+    local extents = get_extents(text)
+    local border_width = data[text].border_width
+    local width = extents.x + extents.width + 2 * border_width
+    local height = extents.y + extents.height + 2 * border_width
+    
+    local surface
+    if text.surface then
+        surface = text.surface
+        surface:resize(width, height)
+    else
+        surface = capi.cairo_surface(width, height)
+    end
+    
+    surface:resize(extents.x + extents.width, extents.y + extents.height)
     cr = oocairo.context_create(surface:get_surface())
     cr:set_operator("clear")
     cr:paint()
@@ -40,9 +49,11 @@ local function update(text)
     desc = oopango.font_description_from_string(data[text].font)
     layout:set_font_description(desc)
     layout:set_text(data[text].text)
-    cr:translate(data[text].border_width, -data[text].border_width)
+    cr:translate(border_width, border_width)
+    
     oopango.cairo.update_layout(cr, layout)
     oopango.cairo.layout_path(cr, layout)
+    
     if data[text].border_width then
         local r, g, b, a = capi.utils.parse_color(data[text].border_color)
         cr:set_source_rgba(r, g, b, a)
