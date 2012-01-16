@@ -29,10 +29,10 @@ void draw_password_field(cairo_t *cr) {
     cairo_rectangle(cr, 0, 0, lualock.style.width,
                     lualock.style.height);
     cairo_clip_preserve(cr);
-    cairo_set_source_rgb(cr, 1, 1, 1);
+    gdk_cairo_set_source_rgba(cr, &lualock.style.bg_color);
     cairo_fill_preserve(cr);
-    cairo_set_source_rgba(cr, 0, 0, 0, .6);
-    cairo_set_line_width(cr, 2.0);
+    gdk_cairo_set_source_rgba(cr, &lualock.style.border_color);
+    cairo_set_line_width(cr, lualock.style.border_width);
     cairo_stroke(cr);
 }
 

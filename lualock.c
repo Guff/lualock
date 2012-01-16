@@ -98,6 +98,7 @@ static void init_style(void) {
     lualock.style.g = 0;
     lualock.style.b = 0;
     lualock.style.a = 1;
+    lualock.style.border_width = 2;
 }
 
 static void init_cairo(void) {

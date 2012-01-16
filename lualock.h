@@ -40,6 +40,10 @@ typedef struct {
     gdouble g;
     gdouble b;
     gdouble a;
+    
+    GdkRGBA bg_color;
+    GdkRGBA border_color;
+    gdouble border_width;
 } style_t;
 
 typedef struct {

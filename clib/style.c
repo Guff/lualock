@@ -24,7 +24,8 @@
 
 void style_set(const gchar *font, gint x, gint y, gint off_x, gint off_y,
                gint width, gint height, gdouble r, gdouble g, gdouble b,
-               gdouble a) {
+               gdouble a, const gchar *bg, const gchar *border,
+               gdouble border_width) {
     if (font) {
         pango_font_description_free(lualock.style.font_desc);
         lualock.style.font_desc = pango_font_description_from_string(font);
@@ -40,6 +41,18 @@ void style_set(const gchar *font, gint x, gint y, gint off_x, gint off_y,
     lualock.style.g = g;
     lualock.style.b = b;
     lualock.style.a = a;
+    
+    GdkRGBA bg_color, border_color;
+    
+    gdk_rgba_parse(&bg_color, bg ? bg : "white");
+    
+    lualock.style.bg_color = bg_color;
+    
+    gdk_rgba_parse(&border_color, border ? border : "rgba(0, 0, 0, 0.6)");
+    
+    lualock.style.border_color = border_color;
+    
+    lualock.style.border_width = border_width;
     
     cairo_surface_t *old_pw_surface = lualock.pw_surface;
     lualock.pw_surface = create_surface(width, height);
@@ -58,6 +71,9 @@ int lualock_lua_style_set(lua_State *L) {
     lua_getfield(L, 1, "off_y");
     lua_getfield(L, 1, "width");
     lua_getfield(L, 1, "height");
+    lua_getfield(L, 1, "bg_color");
+    lua_getfield(L, 1, "border_color");
+    lua_getfield(L, 1, "border_width");
     
     style_set(luaL_optstring(L, 2, DEFAULT_FONT),
               luaL_optnumber(L, 3, lualock.style.x),
@@ -66,7 +82,10 @@ int lualock_lua_style_set(lua_State *L) {
               luaL_optnumber(L, 6, lualock.style.off_y),
               luaL_optnumber(L, 7, lualock.style.width),
               luaL_optnumber(L, 8, lualock.style.height),
-              r, g, b, a);
+              r, g, b, a,
+              lua_tostring(L, 9),
+              lua_tostring(L, 10),
+              luaL_optnumber(L, 11, lualock.style.border_width));
     return 0;
 }
 

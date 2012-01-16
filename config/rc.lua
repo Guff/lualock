@@ -3,7 +3,8 @@ local oocairo = require "oocairo"
 
 -- {{{ lualock settings
 style{ color = "#333333", font = "Sans 12", x = 500, y = 400, off_x = 5,
-        off_y = 6, width = 150, height = 24 }
+       off_y = 6, width = 150, height = 24, bg_color = 'rgba(255, 255, 255, 1)',
+       border_color = 'rgba(0, 0, 0, 0.6)', border_width = 2 }
 
 prefs{ timeout = 10 * 60 }
 -- }}}
