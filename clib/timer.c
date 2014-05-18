@@ -88,7 +88,7 @@ static gint lualock_lua_timer_stop(lua_State *L) {
 }
 
 void lualock_lua_timer_init(lua_State *L) {
-    const struct luaL_reg lualock_timer_lib[] = {
+    const struct luaL_Reg lualock_timer_lib[] = {
         { "start", lualock_lua_timer_start },
         { "stop", lualock_lua_timer_stop },
         { NULL, NULL }

@@ -55,7 +55,7 @@ static gint lualock_lua_hook_connect(lua_State *L) {
 }
 
 void lualock_lua_hook_init(lua_State *L) {
-    const struct luaL_reg lualock_hook_lib[] = {
+    const struct luaL_Reg lualock_hook_lib[] = {
         { "connect", lualock_lua_hook_connect },
         { NULL, NULL }
     };
