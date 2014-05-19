@@ -1,3 +1,4 @@
+#define luaL_register(L,n,l)    (luaL_openlib(L,(n),(l),0))
 #include <cairo.h>
 #include <oocairo.h>
 

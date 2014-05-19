@@ -16,6 +16,7 @@
 //      MA 02110-1301, USA.
 //
 
+#define luaL_register(L,n,l)    (luaL_openlib(L,(n),(l),0))
 #include <lauxlib.h>
 #include <string.h>
 

@@ -258,7 +258,7 @@ void lualock_lua_image_init(lua_State *L) {
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
     
-    luaL_register(L, NULL, lualock_image_lib);
+    luaL_setfuncs(L, lualock_image_lib, 0);
     lua_register(L, "image", lualock_lua_image_new);
     lua_pop(L, 1);
 }
