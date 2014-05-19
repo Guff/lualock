@@ -240,7 +240,7 @@ static gint lualock_lua_image_get_surface(lua_State *L) {
 }
 
 void lualock_lua_image_init(lua_State *L) {
-    const struct luaL_reg lualock_image_lib[] =
+    const struct luaL_Reg lualock_image_lib[] =
     {
         { "show", lualock_lua_image_show },
         { "hide", lualock_lua_image_hide },
@@ -258,7 +258,7 @@ void lualock_lua_image_init(lua_State *L) {
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
     
-    luaL_register(L, NULL, lualock_image_lib);
+    luaL_setfuncs(L, lualock_image_lib, 0);
     lua_register(L, "image", lualock_lua_image_new);
     lua_pop(L, 1);
 }

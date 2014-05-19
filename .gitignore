@@ -2,3 +2,8 @@
 lualock
 apidocs/
 apidocs/*
+
+# Temporary files
+*swp
+*swo
+*~

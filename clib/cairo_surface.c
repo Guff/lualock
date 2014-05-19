@@ -1,3 +1,4 @@
+#define luaL_register(L,n,l)    (luaL_openlib(L,(n),(l),0))
 #include <cairo.h>
 #include <oocairo.h>
 
@@ -52,7 +53,7 @@ static gint lualock_lua_cairo_surface_resize(lua_State *L) {
 }
 
 void lualock_lua_cairo_surface_init(lua_State *L) {
-    const struct luaL_reg lualock_cairo_surface_lib[] =
+    const struct luaL_Reg lualock_cairo_surface_lib[] =
     {
         { "show", lualock_lua_cairo_surface_show },
         { "get_surface", lualock_lua_cairo_surface_get_surface },

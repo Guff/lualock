@@ -1,3 +1,4 @@
+#define luaL_register(L,n,l)    (luaL_openlib(L,(n),(l),0))
 #include <glib.h>
 #include <lauxlib.h>
 #include <unistd.h>
@@ -91,7 +92,7 @@ static gint lualock_lua_parse_color(lua_State *L) {
 }
 
 void lualock_lua_utils_init(lua_State *L) {
-    const struct luaL_reg lualock_utils_lib[] = {
+    const struct luaL_Reg lualock_utils_lib[] = {
         { "spawn", lualock_lua_spawn },
         { "get_data_dir", lualock_lua_get_data_dir },
         { "get_config_dir", lualock_lua_get_config_dir },
